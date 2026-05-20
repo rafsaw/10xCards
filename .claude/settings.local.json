@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(findstr /R \"claude agents\")"
+      "Bash(findstr /R \"claude agents\")",
+      "PowerShell(Set-Clipboard *)"
     ]
   }
 }
