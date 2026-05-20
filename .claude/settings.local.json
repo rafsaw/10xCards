@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(findstr /R \"claude agents\")",
-      "PowerShell(Set-Clipboard *)"
+      "PowerShell(Set-Clipboard *)",
+      "PowerShell(Test-Path *)"
     ]
   }
 }
