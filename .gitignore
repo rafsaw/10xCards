@@ -1,0 +1,16 @@
+# JS/Node/React/Next
+node_modules/
+.env
+.env.local
+dist/
+build/
+.next/
+coverage/
+*.log
+.vscode/
+
+
+# Python
+.venv/
+__pycache__/
+*.pyc
