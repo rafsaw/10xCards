@@ -19,9 +19,11 @@ checkpoint:
     - topic: "pain category"
       decision: "workflow friction + decision paralysis — manual card creation interrupts reading AND the user doesn't always know what to turn into a card"
     - topic: "competitive insight"
-      decision: "human-in-the-loop curation — existing AI flashcard tools either dump output directly into a deck or require awkward copy-paste; wedge is AI proposes, user accepts/edits/rejects each card before it enters study material"
+      decision: "Existing AI flashcard tools either dump model output directly into a deck without per-card review, or require awkward copy-paste workflows between an LLM and a separate flashcard app. The insight is that the value is not faster generation alone — it is a curated, human-in-the-loop workflow where the AI proposes candidate cards and the user explicitly accepts or rejects them before they enter study material. If a saved card later needs refinement, it can be edited through the normal card-management flow. The user remains the authority on what gets memorized; the AI removes the friction of transforming source material into study-ready flashcards."
+
     - topic: "primary persona scope"
-      decision: "just the project author, dogfooding (single user for v1); auth included from day one to allow growth without retrofit"
+      decision: "Primary persona — a technical self-learner (initially the project author, via dogfooding) reading dense technical material such as books and papers on AI and software engineering. Although the first real user is the project author, the MVP is intentionally implemented as a multi-user web application from day one, so access control and per-user data isolation are built into the architecture rather than retrofitted later."
+
     - topic: "auth strategy"
       decision: "email + password — classic signup/login flow"
     - topic: "role model"
@@ -44,11 +46,17 @@ checkpoint:
 
 A technical self-learner reading dense material — AI, software engineering, or similar topics — wants to retain concepts using spaced repetition, but manually crafting question/answer cards while reading interrupts the flow enough that they skip it. They fall back to passive highlighting, postpone card creation until later and never return to it, and end up re-reading the same material at the cost of time and retention.
 
-Existing AI flashcard tools either dump model output directly into a deck without per-card review, or require awkward copy-paste workflows between an LLM and a separate flashcard app. The insight is that the value is not faster generation alone — it is a curated, human-in-the-loop step where the AI proposes cards and the user accepts, edits, or rejects each one before it enters their study material. The user remains the authority on what gets memorized; the AI removes the typing friction.
+Existing AI flashcard tools either dump model output directly into a deck without per-card review, or require awkward copy-paste workflows between an LLM and a separate flashcard app.
+
+The insight is that the value is not faster generation alone — it is a curated, human-in-the-loop workflow where the AI proposes candidate cards and the user explicitly accepts or rejects them before they enter study material.
+
+If a saved card later needs refinement, it can be edited through the normal card-management flow.
+
+The user remains the authority on what gets memorized; the AI removes the friction of transforming source material into study-ready flashcards.
 
 ## User & Persona
 
-**Primary persona** — A technical self-learner (the project author for v1) reading dense technical material such as books and papers on AI and software engineering. They have a working understanding of spaced repetition and want to use it, but in practice skip the card-creation step because writing high-quality Q/A cards from prose interrupts reading. They want to paste a passage and get usable candidate cards in seconds, with the option to fix or discard any that don't capture what they meant to remember.
+**Primary persona** — A technical self-learner (the project author for v1) reading dense technical material such as books and papers on AI and software engineering. They have a working understanding of spaced repetition and want to use it, but in practice skip the card-creation step because writing high-quality Q/A cards from prose interrupts reading. They want to paste a passage and get usable candidate cards in seconds, deciding which ones deserve to enter their study set.
 
 For v1 the persona is literally one user — dogfooding. Auth is included in the MVP anyway so the product can grow beyond a single user without a retrofit later.
 
@@ -65,7 +73,7 @@ Whether password-reset and email-verification flows are inside the MVP or deferr
 ## Success Criteria
 
 ### Primary
-- ≥ 75% of AI-generated candidate cards are accepted by the user (with or without edit) across the first several generation sessions. "Accepted" includes both accept-as-is and edit-then-accept; "rejected" counts as not accepted. This metric directly measures the wedge: AI quality high enough that the user prefers it to manual writing.
+- AI-generated flashcards are useful enough that the user repeatedly chooses the AI generation workflow instead of abandoning it in favor of manual-only creation.
 
 ### Secondary
 - Review sessions are reliable end-to-end: a user can start a review, work through all due cards, rate each one, and have progress saved without crashes or lost state across sessions.
@@ -94,8 +102,8 @@ The smallest end-to-end flow that proves the product works:
 - Logout — explicit logout action.
 
 **Scope-down moves applied in Phase 3:**
-- Password reset and email verification deferred to v2. MVP supports manual recovery only (user contacts author by email).
-- SR algorithm is the simplest viable option — Leitner-style 2-state bucketing. Binary right/wrong rating per card.
+- Password reset and email verification deferred to v2. Password reset and email verification are explicitly deferred from MVP scope.
+- Spaced repetition uses a deliberately simple deterministic scheduling model with binary right/wrong recall tracking. Advanced scheduling optimization is explicitly out of MVP scope.
 
 ## Timeline acknowledgment
 
@@ -179,9 +187,9 @@ Acknowledged on 2026-05-20: the 4-week MVP requires sustained dedication and har
 
 ### Review (spaced repetition)
 - FR-013: User can start a review session; the SR algorithm selects due cards. *Priority: must-have*
-  > Socrates: Counter considered — replace SR with random shuffle for radical simplification. Resolution: stands. SR is the integration point this product exists for; idea-notes explicitly lists "integration with a ready-made SR algorithm" in MVP.
+  > Socrates: Counter considered — replace SR with random shuffle for radical simplification. Resolution: stands. SR is the integration point this product exists for; idea-notes explicitly lists "SR is the core review behavior this product exists for" in MVP.
 - FR-014: User can rate their recall on each card during review using a binary right/wrong scale. *Priority: must-have*
-  > Socrates: Counter considered — multi-level rating (SM-2's again/hard/good/easy) gives better scheduling. Resolution: stands. Binary matches the simplest-viable SR choice (Leitner) from Phase 3; smaller UI, simpler math; sophistication is a v2 lever.
+  > Socrates: Counter considered — multi-level rating (SM-2's again/hard/good/easy) gives better scheduling. Resolution: stands. Binary matches the deliberately simplified MVP scheduling model from Phase 3. Binary matches the deliberately simplified MVP scheduling model from Phase 3. Smaller UI, simpler logic, lower implementation risk. Sophistication is a v2 lever.
 - FR-015: User's review progress persists across sessions (next-due dates update per the SR algorithm). *Priority: must-have*
   > Socrates: Counter considered — localStorage instead of backend persistence. Resolution: stands. Auth + per-user data already imply backend; localStorage breaks cross-device support and loses progress on browser-data clears.
 
@@ -197,16 +205,16 @@ The user encounters the rule's output immediately after submitting a passage, as
 
 ## Non-Functional Requirements
 
-- A failed login does not lock out a legitimate user who mistypes their password three to five times in a row, but credential-stuffing at scale is rejected before reaching the authentication check.
+- Authentication should protect against common abuse patterns without degrading normal user access.
 - The product remains usable on the latest two major versions of the four mainstream desktop browsers (Chrome, Firefox, Safari, Edge). Mobile-browser usability is a baseline, not a first-class commitment.
 
 ## Non-Goals
 
-- **Avoid: building our own SR algorithm.** Integrate a ready-made one (Leitner-style, biased by FR-014's binary rating). Prevents algorithm rabbit-holes that would torpedo the 4-week timeline.
+- **Avoid: advanced spaced-repetition algorithm engineering.** The MVP uses a deliberately simple scheduling model rather than sophisticated optimization logic.
 - **Avoid: multi-format import (PDF, DOCX, EPUB, web URLs).** Plain-text paste only in v1. File ingestion and parsing is v2+.
 - **Avoid: sharing flashcards or decks between users.** Single-tenant per user. Closes off team/social features explicitly.
 - **Avoid: native mobile apps (iOS, Android).** Web only. Mobile-browser usability is in scope as a baseline, but no native shells.
-- **Avoid: password reset and email verification flows in v1.** Manual support-email recovery only. Cuts the email-sending dependency from MVP scope.
+- **Avoid: password reset and email verification flows in v1.** Authentication is limited to signup, login, logout, and session handling.
 - **Avoid: integrations with other platforms (Anki export, Quizlet sync, LMS integrations).** Self-contained product. Export/sync deferred to v2+.
 - **Avoid: editing AI-generated candidates before saving.** Candidate cards are accept-or-reject only; refinement happens post-save via the standard saved-card edit surface (FR-011). Consolidates editing into one UI; explicit Phase 4 decision.
 
