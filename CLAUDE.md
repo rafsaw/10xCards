@@ -74,3 +74,39 @@ The shipped skill carries no 10xDevs / cohort / certification references. The re
 Skills must not write to `context/archive/`. Archived changes are immutable; if a resolved target path starts with `context/archive/`, abort with: "This change is archived. Open a new change with `/10x-new` instead."
 
 <!-- END @przeprogramowani/10x-cli -->
+
+---
+
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this repo is
+
+**10xCards** — an AI-assisted spaced-repetition flashcard MVP. A user pastes a passage, AI proposes candidate cards, user accepts/rejects each one before it enters their study library. Greenfield, web-app, single-user dogfood for v1, multi-user architecture from day one. PRD is at `context/foundation/prd.md`; raw shape conversation at `context/foundation/shape-notes.md`. No application code exists yet — the project is still in the planning chain (`/10x-shape` → `/10x-prd` → `/10x-tech-stack-selector` → `/10x-bootstrapper`).
+
+## Editing CLAUDE.md — the regeneration trap
+
+Everything between `<!-- BEGIN @przeprogramowani/10x-cli -->` and `<!-- END @przeprogramowani/10x-cli -->` is **overwritten** every time the user pulls lesson artifacts (`npx @przeprogramowani/10x-cli@latest get mXlY --tool claude-code`). Place any persistent project guidance **outside** those markers (i.e., below this line or above the BEGIN). The same caveat applies to anything under `.claude/skills/10x-*/` — those directories are CLI-managed and listed in `.claude/.10x-cli-manifest.json`.
+
+## 10x CLI commands the user runs
+
+- `npx @przeprogramowani/10x-cli@latest auth` — one-time login; writes `C:\Users\rafal\AppData\Roaming\10x-cli\auth.json`.
+- `npx @przeprogramowani/10x-cli@latest get mXlY` — pull lesson `mXlY` skills into `.claude/skills/`; respects the tool set in `C:\Users\rafal\AppData\Roaming\10x-cli\config.json` (currently `claude-code`). Add `--tool claude-code` to override.
+- `npx @przeprogramowani/10x-cli@latest doctor` — diagnose CLI/auth/config issues; first stop when slash commands don't appear.
+- `10x ...` is the short alias for `npx @przeprogramowani/10x-cli@latest ...` (works once the package is cached).
+
+Helper meta-skills (`10x-cli-setup`, `10x-cli-guide`) install globally to `C:\Users\rafal\.agents\skills\` via `npx skills add przeprogramowani/10x-cli -g`. With `-g` they don't appear under `.claude/skills/` in this project but are still loaded; without `-g` they scope to the current project only.
+
+## Where the user is in the lesson chain
+
+Current lesson is **m1l2** (per `.claude/.10x-cli-manifest.json`) — tech-stack selection. PRD already exists, so `/10x-tech-stack-selector` is the next intended step; it will write `context/foundation/tech-stack.md`. Do not invent application files (package.json, src/, etc.) — wait for `/10x-bootstrapper` (lesson 3) to scaffold the chosen starter.
+
+## Hard rule from the lesson body
+
+Never write to `context/archive/` or `context/foundation/archive/`. Archived artifacts are immutable; if a resolved write path lands there, abort with: *"This change is archived. Open a new change with `/10x-new` instead."*
+
+## Environment
+
+Windows 11 + PowerShell. Use PowerShell syntax (`$env:VAR`, `Test-Path`, `;` chaining — no `&&`). The user's notes mix Polish and English; respond in whichever language the user used in their latest message.
+
