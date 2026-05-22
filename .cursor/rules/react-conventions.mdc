@@ -1,0 +1,65 @@
+---
+description: React 19 component conventions for 10xCards (Astro islands, Tailwind, ESLint)
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# React Conventions
+
+## Placement & naming
+
+- Put interactive UI in `src/components/` — `auth/` for forms, `ui/` for reusable primitives.
+- One component per file; filename `PascalCase.tsx` matching the component name.
+- Use `@/` path alias for imports (e.g. `@/components/ui/button`, `@/lib/utils`).
+- Prefer **named exports** for building blocks; **default export** only for top-level page islands (e.g. `SignInForm`).
+
+## Components & types
+
+- Functional components only; type props with `interface ComponentNameProps` (or `Props` for a single exported form).
+- Use `import type { ReactNode } from "react"` for type-only imports.
+- Prefix intentionally unused identifiers with `_` (ESLint).
+
+```tsx
+// ✅ GOOD — typed props, named export
+interface FormFieldProps {
+  id: string;
+  label: string;
+  onChange: (value: string) => void;
+}
+
+export function FormField({ id, label, onChange }: FormFieldProps) { /* ... */ }
+```
+
+## Styling
+
+- Tailwind utility classes; merge conditionals with `cn()` from `@/lib/utils`.
+- Shared primitives in `ui/` use `class-variance-authority` (`cva`) + `VariantProps` (see `button.tsx`).
+- Icons from `lucide-react` with `className="size-4"` (or `size-3` for inline hints).
+
+## Astro integration
+
+- React runs as **client islands** in `.astro` pages — add `client:load` (or stricter directive when appropriate).
+- Keep routes and layouts as `.astro`; do not convert pages to `.tsx` unless required.
+- Forms may use native `method`/`action` to API routes; client-side validation runs in `onSubmit` before submit.
+
+## Hooks & React 19
+
+- Follow Rules of Hooks; only call hooks at the top level of function components or custom hooks.
+- `react-compiler` is an **error** — write code the compiler can optimize (no manual memoization unless needed).
+- Use `useFormStatus` from `react-dom` inside submit buttons wrapped by a `<form>`.
+- Prefer `React.SubmitEvent<HTMLFormElement>` for form submit handlers.
+
+## Accessibility
+
+- jsx-a11y rules apply — associate labels with inputs (`htmlFor` + `id`), meaningful `aria-label` on icon-only controls.
+- Do not rely on color alone for errors; show text (see `FormField` error pattern).
+
+```tsx
+// ✅ GOOD — accessible toggle
+<button type="button" onClick={onToggle} aria-label={visible ? "Hide password" : "Show password"}>
+```
+
+## Before finishing
+
+- Run `npm run lint` on touched files.
+- Manually verify affected routes (e.g. `/auth/signin`, `/auth/signup`) when changing auth components.
