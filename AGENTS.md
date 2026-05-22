@@ -22,9 +22,8 @@
 
 Node `22.14.0` (`.nvmrc`); install with `npm install`.
 
-- `npm run dev` — dev server.
+- `npm run dev` / `preview` — dev server and production preview.
 - `npm run build` — production build for Cloudflare.
-- `npm run preview` — preview the build.
 - `npm run lint` / `lint:fix` — type-aware ESLint, optionally auto-fixing.
 - `npm run format` — Prettier across the repo.
 - `npx astro sync` — regenerate Astro types; CI runs this before lint/build.
@@ -41,7 +40,7 @@ No test runner is configured yet. Validate with `npm run lint`, `npm run build`,
 
 ## Commit & Pull Request Guidelines
 
-Recent history uses short, task-oriented messages prefixed with lesson/tool context (`m1l4 - ...`). Keep commits concise and imperative.
+Recent history uses short, task-oriented messages prefixed with lesson/tool context (`m1l4 - ...`). Match it: imperative mood, subject ≤ ~72 characters, same lesson/tool prefix.
 
 PRs should include a summary, validation steps, lesson/issue context, and screenshots for UI changes. Lint and build locally before pushing — CI does not gate `main` (see Agent Tripwires).
 
