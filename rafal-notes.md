@@ -23,3 +23,5 @@
 
 
   ## npx @przeprogramowani/10x-cli@latest get m1l4
+
+  /10x-rule-review @CLAUDE.md
