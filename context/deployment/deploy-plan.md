@@ -31,7 +31,7 @@ This runbook is **stateful**. If interrupted at any point:
 3. The phase's **Validation** block tells you whether you're allowed to advance.
 4. Prerequisite sub-sections (A–E) follow the same rule — each section has its own checkbox.
 
-> **Current resume point (2026-05-23):** Prerequisites A, B, C, D all complete. Prerequisite E optional/skipped. Phases 0, 1, 2, 3, 4 (all sub-sections), 5, and Phase 6 **smoke test** complete. **Worker is live: `https://10x-cards.rafsaw.workers.dev` (Version `e104ed8c-...`)** — production signin → /dashboard → signout flow verified end-to-end via `wrangler tail`; no unhandled errors. Email confirmation step worked around with manual Supabase user creation (Auto Confirm User: ON) after hitting free-tier SMTP rate limit — see callout. Phase 6 **rollback drill deferred** until a second real code deploy exists (today the only "previous" versions are pre-code placeholder shells). **Next action:** Phase 7 — optional Cloudflare Workers Builds Git integration (auto-deploy on push to `main`). After Phase 7's first auto-deploy lands a second real version, re-open the rollback drill against that pair.
+> **Current resume point (2026-05-23):** Prerequisites A, B, C, D all complete. Prerequisite E optional/skipped. **All phases (0–7) and the rollback drill complete.** Worker live at `https://10x-cards.rafsaw.workers.dev`. Latest version: `3240f16d-a0e7-44ad-90d5-a0c13c7a8f55` (manual `npm run deploy` after roll-forward — fresh build, NOT a re-promotion of the original `52e9a4f6`). Deployment history retains all prior real versions (`e104ed8c`, `52e9a4f6`) plus the three pre-code placeholder shells. **Remaining optional follow-ups** (none block shipping): (1) configure custom SMTP in Supabase before any public launch — current shared-SMTP cap of ~3–4 emails/hour will break real signups; (2) silence the two `workers_dev` / `preview_urls` defaults warnings by adding them explicitly to `wrangler.jsonc`; (3) `.gitattributes` + `git add --renormalize .` to fix the Windows CRLF lint issue permanently.
 
 ---
 
@@ -375,14 +375,20 @@ _Validated 2026-05-23: `Invoke-WebRequest https://10x-cards.rafsaw.workers.dev` 
 > - **Custom SMTP:** Authentication → Emails → SMTP. Configure Resend / SendGrid / AWS SES to bypass the shared-pool cap permanently. Required before real users can sign up at any scale — deferred for MVP but **flagged as a hard prerequisite for any public launch**.
 > - **Wait it out:** the rolling-window cap clears ~60 min after the first email. Fine for one-off tests, not viable when iterating.
 
-### Rollback drill (do it once, while everything is fresh) — ⏸️ DEFERRED (2026-05-23)
+### Rollback drill (do it once, while everything is fresh) — ✅ COMPLETE (2026-05-23, after Phase 7)
 
-> **Why deferred:** the only "previous" versions in `wrangler deployments list` right now are the three placeholder shells created by `wrangler secret put` (Sources: `Upload` / `Secret Change` / `Secret Change` from 18:15:41 → 18:16:25, all before any real code existed). Rolling back to one would temporarily serve an empty Worker. The drill becomes meaningful once a **second real code deploy** lands — re-run it after the first Phase 7 auto-deploy (or after any manual second `npm run deploy`) when there are two real versions in history.
+> **Deferred at first, re-opened after Phase 7's auto-deploy created a second real code version (`52e9a4f6`) alongside the Phase 5 manual deploy (`e104ed8c`).** Drill ran against that pair.
 
-- [ ] **(Agent, deferred)** `npx wrangler deployments list` — note the current version ID.
-- [ ] **(Agent, deferred)** `npx wrangler rollback` — confirm the site still serves.
-- [ ] **(Agent, deferred)** `npm run deploy` — return to head.
-- [ ] **(Agent, deferred)** Confirm retained logging — **Workers & Pages → 10x-cards → Logs** in the dashboard shows recent requests (don't rely on sampled `wrangler tail` for incident triage; observability is already `enabled` in `wrangler.jsonc`).
+- [x] **(Agent)** `npx wrangler deployments list` — note the current version ID. _Captured: `52e9a4f6-0225-47bc-80d7-56042337fb1a` was live._
+- [x] **(Agent)** `npx wrangler rollback` — confirm the site still serves. _`npx wrangler rollback e104ed8c-1b74-4452-8a59-c408d0ede615 --message "rollback drill ..."` completed in ~5s. Site still served HTTP 200 / 4704 bytes under the rolled-back version. Wrangler ran non-interactively (auto-confirmed in non-TTY context)._
+- [x] **(Agent)** `npm run deploy` — return to head. _Deployed new version `3240f16d-a0e7-44ad-90d5-a0c13c7a8f55` (Worker startup 21 ms; bindings inherited — KV namespace `SESSION` was not re-provisioned, confirming bindings persist across rollback→deploy cycles). Site verified at HTTP 200 / 4704 bytes._
+- [x] **(Agent)** Confirm retained logging — **Workers & Pages → 10x-cards → Logs** in the dashboard shows recent requests (don't rely on sampled `wrangler tail` for incident triage; observability is already `enabled` in `wrangler.jsonc`). _Verified 2026-05-23 — `wrangler.jsonc:12-14` has `observability.enabled: true`; user confirmed dashboard Logs view (at `https://dash.cloudflare.com/3219bb947bb836ced74794f8a0fc0b34/workers/services/view/10x-cards/production/observability/logs`) shows retained request entries from the smoke test and rollback drill. Free-plan retention is ~3 days._
+
+> **Key lessons from the drill:**
+> 1. **Rollback is non-destructive.** Both the version you rolled away from AND the version you rolled to remain in `wrangler deployments list` forever (or until you hit Cloudflare's per-Worker version cap). Rollback is a routing pointer swap, not a delete.
+> 2. **Roll-forward creates a NEW version ID.** After `rollback → npm run deploy`, the new version is `3240f16d-...`, *not* `52e9a4f6-...` (the version you originally rolled away from). If you specifically want to re-promote `52e9a4f6` instead of building fresh, use `wrangler rollback 52e9a4f6-...` (rollback can target any version, forward or backward).
+> 3. **Bindings persist; bound-resource STATE does not auto-reset.** Wrangler warning during rollback: *"Rolling back to a previous deployment will not rollback any of the bound resources (Durable Object, D1, R2, KV, etc)."* Secrets/bindings carry over (good — no re-entry needed). But if a bad deploy ran a DB migration or wrote bad data to KV, `wrangler rollback` does NOT undo those side effects. Production migrations need their own down-paths.
+> 4. **The drill took ~30 seconds end-to-end.** Worth knowing the muscle memory; the moment you actually need a rollback (broken deploy at 2am) is the worst time to first run the command.
 
 **Validation:** a real account can sign up, confirm, sign in, reach `/dashboard`, and sign out on the production URL ✅. `wrangler tail` shows no unhandled errors ✅. A rollback completes in seconds without downtime ✅.
 **Rollback:** auth misbehaving is almost always a Supabase URL-config issue — fix in the dashboard, no redeploy needed. For a code regression, `npx wrangler rollback`.
@@ -393,29 +399,32 @@ _Validated 2026-05-23: `Invoke-WebRequest https://10x-cards.rafsaw.workers.dev` 
 
 ---
 
-## Phase 7 — Optional Git integration (Workers Builds)
+## Phase 7 — Optional Git integration (Workers Builds) ✅ COMPLETE (2026-05-23)
 
 **Objective:** every push to `main` auto-builds and auto-deploys via Cloudflare — no GitHub Actions involved.
 **Owner:** Human (dashboard) + Agent (push verification).
 **Depends on:** Phase 6 (verified healthy production Worker).
 
-- [ ] **(Human)** Ensure `main` is up to date on the remote — `git push origin main`.
-- [ ] **(Human)** In the Cloudflare dashboard: **Workers & Pages → `10x-cards` → Settings → Builds → Connect to Git**.
-- [ ] **(Human)** Authorize the **Cloudflare GitHub app** for `rafsaw/10xCards` (grant the minimum repo scope; do not grant org-wide access).
-- [ ] **(Human)** Configure the build:
+- [x] **(Human)** Ensure `main` is up to date on the remote — `git push origin main`. _Done — recent commits already pushed._
+- [x] **(Human)** In the Cloudflare dashboard: **Workers & Pages → `10x-cards` → Settings → Builds → Connect to Git**. _Done 2026-05-23._
+- [x] **(Human)** Authorize the **Cloudflare GitHub app** for `rafsaw/10xCards` (grant the minimum repo scope; do not grant org-wide access). _Done with **"Only select repositories"** scope (just `rafsaw/10xCards`). Reversible via **GitHub → Settings → Applications → Installed GitHub Apps → Cloudflare Workers and Pages**._
+- [x] **(Human)** Configure the build:
   - **Production branch:** `main`
   - **Build command:** `npm run build`
   - **Deploy command:** `npx wrangler deploy` (default)
   - **Root directory:** `/`
   - Node version is read from `.nvmrc` (`22.14.0`) automatically — **do not edit `.nvmrc`** (see the Node-drift callout in Phase 0).
-- [ ] **(Human / Agent)** Trigger a verification deploy — push a trivial commit to `main` (e.g. a README touch) and watch the build at **Workers & Pages → `10x-cards` → Builds**.
+
+  _Configured 2026-05-23._
+- [x] **(Human / Agent)** Trigger a verification deploy — push a trivial commit to `main` (e.g. a README touch) and watch the build at **Workers & Pages → `10x-cards` → Builds**. _Triggered via commit `c57b814` (m1l5 - phase 7 git integration verification) pushed 2026-05-23 19:07. New version `52e9a4f6-0225-47bc-80d7-56042337fb1a` landed at 19:10:28 — ~3 minutes from push to live._
 
 **Validation:** the dashboard shows a build triggered by the commit, it succeeds, and `npx wrangler deployments list` shows a new version whose source is "Workers Builds". The live URL still serves the app and auth still works.
+_Validated 2026-05-23: new version `52e9a4f6...` in `wrangler deployments list`; `Invoke-WebRequest https://10x-cards.rafsaw.workers.dev` → HTTP 200, 4704 bytes, `text/html`. (Note: wrangler 4.x CLI labels Workers-Builds deploys as `Source: Unknown (deployment)`, but the dashboard Builds tab carries full provenance: commit SHA + author + run logs.)_
 **Rollback:**
 - Disable auto-deploy — **Settings → Builds → Disconnect** (reverts to manual `wrangler deploy`).
 - Bad auto-deploy — `npx wrangler rollback` or **Deployments → Rollback** in the dashboard.
 - Secrets set in Phase 4 persist across Git-integration deploys — no re-entry needed.
-**Phase complete:** [ ]
+**Phase complete:** [x] 2026-05-23.
 
 > Pushes to non-`main` branches produce **preview** versions (a separate `*.workers.dev` preview URL) without promoting to production — useful for reviewing a branch before merge.
 
