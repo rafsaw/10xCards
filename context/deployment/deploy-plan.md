@@ -31,7 +31,7 @@ This runbook is **stateful**. If interrupted at any point:
 3. The phase's **Validation** block tells you whether you're allowed to advance.
 4. Prerequisite sub-sections (A–E) follow the same rule — each section has its own checkbox.
 
-> **Current resume point (2026-05-23):** Prerequisites A, B, C, D all complete. Prerequisite E optional/skipped. Phases 0, 1, 2, 3, 4 (all sub-sections), 5, and Phase 6 **smoke test** complete. **Worker is live: `https://10x-cards.rafsaw.workers.dev` (Version `e104ed8c-...`)** — production signin → /dashboard → signout flow verified end-to-end via `wrangler tail`; no unhandled errors. Email confirmation step worked around with manual Supabase user creation (Auto Confirm User: ON) after hitting free-tier SMTP rate limit — see callout. **Next action (within Phase 6):** optional **rollback drill** (`wrangler deployments list` → `wrangler rollback` → re-deploy) to prove the rollback path before you need it under pressure. After that → Phase 7 — optional Cloudflare Workers Builds Git integration (auto-deploy on push to `main`).
+> **Current resume point (2026-05-23):** Prerequisites A, B, C, D all complete. Prerequisite E optional/skipped. Phases 0, 1, 2, 3, 4 (all sub-sections), 5, and Phase 6 **smoke test** complete. **Worker is live: `https://10x-cards.rafsaw.workers.dev` (Version `e104ed8c-...`)** — production signin → /dashboard → signout flow verified end-to-end via `wrangler tail`; no unhandled errors. Email confirmation step worked around with manual Supabase user creation (Auto Confirm User: ON) after hitting free-tier SMTP rate limit — see callout. Phase 6 **rollback drill deferred** until a second real code deploy exists (today the only "previous" versions are pre-code placeholder shells). **Next action:** Phase 7 — optional Cloudflare Workers Builds Git integration (auto-deploy on push to `main`). After Phase 7's first auto-deploy lands a second real version, re-open the rollback drill against that pair.
 
 ---
 
@@ -375,12 +375,14 @@ _Validated 2026-05-23: `Invoke-WebRequest https://10x-cards.rafsaw.workers.dev` 
 > - **Custom SMTP:** Authentication → Emails → SMTP. Configure Resend / SendGrid / AWS SES to bypass the shared-pool cap permanently. Required before real users can sign up at any scale — deferred for MVP but **flagged as a hard prerequisite for any public launch**.
 > - **Wait it out:** the rolling-window cap clears ~60 min after the first email. Fine for one-off tests, not viable when iterating.
 
-### Rollback drill (do it once, while everything is fresh)
+### Rollback drill (do it once, while everything is fresh) — ⏸️ DEFERRED (2026-05-23)
 
-- [ ] **(Agent)** `npx wrangler deployments list` — note the current version ID.
-- [ ] **(Agent)** `npx wrangler rollback` — confirm the site still serves.
-- [ ] **(Agent)** `npm run deploy` — return to head.
-- [ ] **(Agent)** Confirm retained logging — **Workers & Pages → 10x-cards → Logs** in the dashboard shows recent requests (don't rely on sampled `wrangler tail` for incident triage; observability is already `enabled` in `wrangler.jsonc`).
+> **Why deferred:** the only "previous" versions in `wrangler deployments list` right now are the three placeholder shells created by `wrangler secret put` (Sources: `Upload` / `Secret Change` / `Secret Change` from 18:15:41 → 18:16:25, all before any real code existed). Rolling back to one would temporarily serve an empty Worker. The drill becomes meaningful once a **second real code deploy** lands — re-run it after the first Phase 7 auto-deploy (or after any manual second `npm run deploy`) when there are two real versions in history.
+
+- [ ] **(Agent, deferred)** `npx wrangler deployments list` — note the current version ID.
+- [ ] **(Agent, deferred)** `npx wrangler rollback` — confirm the site still serves.
+- [ ] **(Agent, deferred)** `npm run deploy` — return to head.
+- [ ] **(Agent, deferred)** Confirm retained logging — **Workers & Pages → 10x-cards → Logs** in the dashboard shows recent requests (don't rely on sampled `wrangler tail` for incident triage; observability is already `enabled` in `wrangler.jsonc`).
 
 **Validation:** a real account can sign up, confirm, sign in, reach `/dashboard`, and sign out on the production URL ✅. `wrangler tail` shows no unhandled errors ✅. A rollback completes in seconds without downtime ✅.
 **Rollback:** auth misbehaving is almost always a Supabase URL-config issue — fix in the dashboard, no redeploy needed. For a code regression, `npx wrangler rollback`.
