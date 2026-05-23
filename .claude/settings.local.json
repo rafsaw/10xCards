@@ -20,7 +20,13 @@
       "Write",
       "PowerShell(Move-Item *)",
       "PowerShell(Get-ChildItem *)",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "Bash(gh *)",
+      "Bash(docker *)",
+      "PowerShell(docker --version)",
+      "PowerShell(supabase *)",
+      "PowerShell(node -v)",
+      "PowerShell(Get-Command *)"
     ],
     "deny": [
       "Bash(rm -rf *)"
