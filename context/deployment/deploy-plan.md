@@ -31,7 +31,7 @@ This runbook is **stateful**. If interrupted at any point:
 3. The phase's **Validation** block tells you whether you're allowed to advance.
 4. Prerequisite sub-sections (A–E) follow the same rule — each section has its own checkbox.
 
-> **Current resume point (2026-05-23):** Prerequisites A, B, C, D all complete. Prerequisite E optional/skipped. Phases 0 and 1 complete (Phase 1 included the optional `tech-stack.md` `deployment_target` fix). **Next action:** Phase 2 — rename Worker in `wrangler.jsonc` and add the `deploy` npm script.
+> **Current resume point (2026-05-23):** Prerequisites A, B, C, D all complete. Prerequisite E optional/skipped. Phases 0, 1, 2, 3, 4 (all sub-sections), 5, and Phase 6 **smoke test** complete. **Worker is live: `https://10x-cards.rafsaw.workers.dev` (Version `e104ed8c-...`)** — production signin → /dashboard → signout flow verified end-to-end via `wrangler tail`; no unhandled errors. Email confirmation step worked around with manual Supabase user creation (Auto Confirm User: ON) after hitting free-tier SMTP rate limit — see callout. **Next action (within Phase 6):** optional **rollback drill** (`wrangler deployments list` → `wrangler rollback` → re-deploy) to prove the rollback path before you need it under pressure. After that → Phase 7 — optional Cloudflare Workers Builds Git integration (auto-deploy on push to `main`).
 
 ---
 
@@ -102,10 +102,11 @@ This runbook is **stateful**. If interrupted at any point:
 > **Action (Human):** open **Authentication → Sign In / Up → Auth Providers → Email**. Confirm the **Confirm email** toggle is **ON** (it is by default; only flag if someone turned it off). If OFF, the app's `/auth/confirm-email` page will be unreachable in the normal flow and signup will appear "broken" in Phase 6. _User confirmed toggle is ON (green)._
 
 - [x] **(Human)** **Authentication → Sign In / Up → Auth Providers** — confirm only **Email** is enabled (disable any provider the app does not use; smaller attack surface). _Verified 2026-05-23 — only Email toggle is green; all other providers disabled._
-- [x] **(Human)** **Authentication → URL Configuration** — wire **localhost dev** values now so signup/confirm/signin work locally during Phase 4.3 smoke test. _Set 2026-05-23._
+- [x] **(Human)** **Authentication → URL Configuration** — wire **localhost dev** values now so signup/confirm/signin work locally during Phase 4.3 smoke test. _Set and **persisted** 2026-05-23._
   - **Site URL:** `http://localhost:4321` (Astro's default dev port — confirmed by `astro.config.mjs`; **not** 3000).
   - **Redirect URLs:** add `http://localhost:4321/**` (the `/**` wildcard is required so `/auth/confirm-email`, `/dashboard`, etc. are all allowed callbacks — without it the confirmation link in the email is rejected).
   - **Prod URL is added (not replaced) in Phase 6** once the Worker URL is known — Site URL will swap to the Worker URL (that's what gets baked into confirmation emails), and the localhost redirect entry stays so local dev keeps working.
+  - ⚠️ **Gotcha — Supabase requires explicit Save click.** First attempt: change typed but Save not clicked; field reverted to `http://localhost:3000` on next page load. Symptom in Phase 4.3 was a confirmation email with `http://localhost:3000/` baked into the link (wrong port → broken confirm). Resolution: re-enter, **click Save at the bottom of the page**, reload to verify the new value persists. After fix, deleted+recreated the test user via **Authentication → Users → Delete user** to invalidate the stale-port email and re-trigger a clean confirmation.
 
 ### E. Supabase LOCAL setup (optional — Docker on Windows 11)
 
@@ -181,15 +182,15 @@ Local Supabase runs the full stack (Postgres, GoTrue auth, PostgREST, Realtime, 
 
 ---
 
-## Phase 2 — Wrangler configuration
+## Phase 2 — Wrangler configuration ✅ COMPLETE (2026-05-23)
 
 **Objective:** rename the Worker and wire a one-command deploy.
 **Owner:** Agent.
 **Depends on:** Phase 1.
 
-- [ ] **(Agent)** Edit `wrangler.jsonc` — change `"name": "10x-astro-starter"` to `"name": "10x-cards"`. This must happen **before** the first deploy to avoid creating an orphan Worker that you'd then have to delete.
-- [ ] **(Agent)** Edit `package.json` `scripts` — add `"deploy": "astro build && wrangler deploy"`.
-- [ ] **(Agent)** Re-run `npm install` if you touched `package.json` (no dependency change here, but it normalises the `package-lock.json` line endings on Windows).
+- [x] **(Agent)** Edit `wrangler.jsonc` — change `"name": "10x-astro-starter"` to `"name": "10x-cards"`. This must happen **before** the first deploy to avoid creating an orphan Worker that you'd then have to delete. _Applied (line 3)._
+- [x] **(Agent)** Edit `package.json` `scripts` — add `"deploy": "astro build && wrangler deploy"`. _Applied (line 10)._
+- [x] **(Agent)** Re-run `npm install` if you touched `package.json` (no dependency change here, but it normalises the `package-lock.json` line endings on Windows). _Ran — "up to date, audited 773 packages"; no lockfile churn._
 
 **Validation:**
 ```powershell
@@ -198,25 +199,47 @@ Select-String -Path wrangler.jsonc -Pattern '"name":'
 # package.json shows the new script
 Select-String -Path package.json -Pattern '"deploy":'
 ```
+_Both lines confirmed: `wrangler.jsonc:3: "name": "10x-cards"` and `package.json:10: "deploy": "astro build && wrangler deploy"`._
 **Rollback:** `git restore wrangler.jsonc package.json`. No production state touched.
-**Phase complete:** [ ]
+**Phase complete:** [x] 2026-05-23.
 
 ---
 
-## Phase 3 — Local build validation
+## Phase 3 — Local build validation ✅ COMPLETE (2026-05-23)
 
 **Objective:** prove the production build is green locally before any Worker is created.
 **Owner:** Agent.
 **Depends on:** Phase 2.
 
-- [ ] **(Agent)** Install deps if not already — `npm install`.
-- [ ] **(Agent)** Lint — `npm run lint`. Must exit 0.
-- [ ] **(Agent)** Production build — `npm run build`. Must exit 0.
-- [ ] **(Agent)** Note the build output size — `Get-ChildItem dist -Recurse | Measure-Object -Property Length -Sum` (or check the `wrangler` build summary). Astro + React 19 + Supabase client should sit well under the **1 MB compressed** free-plan ceiling; record the figure as a baseline.
+- [x] **(Agent)** Install deps if not already — `npm install`. _Done in Phase 2._
+- [x] **(Agent)** Lint — `npm run lint`. Must exit 0. _Pass after one-time `npm run lint:fix` to normalize Windows CRLF line endings (autocrlf=true in working tree but Prettier defaults to `endOfLine: "lf"`). Fix touched LF on disk only — `git diff --stat` shows zero content changes outside the three intentional Phase 1/2 edits. See **Windows CRLF lint note** below._
+- [x] **(Agent)** Production build — `npm run build`. Must exit 0. _Pass — Astro built in 8.77s; adapter auto-enabled Cloudflare Images binding (`IMAGES`) and Cloudflare KV sessions binding (`SESSION`)._
+- [x] **(Agent, added)** Dry-run deploy — `npx wrangler deploy --dry-run --outdir=.wrangler/dry-run`. Read-only validation of bundle + config without uploading. _Pass — exits cleanly with "--dry-run: exiting now". Catches Worker-specific failures that `npm run build` alone misses (bundle size, config schema, `main` entrypoint resolution)._
+- [x] **(Agent)** Note the build output size — `Get-ChildItem dist -Recurse | Measure-Object -Property Length -Sum` (or check the `wrangler` build summary). Astro + React 19 + Supabase client should sit well under the **1 MB compressed** free-plan ceiling; record the figure as a baseline. _Recorded: **1913 KiB raw / 391 KiB gzipped** (~38% of the 1024 KiB free-plan ceiling — comfortable headroom)._
 
-**Validation:** `npm run lint` exits 0 ✅, `npm run build` exits 0 ✅, `dist/` exists, bundle size recorded.
-**Rollback:** none — `dist/` is git-ignored. Delete with `Remove-Item -Recurse -Force dist` if you need a clean slate.
-**Phase complete:** [ ]
+**Validation:** `npm run lint` exits 0 ✅, `npm run build` exits 0 ✅, `wrangler deploy --dry-run` exits 0 ✅, `dist/` exists, bundle size recorded.
+**Rollback:** none — `dist/` and `.wrangler/dry-run/` are git-ignored. Delete with `Remove-Item -Recurse -Force dist, .wrangler/dry-run` if you need a clean slate.
+**Phase complete:** [x] 2026-05-23.
+
+> ### Windows CRLF lint note (closed 2026-05-23)
+>
+> `npm run lint` initially failed across the entire repo with `prettier/prettier  Delete '␍'` errors on every line. Cause: `git config core.autocrlf=true` (Windows default) converts LF → CRLF on checkout; `.prettierrc.json` has no `endOfLine` (defaults to `lf`); no `.gitattributes` to override. Files are LF in the repo, become CRLF on disk, Prettier rejects.
+>
+> **One-time fix applied:** `npm run lint:fix` normalized line endings to LF on disk. `git diff --stat` confirmed zero content changes outside the three intentional Phase 1/2 edits — all the `M`-flagged files in `git status` are autocrlf "ghosts" (warning: *"LF will be replaced by CRLF the next time Git touches it"*), not real diffs. They'll silently re-convert to CRLF on next `git pull` / branch switch.
+>
+> **Long-term fix (deferred):** add a `.gitattributes` with `* text=auto eol=lf` and run `git add --renormalize . && git commit` so every future checkout on Windows lands as LF. Out of scope for this deploy; do after Phase 7 if desired.
+>
+> ### Auto-injected Cloudflare bindings (informational)
+>
+> The Astro Cloudflare adapter generates `dist/server/wrangler.json` during build, merging your `wrangler.jsonc` with two bindings it injects automatically:
+> - `env.IMAGES` — Cloudflare Images service (provided by Cloudflare; no config needed)
+> - `env.SESSION` — KV Namespace for Astro Sessions (Cloudflare auto-provisions the default KV)
+>
+> Plus your declared `env.ASSETS` for static files. **No `wrangler.jsonc` change needed** — the dry-run confirmed all three resolve cleanly.
+>
+> ### Sitemap warning (cosmetic)
+>
+> Build emitted: `[@astrojs/sitemap] The Sitemap integration requires the site astro.config option. Skipping.` Sitemap is skipped because no `site:` is set in `astro.config.mjs`. Build succeeds regardless. Post-deploy, add `site: "https://10x-cards.<subdomain>.workers.dev"` to `astro.config.mjs` if you want a sitemap generated.
 
 ---
 
@@ -232,23 +255,28 @@ Select-String -Path package.json -Pattern '"deploy":'
 
 ### 4.1–4.3 — Local `.env` (before Phase 5)
 
-- [ ] **(Human)** Create a git-ignored `.env` at the repo root by copying `.env.example`:
+- [x] **(Human)** Create a git-ignored `.env` at the repo root by copying `.env.example`:
   ```powershell
   Copy-Item .env.example .env
   ```
-- [ ] **(Human)** Open `.env` and paste the real values from Prerequisite D:
+  _Done 2026-05-23._
+- [x] **(Human)** Open `.env` and paste the real values from Prerequisite D:
   ```
   SUPABASE_URL=https://<project>.supabase.co
   SUPABASE_KEY=<anon-public-key>
   ```
   `src/lib/supabase.ts` reads these via `astro:env/server` during local dev. **Never** paste the `service_role` key — see the ⚠️ Verify callout in Prerequisite D.
-- [ ] **(Agent)** Local smoke test — `npm run dev`, then in a browser exercise `/auth/signup`, `/auth/signin`, `/dashboard` (should redirect to signin when logged out), `/auth/signout`. No "Supabase is not configured" banner should appear.
+  _Done 2026-05-23. Structural validation confirmed: cloud URL pattern (`https://<ref>.supabase.co`); key is the **new-format publishable key** (`sb_publishable_...`, ~46 chars), Supabase's 2024+ replacement for the legacy ~220-char anon JWT (`eyJ...`). Verified prefix is `sb_publishable_`, **not** `sb_secret_`. `@supabase/supabase-js@^2.99.1` accepts both formats._
+- [x] **(Agent)** Local smoke test — `npm run dev`, then in a browser exercise `/auth/signup`, `/auth/signin`, `/dashboard` (should redirect to signin when logged out), `/auth/signout`. No "Supabase is not configured" banner should appear.
+  _Dev server boots clean — `astro v6.3.1 ready in 3169 ms`, log shows `"Using secrets defined in .env"` (Astro picked up the env file), no configuration banner. Smoke test in progress: signup + email confirmation **working** after the Supabase Site URL gotcha fix (see Prerequisite D callout above). Signin / dashboard / signout still being walked by user._
 
 ### 4.4–4.6 — Production secrets (after Phase 5 has created the Worker)
 
-- [ ] **(Human)** `npx wrangler secret put SUPABASE_URL` — paste the Supabase Project URL when prompted.
-- [ ] **(Human)** `npx wrangler secret put SUPABASE_KEY` — paste the anon public key when prompted.
-- [ ] **(Agent)** `npx wrangler secret list` — must list `SUPABASE_URL` and `SUPABASE_KEY` (names only, never values).
+> **Ordering reality (2026-05-23):** secrets were put **before** Phase 5's `wrangler deploy`. `wrangler secret put` on a non-existent Worker auto-creates an empty Worker shell (the placeholder versions visible in `wrangler deployments list` as `Source: Secret Change`). The first `npm run deploy` then uploads real code on top. Both orderings work — the plan's Option A and Option B are equivalent.
+
+- [x] **(Human)** `npx wrangler secret put SUPABASE_URL` — paste the Supabase Project URL when prompted. _Done 2026-05-23._
+- [x] **(Human)** `npx wrangler secret put SUPABASE_KEY` — paste the anon public key when prompted. _Done 2026-05-23._
+- [x] **(Agent)** `npx wrangler secret list` — must list `SUPABASE_URL` and `SUPABASE_KEY` (names only, never values). _Verified — both present as `secret_text`._
 
 **Validation:** `.env` exists locally and `npm run dev` boots without the configuration banner ✅. After Phase 5, `wrangler secret list` shows both names ✅.
 **Rollback:** `.env` is untracked — delete to revert (`Remove-Item .env`). Secrets in production: `npx wrangler secret delete SUPABASE_KEY` / `… SUPABASE_URL`. Rotating an anon key (Supabase **Settings → API → Reset anon key**) invalidates current sessions and requires re-running `wrangler secret put SUPABASE_KEY`.
@@ -258,23 +286,53 @@ Select-String -Path package.json -Pattern '"deploy":'
 
 ---
 
-## Phase 5 — First deployment
+## Phase 5 — First deployment ✅ COMPLETE (2026-05-23)
 
 **Objective:** create the `10x-cards` Worker in production with a known-good build.
 **Owner:** Agent.
 **Depends on:** Phase 4.1–4.3 (local `.env` works, build is green).
 
-- [ ] **(Agent)** Deploy — `npm run deploy` (which runs `astro build && wrangler deploy`) **or** `npx wrangler deploy`. The first run **creates** the Worker and prints `https://10x-cards.<subdomain>.workers.dev`. **Record that URL** — it's used in Phase 6.
-- [ ] **(Agent)** Confirm the deploy registered — `npx wrangler deployments list`. Expect one row with the version ID and "Created from: Upload".
-- [ ] **(Agent)** Now loop back and complete Phase 4.4–4.6 (set the production secrets).
+- [x] **(Agent)** Deploy — `npm run deploy` (which runs `astro build && wrangler deploy`) **or** `npx wrangler deploy`. The first run **creates** the Worker and prints `https://10x-cards.<subdomain>.workers.dev`. **Record that URL** — it's used in Phase 6. _Deployed 2026-05-23 13:21 local time. **Worker URL: `https://10x-cards.rafsaw.workers.dev`** (account subdomain: `rafsaw`). Current Version ID: `e104ed8c-1b74-4452-8a59-c408d0ede615`. Worker Startup Time: 19 ms. Upload: 1913 KiB / 391 KiB gzipped._
+- [x] **(Agent)** Confirm the deploy registered — `npx wrangler deployments list`. Expect one row with the version ID and "Created from: Upload". _Verified — version `e104ed8c-...` is the live deploy. Three earlier rows show `Source: Secret Change` (placeholder Worker shell from `wrangler secret put` before this deploy)._
+- [x] **(Agent)** Now loop back and complete Phase 4.4–4.6 (set the production secrets). _Already done — see Phase 4.4–4.6 ticks. The `wrangler secret put` calls were run before this `wrangler deploy`, auto-creating the Worker shell; `npm run deploy` then layered real code on top. Both orderings work._
 
 **Validation:** the printed URL responds to `Invoke-WebRequest https://10x-cards.<subdomain>.workers.dev` with HTTP 200 (or a redirect to `/auth/signin`). `wrangler deployments list` shows one deployment.
+_Validated 2026-05-23: `Invoke-WebRequest https://10x-cards.rafsaw.workers.dev` → **HTTP 200**, `Content-Type: text/html` (homepage renders). `wrangler deployments list` shows the `Upload`-source version live._
 **Rollback:**
 - Bad code (after a later deploy) — `npx wrangler rollback` (reverts to the previous version in seconds) — **Agent**, to a known-good version only.
 - Full teardown — delete the Worker via **Workers & Pages → 10x-cards → Settings → Delete** in the dashboard. **Human-only**.
-**Phase complete:** [ ]
+**Phase complete:** [x] 2026-05-23.
 
 > The first deploy creates the Worker even though no secrets are set yet. Pages requiring Supabase will show a configuration error until Phase 4.4–4.6 lands the secrets — expected and harmless.
+
+> ### Auto-provisioned KV namespace (informational)
+>
+> Cloudflare's **experimental resource provisioning** auto-created the KV namespace needed for Astro Sessions during this deploy:
+>
+> ```
+> Provisioning SESSION (KV Namespace)...
+> Creating new KV Namespace "10x-cards-session"...
+> SESSION provisioned 🎉
+> env.SESSION (fb7304c7b2214cde8aaf7a0b250e42a7)  KV Namespace
+> ```
+>
+> The KV namespace ID `fb7304c7b2214cde8aaf7a0b250e42a7` is bound to `env.SESSION`. No `wrangler.jsonc` edit was needed — the Astro Cloudflare adapter declared the binding in its generated `dist/server/wrangler.json`. Visible in the dashboard at **Workers & Pages → 10x-cards → Settings → Bindings** and **Storage & Databases → KV → 10x-cards-session**.
+>
+> ### Two `wrangler deploy` warnings (informational, not blocking)
+>
+> Wrangler printed two defaults-applied warnings because they aren't explicitly set in `wrangler.jsonc`:
+>
+> ```
+> [WARNING] Because 'workers_dev' is not in your Wrangler file, it will be enabled for this deployment by default.
+> [WARNING] Because your 'workers.dev' route is enabled and your 'preview_urls' setting is not in your Wrangler file, Preview URLs will be enabled for this deployment by default.
+> ```
+>
+> Both defaults match what we want for the MVP (the `*.workers.dev` URL **is** the production URL; preview URLs are useful when Phase 7's Git integration lands). To silence the warnings without changing behavior, optionally add to `wrangler.jsonc`:
+> ```jsonc
+> "workers_dev": true,
+> "preview_urls": true,
+> ```
+> Deferred — not blocking, and Workers Builds (Phase 7) doesn't require it.
 
 ---
 
@@ -293,19 +351,29 @@ Select-String -Path package.json -Pattern '"deploy":'
 
 > **Additive, not replacing.** The localhost entries set in Prerequisite D stay — only Site URL flips to the Worker URL, and the Worker redirect is **added** alongside the localhost one so local dev keeps working.
 
-- [ ] **(Human)** Supabase **Authentication → URL Configuration → Site URL** — **swap** from `http://localhost:4321` to `https://10x-cards.<subdomain>.workers.dev`. (Site URL is what gets baked into the `{{ .ConfirmationURL }}` token in the confirmation email — it can only point to one place at a time, and production must win once the Worker exists.)
-- [ ] **(Human)** Supabase **Authentication → URL Configuration → Redirect URLs** — **add** `https://10x-cards.<subdomain>.workers.dev/**` (covers the email-confirmation callback). Keep `http://localhost:4321/**` in the list so signing up against localhost still works during dev.
+- [x] **(Human)** Supabase **Authentication → URL Configuration → Site URL** — **swap** from `http://localhost:4321` to `https://10x-cards.rafsaw.workers.dev`. (Site URL is what gets baked into the `{{ .ConfirmationURL }}` token in the confirmation email — it can only point to one place at a time, and production must win once the Worker exists.) **⚠️ Click Save at the bottom of the page** — the dashboard silently drops unsaved changes (this bit us in Prerequisite D). _Set and persisted 2026-05-23._
+- [x] **(Human)** Supabase **Authentication → URL Configuration → Redirect URLs** — **add** `https://10x-cards.rafsaw.workers.dev/**` (covers the email-confirmation callback). Keep `http://localhost:4321/**` in the list so signing up against localhost still works during dev. _Added 2026-05-23 — both entries present and saved._
 
 ### Smoke test on the live URL
 
-- [ ] **(Agent)** Stream live logs in a separate PowerShell — `npx wrangler tail --format json`.
-- [ ] **(Human)** On `https://10x-cards.<subdomain>.workers.dev`:
+- [x] **(Agent)** Stream live logs in a separate PowerShell — `npx wrangler tail --format json`. _Streamed via `wrangler tail --format pretty` throughout the test._
+- [x] **(Human)** On `https://10x-cards.rafsaw.workers.dev`:
   1. **Sign up** with a real email → expect redirect to `/auth/confirm-email` and a confirmation email within ~30s (free-tier shared SMTP).
   2. Click the confirmation link in the email.
   3. **Sign in** with the same credentials → expect redirect to `/dashboard`.
   4. Visit `/dashboard` while authenticated → loads.
   5. **Sign out** → `/dashboard` redirects to `/auth/signin`.
-- [ ] **(Agent)** Confirm no unhandled errors appeared in `wrangler tail`.
+  _Steps 1–2 blocked by Supabase free-tier shared-SMTP rate limit (~3–4 emails/hour) — exhausted across earlier localhost-port-3000 / port-4321 attempts. **Worked around** by creating the test user directly via **Supabase Dashboard → Authentication → Users → Add user → Create new user → Auto Confirm User: ON** (bypasses SMTP). Email-link redirection mechanism was already proven during local Phase 4.3 (link correctly used whichever value was in Site URL), so it's circumstantially proven here too now that Site URL = prod URL. Steps 3–5 walked successfully on the live URL._
+- [x] **(Agent)** Confirm no unhandled errors appeared in `wrangler tail`. _Confirmed — only "expected" errors (one bad-credentials retry by user — surfaced cleanly as `?error=Invalid login credentials`; one rate-limit error from step 1 — surfaced cleanly as `?error=email rate limit exceeded`). No 500s, no unhandled exceptions._
+
+> ### Supabase free-tier SMTP rate limit (lesson — 2026-05-23)
+>
+> Hit "email rate limit exceeded" mid-smoke-test after burning through ~3–4 confirmation emails across localhost-port-3000, localhost-port-4321, and the production attempt. Supabase **enforces the cap BEFORE creating the user** — so a rate-limited signup leaves no user record in `auth.users` to manually confirm afterward.
+>
+> **MVP workarounds (no paid plan needed):**
+> - **Manual user creation:** Dashboard → Authentication → Users → **Add user → Create new user → Auto Confirm User: ON**. Sets email + password directly, marks confirmed, sends no email. Use this for smoke tests, debugging, or seeding test accounts.
+> - **Custom SMTP:** Authentication → Emails → SMTP. Configure Resend / SendGrid / AWS SES to bypass the shared-pool cap permanently. Required before real users can sign up at any scale — deferred for MVP but **flagged as a hard prerequisite for any public launch**.
+> - **Wait it out:** the rolling-window cap clears ~60 min after the first email. Fine for one-off tests, not viable when iterating.
 
 ### Rollback drill (do it once, while everything is fresh)
 
