@@ -246,10 +246,10 @@ Because we are pushing directly to production with no local-stack dry-run, the s
 
 #### Automated
 
-- [x] 2.1 `verify-rls.sql` is committed to the change folder with the actual user UUIDs filled in (no `<USER_._UUID>` placeholders remain)
+- [x] 2.1 `verify-rls.sql` is committed to the change folder with the actual user UUIDs filled in (no `<USER_._UUID>` placeholders remain) — c21106d
 
 #### Manual
 
-- [x] 2.2 The two test users (`rls-test-a@example.invalid`, `rls-test-b@example.invalid`) exist in remote Authentication → Users with the recorded UUIDs
-- [x] 2.3 Every block in `verify-rls.sql` produces its documented expected result when run in Studio with the correct role/UID for that block
-- [x] 2.4 After the cleanup block, `select count(*) from cards;` as `service_role` returns 0 (no fixture residue)
+- [x] 2.2 The two test users (`rls-test-a@example.invalid`, `rls-test-b@example.invalid`) exist in remote Authentication → Users with the recorded UUIDs — c21106d
+- [x] 2.3 Every block in `verify-rls.sql` produces its documented expected result when run in Studio with the correct role/UID for that block — c21106d
+- [x] 2.4 After the cleanup block, `select count(*) from cards;` as `service_role` returns 0 (no fixture residue) — c21106d
