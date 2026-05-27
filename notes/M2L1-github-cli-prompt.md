@@ -1,0 +1,1 @@
+ I would like to convert  @context/foundation/roadmap.md into a set of github issues. Identify task management system, propose format, and after my approval migrate roadmap to github using GH CLI.

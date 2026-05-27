@@ -28,7 +28,13 @@
       "PowerShell(node -v)",
       "PowerShell(Get-Command *)",
       "Bash(git check-ignore *)",
-      "Bash(supabase --version)"
+      "Bash(supabase --version)",
+      "mcp__linear-server__list_projects",
+      "mcp__linear-server__list_teams",
+      "mcp__linear-server__list_issue_labels",
+      "mcp__linear-server__list_issues",
+      "mcp__linear-server__create_issue_label",
+      "mcp__linear-server__save_issue"
     ],
     "deny": [
       "Bash(rm -rf *)"
