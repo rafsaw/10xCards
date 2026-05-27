@@ -1,112 +1,136 @@
 ---
 project: 10xCards
-version: 1
+version: 2
 status: active
 created: 2026-05-27
 updated: 2026-05-27
 source: context/foundation/roadmap.md
-mirror: linear
-workspace: rafsaw
-team: Rafsaw (RAF)
-linear_project: 10xCards
-linear_project_url: https://linear.app/rafsaw/project/10xcards-c2c463decb8e
+sibling: context/foundation/tasks-github.md
+linear:
+  workspace: rafsaw
+  team: Rafsaw (key: RAF)
+  project: 10xCards
+  project_id: 93f69a9c-a1e5-4ff0-91b3-14d42425dcfd
+  team_id: 53788563-f09a-4256-bd5a-2a93fe1e2dc2
+  project_url: https://linear.app/rafsaw/project/10xcards-c2c463decb8e
 ---
 
-# Tasks (Linear mirror)
+# Tasks — Linear mirror
 
-Linear Issues mirror the roadmap alongside the GitHub mirror (see `tasks-github.md`). `context/foundation/roadmap.md` remains the source of truth for outcomes, prerequisites, risks, and unknowns — Linear issues are a navigational mirror that adds proper dependency graphs (`Blocked by` / `Blocks`) which the GitHub mirror encodes only in prose.
+Linear Issues mirror the roadmap. `context/foundation/roadmap.md` is canonical; Linear issues są navigational/workflow surface. GitHub Issues mirror'ują tę samą roadmapę równolegle — patrz `tasks-github.md`. Gdy roadmap się zmienia, update obu trackerów (lub cancel + recreate).
 
-This mirror was created on 2026-05-27 via the Linear MCP server (no manual Linear web UI work).
+> **Sync state (2026-05-27):** Linear w v2 (RAF-10..RAF-15 — odpowiadają roadmap v2 z 6 elementami: F-01 + S-01..S-05). Stare RAF-5..RAF-9 (mirror'owały roadmap v1) ustawione na status `Canceled` — Linear MCP nie wystawia `delete_issue`, więc `Canceled` to operacyjny ekwiwalent skasowania.
 
 ## Workspace shape
 
 - **Workspace:** `rafsaw`
-- **Team:** `Rafsaw` (key `RAF`) — currently the only team in the workspace.
+- **Team:** `Rafsaw` (key `RAF`, id `53788563-f09a-4256-bd5a-2a93fe1e2dc2`) — jedyny team w workspace.
 - **Project:** `10xCards` (id `93f69a9c-a1e5-4ff0-91b3-14d42425dcfd`).
-- **Status (project):** Backlog. All issues created at default state `Backlog`.
+- **Standardowe statusy w teamie:** `Backlog`, `Todo`, `In Progress`, `Done`, `Canceled`, `Duplicate`.
 
-## Conventions
+## Konwencje
 
-- **Title format:** `[<Roadmap ID>] <Suggested issue title from roadmap §Backlog Handoff>` — identical to the GitHub mirror so issues are searchable across trackers by `[F-01]` etc.
-- **One issue per roadmap item** (foundations + slices). Parked, Open Questions, and Streams do not get Linear issues.
-- **Body** mirrors the roadmap entry: Outcome, PRD refs, Prerequisites, Parallel with, Unknowns, Risk. Header lists Roadmap ID, Change ID, Status, GitHub mirror link, and back-pointer to `context/foundation/roadmap.md`.
-- **GitHub mirror link:** every Linear issue carries a Link Attachment to its GitHub counterpart (`rafsaw/10xCards#<n>`) so the cross-reference shows up in Linear's sidebar.
-- **Dependencies:** encoded as native Linear `Blocked by` relations on the issue itself — not as label text. This is the main expressive gain over the GitHub mirror.
+- **Title format:** `[<Roadmap ID>] <Suggested issue title>` — identyczny z GitHub. Pozwala wyszukiwać po `[F-01]` w obu trackerach.
+- **Description format:** mirror sekcji z roadmap.md (Outcome, PRD refs, Prerequisites, Parallel with, Unknowns, Risk, Next move) + nagłówek z Change ID, Stream, Status, link do GitHub mirror.
+- **State:** F-01 jako `ready` startuje w `Todo`, reszta `proposed` startuje w `Backlog`. Po wejściu w `/10x-plan` → `In Progress`. Po `/10x-archive` → `Done`. Anulowane wersje → `Canceled`.
+- **Labels:** identyczna paleta jak GitHub — `roadmap:foundation`, `roadmap:slice`, `stream:{a-core-loop,b-library,c-review,d-compliance}`, `north-star`. Labels są team-scoped na Rafsaw.
+- **Dependencies:** zakodowane jako natywne Linear `Blocked by` relations (nie adnotacje w body). To główna przewaga Linear nad GitHub w tym mirrorze.
+- **GitHub backlinks:** każdy Linear issue ma attachment "GitHub mirror #N" z URL-em do odpowiadającego GH issue.
 
-## Labels (team-scoped)
+## Etykiety (team Rafsaw)
 
-All five labels live on the `Rafsaw` team and match the GitHub label scheme name-for-name and color-for-color.
-
-| Label | Color | Linear ID | Purpose |
-| --- | --- | --- | --- |
-| `roadmap:foundation` | `#5319e7` | `c9f438f9-9048-4688-99a7-4b8b4b2ed3ee` | Foundation items (`F-*`) — bounded enablers per roadmap §Foundations. |
-| `roadmap:slice` | `#0e8a16` | `5cb8afe6-44a2-4b77-94c5-8f8bbd7e60cc` | Vertical slices (`S-*`) — user-visible outcomes. |
-| `stream:a-core-loop` | `#1d76db` | `c082a0d9-2ea4-406e-9241-eea8aa30711f` | Stream A: `F-01` → `S-01` → `S-02` (north-star chain). |
-| `stream:b-library` | `#fbca04` | `8d687a55-c78a-406f-8d2b-f188c3f57afd` | Stream B: `S-03` → `S-04` (library completeness, parallel after F-01). |
-| `north-star` | `#b60205` | `08f4393c-f352-43b5-8c6a-9fc69b97efc4` | Validation milestone for PRD Primary Success Criterion (S-02 only). |
+| Label | Color | Purpose |
+| --- | --- | --- |
+| `roadmap:foundation` | `5319e7` | Foundation items (`F-*`) — bounded enablers per roadmap §Foundations. |
+| `roadmap:slice` | `0e8a16` | Vertical slices (`S-*`) — user-visible outcomes. |
+| `stream:a-core-loop` | `1d76db` | Stream A: `F-01` → `S-01` → `S-02` (north-star chain). |
+| `stream:b-library` | `fbca04` | Stream B: `S-03` (library + manual create, parallel after F-01). **Opis w Linear wciąż brzmi v1** (`S-03 → S-04`) — MCP nie wystawia `edit_label`, jest do ręcznej poprawki w UI lub odbudowy etykiety. |
+| `stream:c-review` | `bfd4f2` | Stream C: `S-04` (SRS review loop, joins A at S-02). |
+| `stream:d-compliance` | `d4c5f9` | Stream D: `S-05` (account lifecycle / compliance, parallel after F-01). |
+| `north-star` | `b60205` | Validation milestone for PRD Primary Success Criterion (S-02 only). |
 
 ## Issue index
 
-| Roadmap ID | Change ID | Linear | GitHub | Labels | Blocked by | Stream | Status |
+| Roadmap ID | Change ID | Linear | GitHub mirror | Labels | Stream | Linear state | Blocked by |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| F-01 | `cards-schema-and-rls` | [RAF-5](https://linear.app/rafsaw/issue/RAF-5) | [#1](https://github.com/rafsaw/10xCards/issues/1) | `roadmap:foundation`, `stream:a-core-loop` | — | A | ready |
-| S-01 | `ai-candidate-generation-with-accept-reject` | [RAF-6](https://linear.app/rafsaw/issue/RAF-6) | [#2](https://github.com/rafsaw/10xCards/issues/2) | `roadmap:slice`, `stream:a-core-loop` | RAF-5 | A | proposed |
-| S-02 | `srs-review-session` | [RAF-7](https://linear.app/rafsaw/issue/RAF-7) | [#4](https://github.com/rafsaw/10xCards/issues/4) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | RAF-5, RAF-6 | A | proposed |
-| S-03 | `manual-card-creation` | [RAF-8](https://linear.app/rafsaw/issue/RAF-8) | [#3](https://github.com/rafsaw/10xCards/issues/3) | `roadmap:slice`, `stream:b-library` | RAF-5 | B | proposed |
-| S-04 | `card-library-browse-edit-delete` | [RAF-9](https://linear.app/rafsaw/issue/RAF-9) | [#5](https://github.com/rafsaw/10xCards/issues/5) | `roadmap:slice`, `stream:b-library` | RAF-5, RAF-6 | B | proposed |
+| F-01 | `cards-schema-and-rls` | [RAF-10](https://linear.app/rafsaw/issue/RAF-10) | [#6](https://github.com/rafsaw/10xCards/issues/6) | `roadmap:foundation`, `stream:a-core-loop` | A | Todo | — |
+| S-01 | `first-gated-generation` | [RAF-11](https://linear.app/rafsaw/issue/RAF-11) | [#7](https://github.com/rafsaw/10xCards/issues/7) | `roadmap:slice`, `stream:a-core-loop` | A | Backlog | RAF-10 |
+| S-02 | `atomic-save-to-deck` | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | [#8](https://github.com/rafsaw/10xCards/issues/8) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | Backlog | RAF-10, RAF-11 |
+| S-03 | `deck-edit-delete` | [RAF-13](https://linear.app/rafsaw/issue/RAF-13) | [#9](https://github.com/rafsaw/10xCards/issues/9) | `roadmap:slice`, `stream:b-library` | B | Backlog | RAF-10 |
+| S-04 | `srs-review-session` | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | [#10](https://github.com/rafsaw/10xCards/issues/10) | `roadmap:slice`, `stream:c-review` | C | Backlog | RAF-10, RAF-12 |
+| S-05 | `account-deletion-with-retention` | [RAF-15](https://linear.app/rafsaw/issue/RAF-15) | [#11](https://github.com/rafsaw/10xCards/issues/11) | `roadmap:slice`, `stream:d-compliance` | D | Backlog (priority: Medium) | RAF-10 + zewnętrzny: PRD update |
 
-Identifier note: Linear sequence starts at `RAF-5` because identifiers `RAF-1..RAF-4` were already consumed by earlier workspace activity before this mirror was created. There is no `RAF-1..RAF-4` gap to interpret — the offset is incidental, not semantic.
+## Anulowane (v1, mirror starej roadmapy)
 
-## Dependency graph
+| Linear | Stary Roadmap ID | Change ID | Status |
+| --- | --- | --- | --- |
+| [RAF-5](https://linear.app/rafsaw/issue/RAF-5) | F-01 (v1) | `cards-schema-and-rls` | Canceled |
+| [RAF-6](https://linear.app/rafsaw/issue/RAF-6) | S-01 (v1) | `ai-candidate-generation-with-accept-reject` | Canceled |
+| [RAF-7](https://linear.app/rafsaw/issue/RAF-7) | S-02 (v1, north star) | `srs-review-session` | Canceled |
+| [RAF-8](https://linear.app/rafsaw/issue/RAF-8) | S-03 (v1) | `manual-card-creation` | Canceled |
+| [RAF-9](https://linear.app/rafsaw/issue/RAF-9) | S-04 (v1) | `card-library-browse-edit-delete` | Canceled |
 
-```
-              RAF-5 (F-01)
-              /  |  \
-             /   |   \
-         RAF-6  RAF-8  (Stream A vs B branch after F-01)
-         (S-01) (S-03)
-          /  \
-         /    \
-     RAF-7   RAF-9
-     (S-02   (S-04)
-      north
-      star)
-```
+> **Uwaga:** Linear MCP (`mcp__linear-server__*`) nie wystawia narzędzia `delete_issue`. `Canceled` to najczystszy operacyjny ekwiwalent — issues znikają z aktywnego backlogu, ich `Blocked by` relations na inne anulowane issues pozostają (nieaktywne — nie blokują nic w v2). Dla pełnego skasowania użyj Linear web UI lub Linear GraphQL API.
 
-- **Stream A (north-star chain):** RAF-5 → RAF-6 → RAF-7.
-- **Stream B (library):** RAF-5 → RAF-8; RAF-5 + RAF-6 → RAF-9 (S-04 needs S-01 because library lists / edits AI-saved cards too).
-- **Hard dependency on RAF-5:** all four slices. RAF-5 is the unblocker for everything else.
+## Sync rules (Linear-specific)
 
-## How this mirror was created (session log, 2026-05-27)
+- **Roadmap is canonical.** Conflict → edit roadmap first, then `mcp__linear-server__save_issue` z `id: "RAF-<n>"`.
+- **Dependencies append-only via MCP:** `blockedBy: [...]` dodaje, zerwanie via `removeBlockedBy: [...]`.
+- **Status transitions:**
+  - Roadmap `Status: ready` → Linear `Todo` (widoczne w Active, gotowe do `In Progress`).
+  - Roadmap `Status: proposed` → Linear `Backlog`.
+  - `/10x-plan` start → Linear `In Progress`.
+  - `/10x-archive` → Linear `Done` (z lookup'em do roadmap `## Done`).
+  - Roadmap `Status: blocked` → Linear pozostaje `Backlog` z bannerem w body + `priority: Medium` (jak RAF-15) żeby wyróżnić.
+- **GitHub mirror linkage** — przy tworzeniu / aktualizacji użyj `links: [{url: "https://github.com/rafsaw/10xCards/issues/N", title: "GitHub mirror #N"}]`. To pojawia się jako attachment w Linear UI.
+- **No new tracker fields** — żadnych priorytetów / estimates / milestones / assignees których nie ma w roadmapie. Wyjątek: priority Medium dla `blocked` issues (visual cue dla Linear backlog view).
 
-1. **Discovery.** `list_teams` returned the single team `Rafsaw`; `list_projects` found an existing `10xCards` project; `list_issues` on the project was empty; `list_issue_labels` showed only default labels (`Bug`, `Feature`, `Improvement`) — none of the roadmap-shaped labels existed yet.
-2. **Labels first.** Created the five team-scoped labels above with `create_issue_label`, matching GitHub colors and descriptions so the two mirrors are visually identical.
-3. **Issues in dependency order.** Created F-01 (`RAF-5`) first so the four slices could reference it via `blockedBy` at creation time. Then S-01 (`RAF-6`, blocked by RAF-5). Then S-02, S-03, S-04 were created in parallel — each referencing its prerequisites via `blockedBy: ["RAF-5", ...]`.
-4. **GitHub back-links.** Every issue was created with a `links` attachment pointing at the matching `rafsaw/10xCards#<n>` GitHub issue so both directions of the mirror are walkable.
-5. **Index updated.** `context/foundation/tasks-github.md` now has a GitHub + Linear two-column index; this file is the Linear-side companion.
+## Re-create the whole mirror after a roadmap rewrite
 
-## Sync rules
+Sekwencja użyta przy migracji v1 → v2:
 
-- **Roadmap is canonical.** When roadmap, GitHub, and Linear disagree: edit the roadmap first, then update both mirrors. Never resolve a disagreement by "letting Linear win".
-- **Status transitions:** `Status: ready` in roadmap → Linear issue stays in `Backlog` (or moves to `Todo`/`In Progress` once `/10x-plan` runs). `Status: done` in roadmap → close the Linear issue (state `Done`) and `/10x-archive` records it under roadmap §Done.
-- **Dependency edits:** keep `Blocked by` in sync if the roadmap changes a Prerequisites line. Use `save_issue` with `blockedBy: [...]` (append-only) or `removeBlockedBy: [...]` to detach.
-- **No new tracker fields in Linear.** Do not invent priorities, estimates, cycles, or assignees not present in the roadmap. The roadmap explicitly avoids dates/story points/velocity (`§Roadmap boundaries`); this mirror inherits that discipline.
-- **Roadmap §Parked items** stay out of Linear. If a parked item is promoted, add it to the roadmap first, then mirror to both GitHub and Linear.
+1. **Anuluj stare issues** (Linear MCP nie ma delete):
+   ```
+   mcp__linear-server__save_issue  id: "RAF-<n>"  state: "Canceled"     # dla każdego starego
+   ```
+2. **Dodaj brakujące labels** (MCP nie ma `edit_label`, więc opisy istniejących trzeba poprawić w UI):
+   ```
+   mcp__linear-server__create_issue_label  name: "stream:<x>"  color: "#..."  description: "..."  teamId: "<team-uuid>"
+   ```
+3. **Utwórz nowe issues w kolejności zależności** (F-01 najpierw, potem slices z `blockedBy: [RAF-N]`):
+   ```
+   mcp__linear-server__save_issue  team: "Rafsaw"  project: "10xCards"  title: "[X-NN] …"  description: "…"  labels: [...]  blockedBy: [...]  links: [{url, title}]
+   ```
+4. **Zaktualizuj `tasks-github.md`** (kolumna Linear) i `tasks-linear.md` (cały plik) z nowymi RAF-N.
 
-## Useful Linear MCP calls
+## Limity Linear MCP (na 2026-05-27)
+
+Co MCP wystawia, czego nie wystawia — żeby następne migracje nie traciły czasu na próby:
+
+| Operacja | Tool | Notes |
+| --- | --- | --- |
+| Utwórz issue | `save_issue` (bez `id`) | OK. |
+| Update issue | `save_issue` (z `id`) | OK; `blockedBy`/`blocks`/`relatedTo` są append-only — zerwanie via `removeBlockedBy`. |
+| Anuluj issue | `save_issue` + `state: "Canceled"` | Operacyjny ekwiwalent skasowania. |
+| **Skasuj issue** | — | **Niedostępne via MCP.** Tylko Linear UI lub GraphQL API. |
+| Utwórz label | `create_issue_label` | OK; scope = team (`teamId`) lub workspace (bez `teamId`). |
+| **Edytuj label** | — | **Niedostępne via MCP.** Opisy/kolory tylko w UI. (Stąd `stream:b-library` ma wciąż v1-owy opis.) |
+| Skasuj label | — | Niedostępne via MCP. |
+| Lista statuses | `list_issue_statuses` | OK; team-scoped. |
+| Dodać GitHub link | `save_issue` + `links: [{url, title}]` | OK; pojawia się jako attachment. Append-only. |
+
+## Useful MCP calls
 
 ```text
-# List all mirrored issues
-mcp__linear-server__list_issues(project="10xCards")
+# Lista bieżących issues
+mcp__linear-server__list_issues  project: "10xCards"  state: "Backlog"
 
-# Update an existing issue body from the roadmap (e.g. RAF-6)
-mcp__linear-server__save_issue(id="RAF-6", description="...")
+# Update issue body z roadmapy
+mcp__linear-server__save_issue  id: "RAF-10"  description: "<nowe body>"
 
-# Add a new blocker after a roadmap edit
-mcp__linear-server__save_issue(id="RAF-9", blockedBy=["RAF-6"])
+# Pokaż jeden issue ze wszystkimi relacjami
+mcp__linear-server__get_issue  id: "RAF-12"  includeRelations: true
 
-# Close on archive
-mcp__linear-server__save_issue(id="RAF-5", state="Done")
+# Wszystkie labels team Rafsaw
+mcp__linear-server__list_issue_labels  team: "Rafsaw"  limit: 100
 ```
-
-When calling `save_issue` from this skill, send Markdown content with **literal newlines and characters** — the MCP server documentation explicitly says not to escape `\n` as a backslash-n string. (Linear MCP's server instructions, surfaced on first call.)
