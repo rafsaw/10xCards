@@ -232,24 +232,24 @@ Because we are pushing directly to production with no local-stack dry-run, the s
 
 #### Automated
 
-- [x] 1.1 `supabase db push` returns exit 0 and prints the applied migration filename
-- [x] 1.2 `supabase migration list --linked` shows the migration as applied on remote
-- [x] 1.3 `npm run lint` and `npm run build` still pass
+- [x] 1.1 `supabase db push` returns exit 0 and prints the applied migration filename — 9214f40
+- [x] 1.2 `supabase migration list --linked` shows the migration as applied on remote — 9214f40
+- [x] 1.3 `npm run lint` and `npm run build` still pass — 9214f40
 
 #### Manual
 
-- [x] 1.4 Remote Supabase Studio Table Editor shows both tables, columns match the contract, RLS enabled, all four policies per table present
-- [x] 1.5 `cards.user_id` FK inspector shows `ON DELETE CASCADE`
-- [x] 1.6 Deployed dashboard at `https://10x-cards.rafsaw.workers.dev` still loads, signin works, `/dashboard` loads for an authenticated user
+- [x] 1.4 Remote Supabase Studio Table Editor shows both tables, columns match the contract, RLS enabled, all four policies per table present — 9214f40
+- [x] 1.5 `cards.user_id` FK inspector shows `ON DELETE CASCADE` — 9214f40
+- [x] 1.6 Deployed dashboard at `https://10x-cards.rafsaw.workers.dev` still loads, signin works, `/dashboard` loads for an authenticated user — 9214f40
 
 ### Phase 2: Manual RLS verification (on remote)
 
 #### Automated
 
-- [ ] 2.1 `verify-rls.sql` is committed to the change folder with the actual user UUIDs filled in (no `<USER_._UUID>` placeholders remain)
+- [x] 2.1 `verify-rls.sql` is committed to the change folder with the actual user UUIDs filled in (no `<USER_._UUID>` placeholders remain)
 
 #### Manual
 
-- [ ] 2.2 The two test users (`rls-test-a@example.invalid`, `rls-test-b@example.invalid`) exist in remote Authentication → Users with the recorded UUIDs
-- [ ] 2.3 Every block in `verify-rls.sql` produces its documented expected result when run in Studio with the correct role/UID for that block
-- [ ] 2.4 After the cleanup block, `select count(*) from cards;` as `service_role` returns 0 (no fixture residue)
+- [x] 2.2 The two test users (`rls-test-a@example.invalid`, `rls-test-b@example.invalid`) exist in remote Authentication → Users with the recorded UUIDs
+- [x] 2.3 Every block in `verify-rls.sql` produces its documented expected result when run in Studio with the correct role/UID for that block
+- [x] 2.4 After the cleanup block, `select count(*) from cards;` as `service_role` returns 0 (no fixture residue)
