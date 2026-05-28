@@ -1,7 +1,7 @@
 ---
 change_id: first-gated-generation
 title: Pierwsza gated generacja — drafty w bazie (S-01)
-status: plan_reviewed
+status: implementing
 created: 2026-05-27
 updated: 2026-05-28
 archived_at: null

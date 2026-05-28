@@ -455,14 +455,14 @@ Rollback: revert the commit. No DB state lingers besides any drafts users may ha
 
 #### Automated
 
-- [ ] 1.1 `npm run lint` passes with the new env imports
-- [ ] 1.2 `npm run build` passes
-- [ ] 1.3 `npx astro sync` runs cleanly
+- [x] 1.1 `npm run lint` passes with the new env imports
+- [x] 1.2 `npm run build` passes
+- [x] 1.3 `npx astro sync` runs cleanly
 
 #### Manual
 
-- [ ] 1.4 Visiting `/` with `OPENROUTER_API_KEY` unset shows the OpenRouter missing-config banner
-- [ ] 1.5 After setting both env vars locally, the OpenRouter banner disappears
+- [x] 1.4 Visiting `/` with `OPENROUTER_API_KEY` unset shows the OpenRouter missing-config banner
+- [x] 1.5 After setting both env vars locally, the OpenRouter banner disappears
 - [ ] 1.6 `wrangler secret list` (or Cloudflare dashboard) shows `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` as set for the production Worker
 
 ### Phase 2: Generation API endpoint
