@@ -2,7 +2,7 @@
 
 Analyze a skill to understand its mechanics, design rationale, and how to build something similar. When invoked, read the target skill's source files and produce a structured report that demystifies how the skill works and why it's built that way.
 
-## Input
+## Input 
 
 The user provides a skill name (e.g., `10x-plan`, `10x-shape`, `10x-new`). Accept it as:
 - A bare name: `10x-plan`
