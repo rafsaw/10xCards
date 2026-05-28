@@ -469,18 +469,18 @@ Rollback: revert the commit. No DB state lingers besides any drafts users may ha
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npm run build` passes
-- [ ] 2.3 `npx astro sync` runs cleanly
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npm run build` passes
+- [x] 2.3 `npx astro sync` runs cleanly
 
 #### Manual
 
-- [ ] 2.4 `curl POST /api/generations` with a valid session and a 200+ char source returns 200 and `{drafts:[...]}`; matching rows visible in Supabase Studio
-- [ ] 2.5 `curl POST /api/generations` without a session returns 401 and does not hit OpenRouter
-- [ ] 2.6 `curl POST /api/generations` with source < 200 chars returns 400 and does not hit OpenRouter
-- [ ] 2.7 Forcing `OPENROUTER_MODEL` to an incompatible model returns 502 `ai_provider_error` and inserts nothing
-- [ ] 2.8 `POST /api/generations/discard` removes only the caller's draft rows (status='draft'); saved rows untouched
-- [ ] 2.9 Inserted draft rows in Studio show `status='draft'`, `next_due_at IS NULL`, `interval_days=0`, `repetition_count=0`
+- [x] 2.4 `curl POST /api/generations` with a valid session and a 200+ char source returns 200 and `{drafts:[...]}`; matching rows visible in Supabase Studio
+- [x] 2.5 `curl POST /api/generations` without a session returns 401 and does not hit OpenRouter
+- [x] 2.6 `curl POST /api/generations` with source < 200 chars returns 400 and does not hit OpenRouter
+- [x] 2.7 Forcing `OPENROUTER_MODEL` to an incompatible model returns 502 `ai_provider_error` and inserts nothing
+- [x] 2.8 `POST /api/generations/discard` removes only the caller's draft rows (status='draft'); saved rows untouched
+- [x] 2.9 Inserted draft rows in Studio show `status='draft'`, `next_due_at IS NULL`, `interval_days=0`, `repetition_count=0`
 
 ### Phase 3: Generate page + dashboard hub
 
