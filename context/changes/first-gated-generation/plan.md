@@ -506,14 +506,14 @@ Rollback: revert the commit. No DB state lingers besides any drafts users may ha
 
 #### Automated
 
-- [x] 4.1 `wrangler secret list` (or Cloudflare dashboard) shows both OpenRouter secrets set on the production Worker
-- [x] 4.2 Production build succeeds after `git push origin main` (Cloudflare dashboard build log green)
+- [x] 4.1 `wrangler secret list` (or Cloudflare dashboard) shows both OpenRouter secrets set on the production Worker — 85a6f0d
+- [x] 4.2 Production build succeeds after `git push origin main` (Cloudflare dashboard build log green) — 85a6f0d
 
 #### Manual
 
-- [x] 4.3 User-A on live site reaches `/generate` via the dashboard hub and generates a draft batch successfully
-- [x] 4.4 User-B on live site (incognito) sees no drafts from user-A; generates their own batch
-- [x] 4.5 User-A re-checks; their drafts persist and user-B's are not visible
-- [x] 4.6 Forced failure on production shows the error banner with source text preserved
-- [x] 4.7 Discard on production removes only the caller's drafts (RLS belt-and-braces holds)
-- [x] 4.8 Screenshot of a successful generation captured for the PR description
+- [x] 4.3 User-A on live site reaches `/generate` via the dashboard hub and generates a draft batch successfully — 85a6f0d
+- [x] 4.4 User-B on live site (incognito) sees no drafts from user-A; generates their own batch — 85a6f0d
+- [x] 4.5 User-A re-checks; their drafts persist and user-B's are not visible — 85a6f0d
+- [x] 4.6 Forced failure on production shows the error banner with source text preserved — 85a6f0d
+- [x] 4.7 Discard on production removes only the caller's drafts (RLS belt-and-braces holds) — 85a6f0d
+- [x] 4.8 Screenshot of a successful generation captured for the PR description — 85a6f0d
