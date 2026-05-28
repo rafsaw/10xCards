@@ -40,7 +40,17 @@
       "Read(//tmp/**)",
       "Read(//c/tmp/gh-issues/**)",
       "Read(//c/Users/rafal/AppData/Local/Temp/gh-issues/**)",
-      "mcp__linear-server__list_issue_statuses"
+      "mcp__linear-server__list_issue_statuses",
+      "PowerShell(foreach \\($c in '67e2c92','71d34c2','71f88e0','6e35a37','8cb837b'\\) { $n = \\(git show \"${c}:context/changes/first-gated-generation/plan.md\" | Measure-Object -Line\\).Lines; Write-Output \"$c $n\" })",
+      "PowerShell(Get-Item *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\" -Directory | Select-Object Name; \"---\"; Get-ChildItem -Path \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\src\" -ErrorAction SilentlyContinue | Select-Object Name, PSIsContainer)",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\src\\\\lib\\\\openrouter.ts\" | ForEach-Object { $i=0 } { $i++; \"$i`: $_\" })",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\src\\\\components\\\\generate\\\\PasteAndGenerateForm.tsx\" | ForEach-Object { $i=0 } { $i++; \"$i`: $_\" })",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\src\\\\pages\\\\api\\\\generations\\\\discard.ts\" | ForEach-Object { $i=0 } { $i++; \"$i`: $_\" })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\context\\\\changes\\\\first-gated-generation\" -Recurse -File | Select-Object FullName; \"===SUPABASE===\"; Get-ChildItem -Path \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\supabase\" -Recurse -File | Select-Object FullName)",
+      "PowerShell(git check-ignore *)",
+      "PowerShell(cmd /c \"npx astro sync > sync-out.txt 2>&1 & echo SYNC_EXIT=%errorlevel% >> sync-out.txt & npm run lint > lint-out.txt 2>&1 & echo LINT_EXIT=%errorlevel% >> lint-out.txt & npm run build > build-out.txt 2>&1 & echo BUILD_EXIT=%errorlevel% >> build-out.txt\")",
+      "PowerShell(Get-Content build-out.txt -Tail 15 -ErrorAction SilentlyContinue; \"---LINT---\"; Get-Content lint-out.txt -Tail 15 -ErrorAction SilentlyContinue; \"---SYNC---\"; Get-Content sync-out.txt -Tail 5 -ErrorAction SilentlyContinue)"
     ],
     "deny": [
       "Bash(rm -rf *)"
