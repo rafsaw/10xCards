@@ -13,7 +13,12 @@ const { user } = Astro.locals;
       <p class="text-blue-100/80">
         Welcome, <span class="font-semibold text-white">{user?.email}</span>
       </p>
-      <p class="mt-2 text-sm text-blue-100/50">This page is only for authenticated users.</p>
+      <a
+        href="/generate"
+        class="mt-6 inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40"
+      >
+        Generate cards from text
+      </a>
       <form method="POST" action="/api/auth/signout" class="mt-6">
         <button
           type="submit"

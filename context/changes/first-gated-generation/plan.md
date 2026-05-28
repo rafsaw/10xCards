@@ -486,21 +486,21 @@ Rollback: revert the commit. No DB state lingers besides any drafts users may ha
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes
-- [ ] 3.2 `npm run build` passes
-- [ ] 3.3 `npx astro sync` runs cleanly
+- [x] 3.1 `npm run lint` passes
+- [x] 3.2 `npm run build` passes
+- [x] 3.3 `npx astro sync` runs cleanly
 
 #### Manual
 
-- [ ] 3.4 `/dashboard` shows a "Generate cards" link that navigates to `/generate`
-- [ ] 3.5 Unauthenticated request to `/generate` redirects to `/auth/signin`
-- [ ] 3.6 Logged-in user on `/generate` with zero drafts sees the paste form only
-- [ ] 3.7 < 200 chars + Generate shows the client-side validation message; no network call fires
-- [ ] 3.8 200+ chars + Generate disables the form, shows the spinner + ticking counter, reloads `/generate` to show new drafts on success
-- [ ] 3.9 Second generation appends to the draft list (count grows, sort is newest-first)
-- [ ] 3.10 "Discard all drafts" with confirm dialog wipes the draft list
-- [ ] 3.11 Forcing a failure renders the inline error banner; textarea retains source text; clicking Generate again works without re-paste (FR-008)
-- [ ] 3.12 Page renders correctly on Chrome and at least one other browser (Firefox or Safari)
+- [x] 3.4 `/dashboard` shows a "Generate cards" link that navigates to `/generate`
+- [x] 3.5 Unauthenticated request to `/generate` redirects to `/auth/signin`
+- [x] 3.6 Logged-in user on `/generate` with zero drafts sees the paste form only
+- [x] 3.7 < 200 chars + Generate shows the client-side validation message; no network call fires
+- [x] 3.8 200+ chars + Generate disables the form, shows the spinner + ticking counter, reloads `/generate` to show new drafts on success
+- [x] 3.9 Second generation appends to the draft list (count grows, sort is newest-first)
+- [x] 3.10 "Discard all drafts" with confirm dialog wipes the draft list
+- [x] 3.11 Forcing a failure renders the inline error banner; textarea retains source text; clicking Generate again works without re-paste (FR-008)
+- [x] 3.12 Page renders correctly on Chrome and at least one other browser (Firefox or Safari)
 
 ### Phase 4: End-to-end manual verification on production
 
