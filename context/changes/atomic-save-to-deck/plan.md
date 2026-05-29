@@ -324,33 +324,33 @@ Forward-only: the migration only `CREATE`s a function — nothing to clobber, no
 
 #### Automated
 
-- [x] 1.1 `supabase db push` returns exit 0 and prints the new migration filename
-- [x] 1.2 `supabase migration list --linked` shows the migration applied on remote
-- [x] 1.3 `verify-finalize.sql` committed with real UUIDs (no `<...>` placeholders remain)
-- [x] 1.4 `npm run lint` and `npm run build` still pass
+- [x] 1.1 `supabase db push` returns exit 0 and prints the new migration filename — 1f62e31
+- [x] 1.2 `supabase migration list --linked` shows the migration applied on remote — 1f62e31
+- [x] 1.3 `verify-finalize.sql` committed with real UUIDs (no `<...>` placeholders remain) — 1f62e31
+- [x] 1.4 `npm run lint` and `npm run build` still pass — 1f62e31
 
 #### Manual
 
-- [x] 1.5 `public.finalize_drafts` exists in Studio with `security invoker` and `EXECUTE` granted to `authenticated`
-- [x] 1.6 Every block in `verify-finalize.sql` matches its expected result (happy path `1,1` + correct post-state; cross-user `0,0` with B untouched; idempotent re-run `0,0`)
-- [x] 1.7 After cleanup, `select count(*) from public.cards where user_id in (<A>, <B>);` as `service_role` returns 0 (fixture-scoped, not a global count)
+- [x] 1.5 `public.finalize_drafts` exists in Studio with `security invoker` and `EXECUTE` granted to `authenticated` — 1f62e31
+- [x] 1.6 Every block in `verify-finalize.sql` matches its expected result (happy path `1,1` + correct post-state; cross-user `0,0` with B untouched; idempotent re-run `0,0`) — 1f62e31
+- [x] 1.7 After cleanup, `select count(*) from public.cards where user_id in (<A>, <B>);` as `service_role` returns 0 (fixture-scoped, not a global count) — 1f62e31
 
 ### Phase 2: Save endpoint
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npm run build` passes
-- [ ] 2.3 `npx astro sync` runs cleanly
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npm run build` passes
+- [x] 2.3 `npx astro sync` runs cleanly
 
 #### Manual
 
-- [ ] 2.4 `curl POST /api/generations/save` with a valid session + a selection covering all current drafts returns 200 `{saved,discarded}`; Studio confirms the promote + delete
-- [ ] 2.5 Same `curl` without a session returns 401 and changes nothing
-- [ ] 2.6 A non-array `accept` returns 400 `invalid_selection`
-- [ ] 2.7 A selection covering only some of the caller's drafts returns 400 `incomplete_selection` and changes nothing
-- [ ] 2.8 Passing another user's draft id returns 400 `incomplete_selection` and leaves that row untouched
-- [ ] 2.9 A saved card shows `status='saved'`, `next_due_at`≈now, `interval_days=0`, `repetition_count=0`, `last_reviewed_at` NULL
+- [x] 2.4 `curl POST /api/generations/save` with a valid session + a selection covering all current drafts returns 200 `{saved,discarded}`; Studio confirms the promote + delete
+- [x] 2.5 Same `curl` without a session returns 401 and changes nothing
+- [x] 2.6 A non-array `accept` returns 400 `invalid_selection`
+- [x] 2.7 A selection covering only some of the caller's drafts returns 400 `incomplete_selection` and changes nothing
+- [x] 2.8 Passing another user's draft id returns 400 `incomplete_selection` and leaves that row untouched
+- [x] 2.9 A saved card shows `status='saved'`, `next_due_at`≈now, `interval_days=0`, `repetition_count=0`, `last_reviewed_at` NULL
 
 ### Phase 3: Draft-review island + wire-in
 
