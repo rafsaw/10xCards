@@ -356,31 +356,31 @@ Forward-only: the migration only `CREATE`s a function — nothing to clobber, no
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes
-- [x] 3.2 `npm run build` passes
-- [x] 3.3 `npx astro sync` runs cleanly
+- [x] 3.1 `npm run lint` passes — 183b17d
+- [x] 3.2 `npm run build` passes — 183b17d
+- [x] 3.3 `npx astro sync` runs cleanly — 183b17d
 
 #### Manual
 
-- [x] 3.4 Draft batch renders with per-card Keep/Discard toggles defaulting to Keep; summary reads "N to save · 0 to discard"
-- [x] 3.5 Toggling a card to Discard updates its visual state and the summary counts
-- [x] 3.6 Save to deck shows the confirm with correct N/M; cancel leaves the batch unchanged
-- [x] 3.7 Confirming Save reloads to an empty `/generate`; Studio shows accepted=saved (next_due_at set), rejected gone
-- [x] 3.8 All-kept saves everything; all-discarded removes everything and returns to empty
-- [x] 3.9 A forced endpoint failure shows the error banner and leaves drafts intact (rolled back); retry works
-- [x] 3.10 "Discard all drafts" with confirm wipes the batch and returns to empty `/generate`
-- [x] 3.11 Renders correctly on Chrome and at least one other browser
+- [x] 3.4 Draft batch renders with per-card Keep/Discard toggles defaulting to Keep; summary reads "N to save · 0 to discard" — 183b17d
+- [x] 3.5 Toggling a card to Discard updates its visual state and the summary counts — 183b17d
+- [x] 3.6 Save to deck shows the confirm with correct N/M; cancel leaves the batch unchanged — 183b17d
+- [x] 3.7 Confirming Save reloads to an empty `/generate`; Studio shows accepted=saved (next_due_at set), rejected gone — 183b17d
+- [x] 3.8 All-kept saves everything; all-discarded removes everything and returns to empty — 183b17d
+- [x] 3.9 A forced endpoint failure shows the error banner and leaves drafts intact (rolled back); retry works — 183b17d
+- [x] 3.10 "Discard all drafts" with confirm wipes the batch and returns to empty `/generate` — 183b17d
+- [x] 3.11 Renders correctly on Chrome and at least one other browser — 183b17d
 
 ### Phase 4: End-to-end manual verification on production
 
 #### Automated
 
-- [ ] 4.1 Production build succeeds after `git push origin main` (Cloudflare build log green)
+- [x] 4.1 Production build succeeds after `git push origin main` (Cloudflare build log green)
 
 #### Manual
 
-- [ ] 4.2 User-A on live site completes paste → generate → review → Save and lands on empty `/generate`
-- [ ] 4.3 User-B (incognito) never sees user-A's rows; B's saves are isolated
-- [ ] 4.4 Atomicity spot-check in Studio: a completed Save leaves no `status='draft'` residue and no missing accepted card
-- [ ] 4.5 RLS belt-and-braces: neither user's save/discard touched the other's rows
-- [ ] 4.6 Screenshot of the review → save flow captured for the PR description
+- [x] 4.2 User-A on live site completes paste → generate → review → Save and lands on empty `/generate`
+- [x] 4.3 User-B (incognito) never sees user-A's rows; B's saves are isolated
+- [x] 4.4 Atomicity spot-check in Studio: a completed Save leaves no `status='draft'` residue and no missing accepted card
+- [x] 4.5 RLS belt-and-braces: neither user's save/discard touched the other's rows
+- [x] 4.6 Screenshot of the review → save flow captured for the PR description

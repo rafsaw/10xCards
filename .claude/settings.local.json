@@ -56,7 +56,8 @@
       "Bash(grep -oE '^[A-Z_]+=' .env)",
       "Bash(grep -oE '^[A-Z_]+=' .dev.vars)",
       "Bash(grep -nE 'enable_confirmations|enable_signup|\\\\[auth' supabase/config.toml)",
-      "PowerShell(Get-NetTCPConnection *)"
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(git push *)"
     ],
     "deny": [
       "Bash(rm -rf *)"
