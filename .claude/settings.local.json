@@ -50,7 +50,9 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\context\\\\changes\\\\first-gated-generation\" -Recurse -File | Select-Object FullName; \"===SUPABASE===\"; Get-ChildItem -Path \"C:\\\\Users\\\\rafal\\\\repos\\\\10xDevs3\\\\10xCards\\\\supabase\" -Recurse -File | Select-Object FullName)",
       "PowerShell(git check-ignore *)",
       "PowerShell(cmd /c \"npx astro sync > sync-out.txt 2>&1 & echo SYNC_EXIT=%errorlevel% >> sync-out.txt & npm run lint > lint-out.txt 2>&1 & echo LINT_EXIT=%errorlevel% >> lint-out.txt & npm run build > build-out.txt 2>&1 & echo BUILD_EXIT=%errorlevel% >> build-out.txt\")",
-      "PowerShell(Get-Content build-out.txt -Tail 15 -ErrorAction SilentlyContinue; \"---LINT---\"; Get-Content lint-out.txt -Tail 15 -ErrorAction SilentlyContinue; \"---SYNC---\"; Get-Content sync-out.txt -Tail 5 -ErrorAction SilentlyContinue)"
+      "PowerShell(Get-Content build-out.txt -Tail 15 -ErrorAction SilentlyContinue; \"---LINT---\"; Get-Content lint-out.txt -Tail 15 -ErrorAction SilentlyContinue; \"---SYNC---\"; Get-Content sync-out.txt -Tail 5 -ErrorAction SilentlyContinue)",
+      "PowerShell(git *)",
+      "PowerShell(npx supabase migration list --linked)"
     ],
     "deny": [
       "Bash(rm -rf *)"
