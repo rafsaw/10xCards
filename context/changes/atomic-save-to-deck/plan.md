@@ -339,37 +339,37 @@ Forward-only: the migration only `CREATE`s a function — nothing to clobber, no
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npm run build` passes
-- [x] 2.3 `npx astro sync` runs cleanly
+- [x] 2.1 `npm run lint` passes — c8e1e17
+- [x] 2.2 `npm run build` passes — c8e1e17
+- [x] 2.3 `npx astro sync` runs cleanly — c8e1e17
 
 #### Manual
 
-- [x] 2.4 `curl POST /api/generations/save` with a valid session + a selection covering all current drafts returns 200 `{saved,discarded}`; Studio confirms the promote + delete
-- [x] 2.5 Same `curl` without a session returns 401 and changes nothing
-- [x] 2.6 A non-array `accept` returns 400 `invalid_selection`
-- [x] 2.7 A selection covering only some of the caller's drafts returns 400 `incomplete_selection` and changes nothing
-- [x] 2.8 Passing another user's draft id returns 400 `incomplete_selection` and leaves that row untouched
-- [x] 2.9 A saved card shows `status='saved'`, `next_due_at`≈now, `interval_days=0`, `repetition_count=0`, `last_reviewed_at` NULL
+- [x] 2.4 `curl POST /api/generations/save` with a valid session + a selection covering all current drafts returns 200 `{saved,discarded}`; Studio confirms the promote + delete — c8e1e17
+- [x] 2.5 Same `curl` without a session returns 401 and changes nothing — c8e1e17
+- [x] 2.6 A non-array `accept` returns 400 `invalid_selection` — c8e1e17
+- [x] 2.7 A selection covering only some of the caller's drafts returns 400 `incomplete_selection` and changes nothing — c8e1e17
+- [x] 2.8 Passing another user's draft id returns 400 `incomplete_selection` and leaves that row untouched — c8e1e17
+- [x] 2.9 A saved card shows `status='saved'`, `next_due_at`≈now, `interval_days=0`, `repetition_count=0`, `last_reviewed_at` NULL — c8e1e17
 
 ### Phase 3: Draft-review island + wire-in
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes
-- [ ] 3.2 `npm run build` passes
-- [ ] 3.3 `npx astro sync` runs cleanly
+- [x] 3.1 `npm run lint` passes
+- [x] 3.2 `npm run build` passes
+- [x] 3.3 `npx astro sync` runs cleanly
 
 #### Manual
 
-- [ ] 3.4 Draft batch renders with per-card Keep/Discard toggles defaulting to Keep; summary reads "N to save · 0 to discard"
-- [ ] 3.5 Toggling a card to Discard updates its visual state and the summary counts
-- [ ] 3.6 Save to deck shows the confirm with correct N/M; cancel leaves the batch unchanged
-- [ ] 3.7 Confirming Save reloads to an empty `/generate`; Studio shows accepted=saved (next_due_at set), rejected gone
-- [ ] 3.8 All-kept saves everything; all-discarded removes everything and returns to empty
-- [ ] 3.9 A forced endpoint failure shows the error banner and leaves drafts intact (rolled back); retry works
-- [ ] 3.10 "Discard all drafts" with confirm wipes the batch and returns to empty `/generate`
-- [ ] 3.11 Renders correctly on Chrome and at least one other browser
+- [x] 3.4 Draft batch renders with per-card Keep/Discard toggles defaulting to Keep; summary reads "N to save · 0 to discard"
+- [x] 3.5 Toggling a card to Discard updates its visual state and the summary counts
+- [x] 3.6 Save to deck shows the confirm with correct N/M; cancel leaves the batch unchanged
+- [x] 3.7 Confirming Save reloads to an empty `/generate`; Studio shows accepted=saved (next_due_at set), rejected gone
+- [x] 3.8 All-kept saves everything; all-discarded removes everything and returns to empty
+- [x] 3.9 A forced endpoint failure shows the error banner and leaves drafts intact (rolled back); retry works
+- [x] 3.10 "Discard all drafts" with confirm wipes the batch and returns to empty `/generate`
+- [x] 3.11 Renders correctly on Chrome and at least one other browser
 
 ### Phase 4: End-to-end manual verification on production
 

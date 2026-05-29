@@ -55,7 +55,8 @@
       "PowerShell(npx supabase migration list --linked)",
       "Bash(grep -oE '^[A-Z_]+=' .env)",
       "Bash(grep -oE '^[A-Z_]+=' .dev.vars)",
-      "Bash(grep -nE 'enable_confirmations|enable_signup|\\\\[auth' supabase/config.toml)"
+      "Bash(grep -nE 'enable_confirmations|enable_signup|\\\\[auth' supabase/config.toml)",
+      "PowerShell(Get-NetTCPConnection *)"
     ],
     "deny": [
       "Bash(rm -rf *)"
