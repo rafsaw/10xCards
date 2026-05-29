@@ -375,12 +375,12 @@ Forward-only: the migration only `CREATE`s a function — nothing to clobber, no
 
 #### Automated
 
-- [x] 4.1 Production build succeeds after `git push origin main` (Cloudflare build log green)
+- [x] 4.1 Production build succeeds after `git push origin main` (Cloudflare build log green) — 5948c52
 
 #### Manual
 
-- [x] 4.2 User-A on live site completes paste → generate → review → Save and lands on empty `/generate`
-- [x] 4.3 User-B (incognito) never sees user-A's rows; B's saves are isolated
-- [x] 4.4 Atomicity spot-check in Studio: a completed Save leaves no `status='draft'` residue and no missing accepted card
-- [x] 4.5 RLS belt-and-braces: neither user's save/discard touched the other's rows
-- [x] 4.6 Screenshot of the review → save flow captured for the PR description
+- [x] 4.2 User-A on live site completes paste → generate → review → Save and lands on empty `/generate` — 5948c52
+- [x] 4.3 User-B (incognito) never sees user-A's rows; B's saves are isolated — 5948c52
+- [x] 4.4 Atomicity spot-check in Studio: a completed Save leaves no `status='draft'` residue and no missing accepted card — 5948c52
+- [x] 4.5 RLS belt-and-braces: neither user's save/discard touched the other's rows — 5948c52
+- [x] 4.6 Screenshot of the review → save flow captured for the PR description — 5948c52
