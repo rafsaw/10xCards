@@ -65,7 +65,9 @@
       "Bash(git --no-pager diff-tree --no-commit-id --name-only -r HEAD)",
       "Bash(git diff-tree *)",
       "Bash(grep -v '^$')",
-      "mcp__linear-server__get_issue"
+      "mcp__linear-server__get_issue",
+      "Bash([ -f \"context/changes/$d/change.md\" ])",
+      "Bash(grep -E '^\\(status|title|change_id\\):' context/changes/__TRACKED_VAR__/change.md)"
     ],
     "deny": [
       "Bash(rm -rf *)"
