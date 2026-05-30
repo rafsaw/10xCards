@@ -1,9 +1,9 @@
 ---
 change_id: atomic-save-to-deck
 title: Atomowy zapis wybranych draftów AI do decka — north star pętli capture
-status: implemented
+status: impl_reviewed
 created: 2026-05-29
-updated: 2026-05-29
+updated: 2026-05-30
 archived_at: null
 ---
 
