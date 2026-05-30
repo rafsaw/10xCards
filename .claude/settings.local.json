@@ -57,7 +57,14 @@
       "Bash(grep -oE '^[A-Z_]+=' .dev.vars)",
       "Bash(grep -nE 'enable_confirmations|enable_signup|\\\\[auth' supabase/config.toml)",
       "PowerShell(Get-NetTCPConnection *)",
-      "PowerShell(git push *)"
+      "PowerShell(git push *)",
+      "Bash(git --no-pager log --oneline -7)",
+      "Skill(10x-impl-review)",
+      "Bash(git rev-list *)",
+      "Bash(git --no-pager show --stat --oneline HEAD)",
+      "Bash(git --no-pager diff-tree --no-commit-id --name-only -r HEAD)",
+      "Bash(git diff-tree *)",
+      "Bash(grep -v '^$')"
     ],
     "deny": [
       "Bash(rm -rf *)"
