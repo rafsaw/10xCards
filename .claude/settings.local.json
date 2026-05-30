@@ -64,7 +64,8 @@
       "Bash(git --no-pager show --stat --oneline HEAD)",
       "Bash(git --no-pager diff-tree --no-commit-id --name-only -r HEAD)",
       "Bash(git diff-tree *)",
-      "Bash(grep -v '^$')"
+      "Bash(grep -v '^$')",
+      "mcp__linear-server__get_issue"
     ],
     "deny": [
       "Bash(rm -rf *)"

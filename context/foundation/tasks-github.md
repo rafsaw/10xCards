@@ -3,7 +3,7 @@ project: 10xCards
 version: 4
 status: active
 created: 2026-05-26
-updated: 2026-05-27
+updated: 2026-05-30
 source: context/foundation/roadmap.md
 mirrors:
   - github-issues (rafsaw/10xCards)
@@ -41,7 +41,7 @@ GitHub Issues and Linear Issues are parallel mirrors of the roadmap. `context/fo
 | --- | --- | --- | --- | --- | --- | --- |
 | F-01 | `cards-schema-and-rls` | [#6](https://github.com/rafsaw/10xCards/issues/6) | [RAF-10](https://linear.app/rafsaw/issue/RAF-10) | `roadmap:foundation`, `stream:a-core-loop` | A | ready |
 | S-01 | `first-gated-generation` | [#7](https://github.com/rafsaw/10xCards/issues/7) | [RAF-11](https://linear.app/rafsaw/issue/RAF-11) | `roadmap:slice`, `stream:a-core-loop` | A | proposed |
-| S-02 | `atomic-save-to-deck` | [#8](https://github.com/rafsaw/10xCards/issues/8) | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | proposed |
+| S-02 | `atomic-save-to-deck` | [#8](https://github.com/rafsaw/10xCards/issues/8) | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | **done** (closed 2026-05-30) |
 | S-03 | `deck-edit-delete` | [#9](https://github.com/rafsaw/10xCards/issues/9) | [RAF-13](https://linear.app/rafsaw/issue/RAF-13) | `roadmap:slice`, `stream:b-library` | B | proposed |
 | S-04 | `srs-review-session` | [#10](https://github.com/rafsaw/10xCards/issues/10) | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | `roadmap:slice`, `stream:c-review` | C | proposed |
 | S-05 | `account-deletion-with-retention` | [#11](https://github.com/rafsaw/10xCards/issues/11) | [RAF-15](https://linear.app/rafsaw/issue/RAF-15) | `roadmap:slice`, `stream:d-compliance` | D | **blocked** (wymaga update PRD) |
