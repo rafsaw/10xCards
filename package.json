@@ -10,7 +10,8 @@
     "deploy": "astro build && wrangler deploy",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "sync:issues": "node .claude/hooks/github-issue-sync.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",

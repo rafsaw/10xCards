@@ -40,3 +40,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# local cache for .claude/hooks/github-issue-sync.mjs (rebuilt by `npm run sync:issues -- --apply`)
+.claude/.gh-issue-sync-cache.json

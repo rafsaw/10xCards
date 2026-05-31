@@ -43,7 +43,7 @@ GitHub Issues and Linear Issues are parallel mirrors of the roadmap. `context/fo
 | S-01 | `first-gated-generation` | [#7](https://github.com/rafsaw/10xCards/issues/7) | [RAF-11](https://linear.app/rafsaw/issue/RAF-11) | `roadmap:slice`, `stream:a-core-loop` | A | **done** (closed 2026-05-28) |
 | S-02 | `atomic-save-to-deck` | [#8](https://github.com/rafsaw/10xCards/issues/8) | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | **done** (closed 2026-05-30) |
 | S-03 | `deck-edit-delete` | [#9](https://github.com/rafsaw/10xCards/issues/9) | [RAF-13](https://linear.app/rafsaw/issue/RAF-13) | `roadmap:slice`, `stream:b-library` | B | proposed |
-| S-04 | `srs-review-session` | [#10](https://github.com/rafsaw/10xCards/issues/10) | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | `roadmap:slice`, `stream:c-review` | C | **done** (implemented 2026-05-31; issue not yet closed) |
+| S-04 | `srs-review-session` | [#10](https://github.com/rafsaw/10xCards/issues/10) | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | `roadmap:slice`, `stream:c-review` | C | **done** (closed 2026-05-31) |
 | S-05 | `account-deletion-with-retention` | [#11](https://github.com/rafsaw/10xCards/issues/11) | [RAF-15](https://linear.app/rafsaw/issue/RAF-15) | `roadmap:slice`, `stream:d-compliance` | D | **blocked** (wymaga update PRD) |
 
 Linear-specific: dependencies kodowane jako `Blocked by` relations na issue (RAF-11 ← RAF-10; RAF-12 ← RAF-10, RAF-11; RAF-13 ← RAF-10; RAF-14 ← RAF-10, RAF-12; RAF-15 ← RAF-10 + zewnętrzny blocker: PRD update). Każdy Linear issue linkuje z powrotem do GitHub mirror via attachment. Pełniejsze omówienie w `context/foundation/tasks-linear.md`.
