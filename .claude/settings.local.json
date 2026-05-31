@@ -74,7 +74,9 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
       "Bash(mkdir -p archive)",
-      "Bash(mv supermemo-docs.md archive/)"
+      "Bash(mv supermemo-docs.md archive/)",
+      "PowerShell(npm run *)",
+      "PowerShell(git add *)"
     ],
     "deny": [
       "Bash(rm -rf *)"
