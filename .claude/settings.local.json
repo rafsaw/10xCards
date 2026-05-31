@@ -64,7 +64,22 @@
       "Bash(git --no-pager show --stat --oneline HEAD)",
       "Bash(git --no-pager diff-tree --no-commit-id --name-only -r HEAD)",
       "Bash(git diff-tree *)",
-      "Bash(grep -v '^$')"
+      "Bash(grep -v '^$')",
+      "mcp__linear-server__get_issue",
+      "Bash([ -f \"context/changes/$d/change.md\" ])",
+      "Bash(grep -E '^\\(status|title|change_id\\):' context/changes/__TRACKED_VAR__/change.md)",
+      "Bash(echo \"[exit=$?]\")",
+      "Bash(claude mcp *)",
+      "mcp__exa__web_search_exa",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(mkdir -p archive)",
+      "Bash(mv supermemo-docs.md archive/)",
+      "PowerShell(npm run *)",
+      "PowerShell(git add *)",
+      "PowerShell(npx eslint src/lib/leitner.ts src/pages/api/reviews.ts 2>&1 | Select-Object -Last 40; \"exit=$LASTEXITCODE\")",
+      "PowerShell(node --experimental-strip-types _leitner-check.ts 2>&1; \"exit=$LASTEXITCODE\")",
+      "PowerShell(npx eslint src/components/review/ReviewSession.tsx src/pages/review.astro src/middleware.ts src/pages/dashboard.astro)"
     ],
     "deny": [
       "Bash(rm -rf *)"
@@ -74,6 +89,20 @@
       "Bash(wget *)",
       "Bash(git push *)",
       "Bash(git push)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/roadmap-drift-check.mjs",
+            "timeout": 15,
+            "statusMessage": "Checking roadmap.md sync…"
+          }
+        ]
+      }
     ]
   }
 }

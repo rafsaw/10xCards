@@ -3,7 +3,7 @@ project: 10xCards
 version: 4
 status: active
 created: 2026-05-26
-updated: 2026-05-27
+updated: 2026-05-30
 source: context/foundation/roadmap.md
 mirrors:
   - github-issues (rafsaw/10xCards)
@@ -39,11 +39,11 @@ GitHub Issues and Linear Issues are parallel mirrors of the roadmap. `context/fo
 
 | Roadmap ID | Change ID | GitHub | Linear | Labels | Stream | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| F-01 | `cards-schema-and-rls` | [#6](https://github.com/rafsaw/10xCards/issues/6) | [RAF-10](https://linear.app/rafsaw/issue/RAF-10) | `roadmap:foundation`, `stream:a-core-loop` | A | ready |
-| S-01 | `first-gated-generation` | [#7](https://github.com/rafsaw/10xCards/issues/7) | [RAF-11](https://linear.app/rafsaw/issue/RAF-11) | `roadmap:slice`, `stream:a-core-loop` | A | proposed |
-| S-02 | `atomic-save-to-deck` | [#8](https://github.com/rafsaw/10xCards/issues/8) | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | proposed |
+| F-01 | `cards-schema-and-rls` | [#6](https://github.com/rafsaw/10xCards/issues/6) | [RAF-10](https://linear.app/rafsaw/issue/RAF-10) | `roadmap:foundation`, `stream:a-core-loop` | A | **done** (closed 2026-05-28) |
+| S-01 | `first-gated-generation` | [#7](https://github.com/rafsaw/10xCards/issues/7) | [RAF-11](https://linear.app/rafsaw/issue/RAF-11) | `roadmap:slice`, `stream:a-core-loop` | A | **done** (closed 2026-05-28) |
+| S-02 | `atomic-save-to-deck` | [#8](https://github.com/rafsaw/10xCards/issues/8) | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | **done** (closed 2026-05-30) |
 | S-03 | `deck-edit-delete` | [#9](https://github.com/rafsaw/10xCards/issues/9) | [RAF-13](https://linear.app/rafsaw/issue/RAF-13) | `roadmap:slice`, `stream:b-library` | B | proposed |
-| S-04 | `srs-review-session` | [#10](https://github.com/rafsaw/10xCards/issues/10) | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | `roadmap:slice`, `stream:c-review` | C | proposed |
+| S-04 | `srs-review-session` | [#10](https://github.com/rafsaw/10xCards/issues/10) | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | `roadmap:slice`, `stream:c-review` | C | **done** (implemented 2026-05-31; issue not yet closed) |
 | S-05 | `account-deletion-with-retention` | [#11](https://github.com/rafsaw/10xCards/issues/11) | [RAF-15](https://linear.app/rafsaw/issue/RAF-15) | `roadmap:slice`, `stream:d-compliance` | D | **blocked** (wymaga update PRD) |
 
 Linear-specific: dependencies kodowane jako `Blocked by` relations na issue (RAF-11 ← RAF-10; RAF-12 ← RAF-10, RAF-11; RAF-13 ← RAF-10; RAF-14 ← RAF-10, RAF-12; RAF-15 ← RAF-10 + zewnętrzny blocker: PRD update). Każdy Linear issue linkuje z powrotem do GitHub mirror via attachment. Pełniejsze omówienie w `context/foundation/tasks-linear.md`.
@@ -61,8 +61,8 @@ Linear-specific: dependencies kodowane jako `Blocked by` relations na issue (RAF
 # Re-list mirror
 gh issue list --label roadmap:foundation,roadmap:slice --state all
 
-# Open the next ready item (F-01 jako jedyny obecnie ready)
-gh issue view 6
+# Open the next actionable item (Stream A done; S-03 #9 unblocked po F-01)
+gh issue view 9
 
 # Update an issue body from the roadmap
 gh issue edit <n> --body-file -
@@ -73,4 +73,4 @@ gh issue edit <n> --body-file -
 #   3. gh issue create --title "[X-NN] …" --body-file <body.md> --label … (dla każdego nowego)
 ```
 
-For Linear, use the Linear MCP tools (`mcp__linear-server__save_issue` with `id: "RAF-<n>"` to update an existing issue, `list_issues` with `project: "10xCards"` to enumerate). **Aktualnie Linear mirror jest stale** (RAF-5..RAF-9 odzwierciedlają roadmap v1) — zanim wrócisz do `/10x-plan`-owania, zsynchronizuj Linear z roadmap v2 (delete + recreate, analogicznie do GitHub).
+For Linear, use the Linear MCP tools (`mcp__linear-server__save_issue` with `id: "RAF-<n>"` to update an existing issue, `list_issues` with `project: "10xCards"` to enumerate). Linear jest zsynchronizowany z roadmap v2 (RAF-10..RAF-15); stare RAF-5..RAF-9 zostały `Canceled`. **Stream A domknięty (2026-05-30):** RAF-10/RAF-11 → `Done` 2026-05-28, RAF-12 (north-star) → `Done` 2026-05-30; GitHub #6/#7/#8 wszystkie CLOSED. Szczegóły w `context/foundation/tasks-linear.md`.

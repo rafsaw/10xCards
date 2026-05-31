@@ -1,9 +1,9 @@
 ---
 project: 10xCards
 version: 2
-status: draft
+status: active
 created: 2026-05-26
-updated: 2026-05-27
+updated: 2026-05-30
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -24,6 +24,8 @@ Wedge produktu — jedna cecha, której odjęcie sprawia, że produkt staje się
 
 ## North star
 
+✅ **OSIĄGNIĘTY 2026-05-30** — S-02 wdrożony i zamknięty (#8 CLOSED), cały łańcuch Stream A (F-01 → S-01 → S-02) wylądował. Ścieżka *zaloguj → wklej → wygeneruj → zaakceptuj → zapisz* jest przechodnia end-to-end na produkcji.
+
 **S-02: użytkownik atomowo zapisuje wybranych kandydatów AI do swojego decka** — to validation milestone (kamień walidacji) dowodzący PRD Primary Success Criterion: AI-curated karty stają się trwałą biblioteką, której użytkownik świadomie używa zamiast manualnego pisania. Pętla powtórek (S-04) domyka secondary criterion, ale schodzi pod north star, bo wymaga rozstrzygnięć z lekcji o `/10x-research`.
 
 > "North star" oznacza tu najmniejszy slice end-to-end, którego dostarczenie udowadnia główną tezę produktu — umieszczony tak wcześnie, jak pozwalają Prerequisites, bo cała reszta ma sens dopiero, gdy on działa. Auth i deploy są już wdrożone (patrz `## Baseline`), więc po wylądowaniu S-02 ścieżka *zaloguj → wklej → wygeneruj → zaakceptuj → zapisz* jest przechodnia end-to-end.
@@ -32,11 +34,11 @@ Wedge produktu — jedna cecha, której odjęcie sprawia, że produkt staje się
 
 | ID    | Change ID                          | Outcome (użytkownik może …)                                                                                                                                  | Prerequisites    | PRD refs                                       | Status   |
 | ----- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------- | -------- |
-| F-01  | cards-schema-and-rls               | (foundation) schema kart (z polem `status` rozróżniającym draft / saved) + soft-delete na koncie + RLS izolujące dane każdego użytkownika                  | —                | Access Control, NFR (izolacja), Guardrails     | ready    |
-| S-01  | first-gated-generation             | wkleić fragment tekstu i zobaczyć karty-kandydatów z AI zapisane jako draft w bazie (gated UI accept/reject, ale finalizacja w S-02)                       | F-01             | US-01 (część), FR-004, FR-005, FR-008          | proposed |
-| S-02  | atomic-save-to-deck                | atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)                       | F-01, S-01       | US-01 (część), FR-006, FR-007                  | proposed |
+| F-01  | cards-schema-and-rls               | (foundation) schema kart (z polem `status` rozróżniającym draft / saved) + soft-delete na koncie + RLS izolujące dane każdego użytkownika                  | —                | Access Control, NFR (izolacja), Guardrails     | done     |
+| S-01  | first-gated-generation             | wkleić fragment tekstu i zobaczyć karty-kandydatów z AI zapisane jako draft w bazie (gated UI accept/reject, ale finalizacja w S-02)                       | F-01             | US-01 (część), FR-004, FR-005, FR-008          | done     |
+| S-02  | atomic-save-to-deck                | atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)                       | F-01, S-01       | US-01 (część), FR-006, FR-007                  | done     |
 | S-03  | deck-edit-delete                   | utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę                                  | F-01             | US-03, FR-009, FR-010, FR-011, FR-012          | proposed |
-| S-04  | srs-review-session                 | rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami                                        | F-01, S-02       | US-02, FR-013, FR-014, FR-015                  | proposed |
+| S-04  | srs-review-session                 | rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami                                        | F-01, S-02       | US-02, FR-013, FR-014, FR-015                  | done     |
 | S-05  | account-deletion-with-retention    | zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie blokowane, możliwa kancelacja), po retencji dane twardo usuwane                      | F-01             | **brak — wymaga update PRD**                   | blocked  |
 
 ## Streams
@@ -45,9 +47,9 @@ Pomoc nawigacyjna — grupuje elementy dzielące łańcuch Prerequisites. Kanoni
 
 | Stream | Theme                            | Chain                          | Note                                                                                                                                                |
 | ------ | -------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A      | Pętla AI capture (north-star)    | `F-01` → `S-01` → `S-02`       | Sztywna ścieżka po PRD must-have FR pod `main_goal: speed`. Po wylądowaniu `S-02` north star jest osiągnięty.                                       |
+| A      | Pętla AI capture (north-star)    | `F-01` → `S-01` → `S-02`       | ✅ **Domknięty 2026-05-30** — F-01/S-01/S-02 wszystkie `done`. North star osiągnięty.                                                              |
 | B      | Biblioteka kart (manualna + CRUD) | `S-03`                         | Niezależny od pętli AI: depends tylko od `F-01`. Może iść równolegle ze Stream A natychmiast po wylądowaniu foundation. Pokrywa FR-009/010/011/012. |
-| C      | Pętla powtórek (research-pending) | `S-04`                         | Dołącza do Stream A w `S-02` — SRS czyta zapisane karty. Świadomie po `/10x-research` z następnej lekcji.                                          |
+| C      | Pętla powtórek (research-pending) | `S-04`                         | ✅ **Domknięty 2026-05-31** — `S-04` `done`. Model SR rozstrzygnięty (Leitner, `/10x-research`); review loop + harmonogram utrwalony.              |
 | D      | Lifecycle konta / compliance      | `S-05`                         | Branches z `F-01`. Aktualnie zablokowany na update PRD (brak FR dla account deletion + retention) — patrz Open Roadmap Questions.                  |
 
 ## Baseline
@@ -76,7 +78,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Unknowns:**
   - Czy soft-delete konta projektować jako flagę na profilu Supabase usera (admin API), kolumnę w osobnej tabeli `account_deletion_requests`, czy całkiem inny model. — Owner: TBD. Block: no (rozstrzygnięte w `/10x-plan`, gdy S-05 odblokowane przez PRD update).
 - **Risk:** Źle skonfigurowana polityka RLS przy choćby jednej tabeli/operacji w cichy sposób przecieka dane między userami — a PRD §Guardrails nazywa to wprost ship-blocking. Sekwencjonowane jako pierwsze, bo każdy inny slice zapisuje lub czyta karty; zrobienie RLS dobrze raz na poziomie DB jest tańsze niż weryfikacja izolacji per slice. Wbudowanie `status` i mechanizmu soft-delete od początku jest tańsze niż dwie migracje rozszerzające schemat w środku roadmapy.
-- **Status:** ready
+- **Status:** done (issue #6 zamknięty 2026-05-28; change `impl_reviewed`, czeka na `/10x-archive`)
 
 ## Slices
 
@@ -93,7 +95,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
   - Wybór modelu LLM + sufit kosztowy per request. — Owner: TBD. Block: no (rozstrzygnięte w `/10x-plan`).
   - Polityka czyszczenia "wiszących" draftów (user wygenerował i porzucił bez wejścia w S-02). Czy są one widoczne przy kolejnym wejściu na dashboard, czy są TTL-owane. — Owner: TBD. Block: no.
 - **Risk:** Trwałe drafty w bazie podnoszą koszt RLS-błędu — wyciek listy draftów innego usera jest takim samym ship-blockerem jak wyciek saved. Drugie ryzyko: jeśli S-02 nie wyląduje w krótkim okienku po S-01, user widzi szmugiel "wisz, się nie zapisuje" i pętla wygląda na zepsutą — to wzmacnia argument, że S-02 idzie zaraz po S-01 w tym samym Stream A.
-- **Status:** proposed
+- **Status:** done (issue #7 zamknięty 2026-05-28; change `impl_reviewed`, czeka na `/10x-archive`)
 
 ### S-02: Atomowy zapis do decka (north star)
 
@@ -106,7 +108,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Unknowns:**
   - Czy "atomic" wymaga DB-side transakcji, czy server-side guard + idempotency key wystarczy. — Owner: TBD. Block: no.
 - **Risk:** Brak atomowości w accept/reject (np. accept zapisuje per-card w pętli, awaria w środku) zostawia połowiczny stan — niektóre karty saved, niektóre wciąż draft — i user nie wie, na co patrzy. Drugie ryzyko: granularność operacji na grupie 5–20 draftów może wymagać DB transaction albo batch UPSERT; obie ścieżki są realne, ale dobranie złej daje subtelne race condition gdy user otwiera dwie karty przeglądarki. PRD FR-006/007 obligują "saves to library" i "discards no save" jako wynik *każdej* operacji — atomic finalize jest kontraktem dla obu.
-- **Status:** proposed
+- **Status:** done (issue #8 zamknięty 2026-05-30; change `impl_reviewed`, czeka na `/10x-archive`)
 
 ### S-03: Biblioteka kart — ręczne tworzenie, przegląd, edycja, kasowanie
 
@@ -131,7 +133,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Unknowns:**
   - Konkretna formuła harmonogramowania dla prostego modelu — boxy Leitnera, fixed multipliers, simple Anki-like — i mapowanie binarnego right/wrong na zmianę interwału. PRD §Non-Goals zabrania zaawansowanej optymalizacji; *co* dokładnie to "prosty model" wymaga rozstrzygnięcia. **Planowana ścieżka rozstrzygnięcia: `/10x-research` z następnej lekcji.** — Owner: user. Block: no (formalnie planning może iść z arbitralnym prostym wyborem, ale świadomie czekam na research żeby wybór był informed).
 - **Risk:** Wyrafinowane algorytmy SR są explicit non-goal — ryzyko leży po stronie over-engineeringu, nie under-engineeringu. PRD Guardrails definiują kontrakt fallbacku: gdy podstawowa logika wyboru due-card zawiedzie z dowolnego powodu, sesja spada na "najstarsza due-card pierwsza". Drugie ryzyko: bez S-04 PRD Secondary Success Criterion jest nieweryfikowalny — ale north star (S-02) już lokuje walidację Primary, więc S-04 może świadomie poczekać na research bez blokowania całej roadmapy.
-- **Status:** proposed
+- **Status:** in progress
 
 ### S-05: Usunięcie konta z 30-dniową retencją
 
@@ -152,11 +154,11 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 
 | Roadmap ID | Change ID                          | Suggested issue title                                                                | Ready for `/10x-plan` | Notes                                                                  |
 | ---------- | ---------------------------------- | ------------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------------------------- |
-| F-01       | cards-schema-and-rls               | Schemat kart (z draft status) + soft-delete konta + polityki RLS                     | yes                   | Uruchom `/10x-plan cards-schema-and-rls`                               |
-| S-01       | first-gated-generation             | Pierwsza gated generacja AI — kandydaci zapisywani jako drafty                       | no                    | Zablokowane na F-01                                                    |
-| S-02       | atomic-save-to-deck                | Atomowy accept/reject draftów (north star — domyka PRD Primary Success Criterion)    | no                    | Zablokowane na F-01, S-01                                              |
-| S-03       | deck-edit-delete                   | Biblioteka kart: manual create + browse + edit + hard-delete                         | no                    | Zablokowane na F-01 (może iść równolegle z S-01/S-02)                  |
-| S-04       | srs-review-session                 | Sesja powtórek SRS                                                                   | no                    | Zablokowane na F-01, S-02; świadomie czeka na `/10x-research`          |
+| F-01       | cards-schema-and-rls               | Schemat kart (z draft status) + soft-delete konta + polityki RLS                     | — (done)              | ✅ done — #6 zamknięty 2026-05-28                                       |
+| S-01       | first-gated-generation             | Pierwsza gated generacja AI — kandydaci zapisywani jako drafty                       | — (done)              | ✅ done — #7 zamknięty 2026-05-28                                       |
+| S-02       | atomic-save-to-deck                | Atomowy accept/reject draftów (north star — domyka PRD Primary Success Criterion)    | — (done)              | ✅ done — #8 zamknięty 2026-05-30 (north star)                          |
+| S-03       | deck-edit-delete                   | Biblioteka kart: manual create + browse + edit + hard-delete                         | yes                   | ✅ Odblokowane (F-01 done) — uruchom `/10x-plan deck-edit-delete`       |
+| S-04       | srs-review-session                 | Sesja powtórek SRS                                                                   | yes (done)            | ✅ done — review loop + Leitner scheduler (c784b2d); change zaimplementowany 2026-05-31 |
 | S-05       | account-deletion-with-retention    | Usunięcie konta z 30-dniową retencją                                                 | no                    | **Zablokowane na update PRD** — brak FR dla account deletion           |
 
 ## Open Roadmap Questions
@@ -165,7 +167,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 
 2. **PRD nie ma FR dla account deletion + retention, a S-05 ich wymaga.** Slice S-05 jest invented względem PRD v1 (Roadmap guardrail: każdy slice traceuje do PRD ID). Proponowane FR do dodania: FR-016 (user can request account deletion), FR-017 (deletion enters 30-day retention before hard delete), FR-018 (user can cancel deletion during retention). Decyzje do podjęcia w PRD: czy retention to read-only-locked czy całkowicie zablokowane logowanie; czy anulowanie wymaga magic-link maila czy re-login wystarczy; czy potrzebna jest notyfikacja przed hard-delete. Po update'cie PRD do v2: status S-05 → `proposed`, `PRD refs` wypełnione, slice gotowy do `/10x-plan`. — Owner: user. Block: S-05.
 
-3. **Czy "atomic" w S-02 oznacza DB transakcję, czy server-side guard wystarczy?** Słowo "atomic" jest celowo użyte w S-02 — PRD FR-006/007 wymagają, by każdy kandydat skończył albo jako saved albo jako discarded, bez stanu pośredniego. Czy ta gwarancja jest zapewniana przez DB transaction (jeden BEGIN/COMMIT obejmujący wszystkie UPDATE/DELETE), czy przez batch + idempotency-key + reconciliation, jest decyzją architektoniczną dla `/10x-plan` — ale warto rozstrzygnąć ją *przed* startem S-02, żeby uniknąć refactoru w środku. — Owner: TBD. Block: S-02 (technically), no (formally — `/10x-plan` może rozstrzygnąć).
+3. ✅ **ROZSTRZYGNIĘTE (S-02 wdrożony 2026-05-30, #8).** Rozstrzygnięcie i uzasadnienie w `context/changes/atomic-save-to-deck/` (plan + impl review). — Czy "atomic" w S-02 oznacza DB transakcję, czy server-side guard wystarczy? Słowo "atomic" jest celowo użyte w S-02 — PRD FR-006/007 wymagają, by każdy kandydat skończył albo jako saved albo jako discarded, bez stanu pośredniego. Czy ta gwarancja jest zapewniana przez DB transaction (jeden BEGIN/COMMIT obejmujący wszystkie UPDATE/DELETE), czy przez batch + idempotency-key + reconciliation, jest decyzją architektoniczną dla `/10x-plan` — ale warto rozstrzygnąć ją *przed* startem S-02, żeby uniknąć refactoru w środku. — Owner: TBD. Block: S-02 (technically), no (formally — `/10x-plan` może rozstrzygnąć).
 
 ## Parked
 
