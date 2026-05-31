@@ -3,7 +3,7 @@ project: 10xCards
 version: 2
 status: active
 created: 2026-05-26
-updated: 2026-05-30
+updated: 2026-05-31
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -133,7 +133,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Unknowns:**
   - Konkretna formuła harmonogramowania dla prostego modelu — boxy Leitnera, fixed multipliers, simple Anki-like — i mapowanie binarnego right/wrong na zmianę interwału. PRD §Non-Goals zabrania zaawansowanej optymalizacji; *co* dokładnie to "prosty model" wymaga rozstrzygnięcia. **Planowana ścieżka rozstrzygnięcia: `/10x-research` z następnej lekcji.** — Owner: user. Block: no (formalnie planning może iść z arbitralnym prostym wyborem, ale świadomie czekam na research żeby wybór był informed).
 - **Risk:** Wyrafinowane algorytmy SR są explicit non-goal — ryzyko leży po stronie over-engineeringu, nie under-engineeringu. PRD Guardrails definiują kontrakt fallbacku: gdy podstawowa logika wyboru due-card zawiedzie z dowolnego powodu, sesja spada na "najstarsza due-card pierwsza". Drugie ryzyko: bez S-04 PRD Secondary Success Criterion jest nieweryfikowalny — ale north star (S-02) już lokuje walidację Primary, więc S-04 może świadomie poczekać na research bez blokowania całej roadmapy.
-- **Status:** in progress
+- **Status:** done (zarchiwizowany 2026-05-31 → `context/archive/2026-05-30-srs-review-session/`)
 
 ### S-05: Usunięcie konta z 30-dniową retencją
 
@@ -186,4 +186,4 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 
 ## Done
 
-(Pusta. `/10x-archive` dopisuje wpisy tutaj — i przełącza `Status` pasującego elementu na `done` — gdy change o `Change ID` zgodnym z elementem roadmapy zostaje zarchiwizowany. NIE wypełniać z góry.)
+- **S-04: rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami** — Archived 2026-05-31 → `context/archive/2026-05-30-srs-review-session/`. Lesson: —.
