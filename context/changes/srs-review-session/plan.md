@@ -429,15 +429,15 @@ new check. No data backfill needed — `finalize_drafts` already leaves saved ca
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint` (new files ReviewSession.tsx + review.astro + middleware/dashboard edits lint clean; repo-wide pre-existing unrelated CRLF errors remain)
-- [x] 3.2 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint` (new files ReviewSession.tsx + review.astro + middleware/dashboard edits lint clean; repo-wide pre-existing unrelated CRLF errors remain) — 758d6a9
+- [x] 3.2 Build passes: `npm run build` — 758d6a9
 
 #### Manual
 
-- [x] 3.3 Unauthenticated `/review` redirects to `/auth/signin`
-- [x] 3.4 Due cards appear oldest-first, one at a time; reveal + advance works without reload
-- [x] 3.5 Ratings persist across a reload (rated cards no longer due)
-- [x] 3.6 "All caught up" empty state shows with working dashboard link
-- [x] 3.7 "Session complete" state shows after last card with working dashboard link
-- [x] 3.8 Forced double-submit does not double-advance the box
-- [x] 3.9 Dashboard CTA navigates to `/review`
+- [x] 3.3 Unauthenticated `/review` redirects to `/auth/signin` — 758d6a9
+- [x] 3.4 Due cards appear oldest-first, one at a time; reveal + advance works without reload — 758d6a9
+- [x] 3.5 Ratings persist across a reload (rated cards no longer due) — 758d6a9
+- [x] 3.6 "All caught up" empty state shows with working dashboard link — 758d6a9
+- [x] 3.7 "Session complete" state shows after last card with working dashboard link — 758d6a9
+- [x] 3.8 Forced double-submit does not double-advance the box — 758d6a9
+- [x] 3.9 Dashboard CTA navigates to `/review` — 758d6a9
