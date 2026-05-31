@@ -68,7 +68,13 @@
       "mcp__linear-server__get_issue",
       "Bash([ -f \"context/changes/$d/change.md\" ])",
       "Bash(grep -E '^\\(status|title|change_id\\):' context/changes/__TRACKED_VAR__/change.md)",
-      "Bash(echo \"[exit=$?]\")"
+      "Bash(echo \"[exit=$?]\")",
+      "Bash(claude mcp *)",
+      "mcp__exa__web_search_exa",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(mkdir -p archive)",
+      "Bash(mv supermemo-docs.md archive/)"
     ],
     "deny": [
       "Bash(rm -rf *)"
