@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CircleAlert, Eye, Check, X, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ReviewRating } from "@/lib/leitner";
@@ -45,6 +45,10 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   const [revealed, setRevealed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<RateError | null>(null);
+  // Synchronous re-entrancy guard: `submitting` is async state, so the
+  // disabled button doesn't block a same-frame double-click. This ref does,
+  // preventing a second POST from advancing the card index twice (skipping a card).
+  const lockRef = useRef(false);
 
   if (loadError) {
     return (
@@ -79,6 +83,8 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   const card = dueCards[index];
 
   async function handleRate(rating: ReviewRating) {
+    if (lockRef.current) return; // drop a same-frame second click before it fires a duplicate POST
+    lockRef.current = true;
     setSubmitting(true);
     setError(null);
 
@@ -93,7 +99,6 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         // Success includes applied:false (stale/replay) — advance regardless.
         setIndex((prev) => prev + 1);
         setRevealed(false);
-        setSubmitting(false);
         return;
       }
 
@@ -111,10 +116,11 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         /* non-JSON error body — keep the generic message */
       }
       setError({ code, message: message || FALLBACK_MESSAGES[code] });
-      setSubmitting(false);
     } catch {
       setError({ code: "network_error", message: FALLBACK_MESSAGES.network_error });
+    } finally {
       setSubmitting(false);
+      lockRef.current = false;
     }
   }
 

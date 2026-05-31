@@ -51,7 +51,8 @@ never undefined regardless of the incoming box, and a large box also no-ops on t
   (e.g. `if (lockRef.current) return; lockRef.current = true;` released in a `finally`),
   instead of relying on the async `submitting` state to block the second invocation.
   ~4 lines, no behavior change for the normal path.
-- **Decision**: PENDING
+- **Decision**: FIXED — added `lockRef` (useRef) synchronous re-entrancy guard in
+  `handleRate`, with `submitting`/lock reset moved to a `finally`. Lint + build pass.
 
 ### F2 — Supabase-unconfigured UX is less precise than the sibling page
 
