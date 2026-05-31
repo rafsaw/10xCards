@@ -401,29 +401,29 @@ new check. No data backfill needed — `finalize_drafts` already leaves saved ca
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly against remote Supabase
-- [x] 1.2 Lint passes: `npm run lint` (Phase 1 added no lint-scope files; repo-wide lint has pre-existing unrelated CRLF errors, accepted)
-- [x] 1.3 Build passes: `npm run build`
+- [x] 1.1 Migration applies cleanly against remote Supabase — 8d11ed8
+- [x] 1.2 Lint passes: `npm run lint` (Phase 1 added no lint-scope files; repo-wide lint has pre-existing unrelated CRLF errors, accepted) — 8d11ed8
+- [x] 1.3 Build passes: `npm run build` — 8d11ed8
 
 #### Manual
 
-- [x] 1.4 `cards_due_idx` and `cards_interval_days_nonneg` exist on `public.cards`
-- [x] 1.5 Existing saved cards still satisfy the new check (no rows rejected)
+- [x] 1.4 `cards_due_idx` and `cards_interval_days_nonneg` exist on `public.cards` — 8d11ed8
+- [x] 1.5 Existing saved cards still satisfy the new check (no rows rejected) — 8d11ed8
 
 ### Phase 2: Leitner scheduler + `/api/reviews` endpoint
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint` (new files leitner.ts + reviews.ts lint clean; repo-wide pre-existing unrelated CRLF errors remain)
+- [x] 2.2 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Valid "right" on box-0 card → box 1, interval 2, next_due ≈ now+2d
-- [ ] 2.4 "wrong" on box-3 card → box 0, interval 1
-- [ ] 2.5 Replay same "right" (same currentBox) → applied:false, box unchanged
-- [ ] 2.6 POST for another user's card → no change (RLS + ownership)
-- [ ] 2.7 Unauthenticated → 401; malformed body → 400
+- [x] 2.3 Valid "right" on box-0 card → box 1, interval 2, next_due ≈ now+2d
+- [x] 2.4 "wrong" on box-3 card → box 0, interval 1
+- [x] 2.5 Replay same "right" (same currentBox) → applied:false, box unchanged
+- [x] 2.6 POST for another user's card → no change (RLS + ownership)
+- [x] 2.7 Unauthenticated → 401; malformed body → 400
 
 ### Phase 3: `/review` page + `ReviewSession` island + dashboard CTA
 

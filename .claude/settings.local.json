@@ -76,7 +76,9 @@
       "Bash(mkdir -p archive)",
       "Bash(mv supermemo-docs.md archive/)",
       "PowerShell(npm run *)",
-      "PowerShell(git add *)"
+      "PowerShell(git add *)",
+      "PowerShell(npx eslint src/lib/leitner.ts src/pages/api/reviews.ts 2>&1 | Select-Object -Last 40; \"exit=$LASTEXITCODE\")",
+      "PowerShell(node --experimental-strip-types _leitner-check.ts 2>&1; \"exit=$LASTEXITCODE\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
