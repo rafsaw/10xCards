@@ -59,7 +59,7 @@ Linear Issues mirror the roadmap. `context/foundation/roadmap.md` is canonical; 
 | S-01 | `first-gated-generation` | [RAF-11](https://linear.app/rafsaw/issue/RAF-11) | [#7](https://github.com/rafsaw/10xCards/issues/7) | `roadmap:slice`, `stream:a-core-loop` | A | **Done** (2026-05-28) | RAF-10 |
 | S-02 | `atomic-save-to-deck` | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | [#8](https://github.com/rafsaw/10xCards/issues/8) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | **Done** (2026-05-30) | RAF-10, RAF-11 |
 | S-03 | `deck-edit-delete` | [RAF-13](https://linear.app/rafsaw/issue/RAF-13) | [#9](https://github.com/rafsaw/10xCards/issues/9) | `roadmap:slice`, `stream:b-library` | B | Backlog | RAF-10 |
-| S-04 | `srs-review-session` | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | [#10](https://github.com/rafsaw/10xCards/issues/10) | `roadmap:slice`, `stream:c-review` | C | **Done** (implemented 2026-05-31; Linear not yet updated) | RAF-10, RAF-12 |
+| S-04 | `srs-review-session` | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | [#10](https://github.com/rafsaw/10xCards/issues/10) | `roadmap:slice`, `stream:c-review` | C | **Done** (2026-05-31) | RAF-10, RAF-12 |
 | S-05 | `account-deletion-with-retention` | [RAF-15](https://linear.app/rafsaw/issue/RAF-15) | [#11](https://github.com/rafsaw/10xCards/issues/11) | `roadmap:slice`, `stream:d-compliance` | D | Backlog (priority: Medium) | RAF-10 + zewnętrzny: PRD update |
 
 ## Anulowane (v1, mirror starej roadmapy)
