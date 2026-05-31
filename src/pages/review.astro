@@ -1,0 +1,44 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import ReviewSession from "@/components/review/ReviewSession";
+import type { DueCard } from "@/components/review/ReviewSession";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+let dueCards: DueCard[] = [];
+let loadError = false;
+
+if (supabase) {
+  const { data, error } = await supabase
+    .from("cards")
+    .select("id, front, back, repetition_count")
+    .eq("status", "saved")
+    .lte("next_due_at", new Date().toISOString())
+    .order("next_due_at", { ascending: true })
+    .order("last_reviewed_at", { ascending: true, nullsFirst: true })
+    .overrideTypes<DueCard[], { merge: false }>();
+  if (error) {
+    loadError = true;
+  } else {
+    dueCards = data;
+  }
+} else {
+  loadError = true;
+}
+---
+
+<Layout title="Review session">
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-3xl space-y-6 py-8">
+      <header class="flex items-center justify-between">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+          Review session
+        </h1>
+        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
+      </header>
+
+      <ReviewSession client:load dueCards={dueCards} loadError={loadError} />
+    </div>
+  </div>
+</Layout>

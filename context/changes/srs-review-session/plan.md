@@ -414,30 +414,30 @@ new check. No data backfill needed — `finalize_drafts` already leaves saved ca
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint` (new files leitner.ts + reviews.ts lint clean; repo-wide pre-existing unrelated CRLF errors remain)
-- [x] 2.2 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint` (new files leitner.ts + reviews.ts lint clean; repo-wide pre-existing unrelated CRLF errors remain) — 581c00f
+- [x] 2.2 Build passes: `npm run build` — 581c00f
 
 #### Manual
 
-- [x] 2.3 Valid "right" on box-0 card → box 1, interval 2, next_due ≈ now+2d
-- [x] 2.4 "wrong" on box-3 card → box 0, interval 1
-- [x] 2.5 Replay same "right" (same currentBox) → applied:false, box unchanged
-- [x] 2.6 POST for another user's card → no change (RLS + ownership)
-- [x] 2.7 Unauthenticated → 401; malformed body → 400
+- [x] 2.3 Valid "right" on box-0 card → box 1, interval 2, next_due ≈ now+2d — 581c00f
+- [x] 2.4 "wrong" on box-3 card → box 0, interval 1 — 581c00f
+- [x] 2.5 Replay same "right" (same currentBox) → applied:false, box unchanged — 581c00f
+- [x] 2.6 POST for another user's card → no change (RLS + ownership) — 581c00f
+- [x] 2.7 Unauthenticated → 401; malformed body → 400 — 581c00f
 
 ### Phase 3: `/review` page + `ReviewSession` island + dashboard CTA
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint` (new files ReviewSession.tsx + review.astro + middleware/dashboard edits lint clean; repo-wide pre-existing unrelated CRLF errors remain)
+- [x] 3.2 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.3 Unauthenticated `/review` redirects to `/auth/signin`
-- [ ] 3.4 Due cards appear oldest-first, one at a time; reveal + advance works without reload
-- [ ] 3.5 Ratings persist across a reload (rated cards no longer due)
-- [ ] 3.6 "All caught up" empty state shows with working dashboard link
-- [ ] 3.7 "Session complete" state shows after last card with working dashboard link
-- [ ] 3.8 Forced double-submit does not double-advance the box
-- [ ] 3.9 Dashboard CTA navigates to `/review`
+- [x] 3.3 Unauthenticated `/review` redirects to `/auth/signin`
+- [x] 3.4 Due cards appear oldest-first, one at a time; reveal + advance works without reload
+- [x] 3.5 Ratings persist across a reload (rated cards no longer due)
+- [x] 3.6 "All caught up" empty state shows with working dashboard link
+- [x] 3.7 "Session complete" state shows after last card with working dashboard link
+- [x] 3.8 Forced double-submit does not double-advance the box
+- [x] 3.9 Dashboard CTA navigates to `/review`
