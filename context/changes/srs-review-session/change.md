@@ -1,7 +1,7 @@
 ---
 change_id: srs-review-session
 title: SRS review session — review due cards and persist next-review dates
-status: new
+status: preparing
 created: 2026-05-30
 updated: 2026-05-30
 archived_at: null
