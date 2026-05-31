@@ -43,3 +43,9 @@ pnpm-debug.log*
 
 # local cache for .claude/hooks/github-issue-sync.mjs (rebuilt by `npm run sync:issues -- --apply`)
 .claude/.gh-issue-sync-cache.json
+
+# local settings for .claude/settings.json temporary not tracked by git
+.claude/settings.local.json
+
+# my notes
+notes/
