@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/roadmap-drift-check.mjs",
+            "timeout": 15,
+            "statusMessage": "Checking roadmap.md sync…"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/github-issue-sync.mjs --check",
+            "timeout": 15,
+            "statusMessage": "Checking tracker sync…"
+          }
+        ]
+      }
+    ]
+  }
+}

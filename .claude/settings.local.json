@@ -79,7 +79,14 @@
       "PowerShell(git add *)",
       "PowerShell(npx eslint src/lib/leitner.ts src/pages/api/reviews.ts 2>&1 | Select-Object -Last 40; \"exit=$LASTEXITCODE\")",
       "PowerShell(node --experimental-strip-types _leitner-check.ts 2>&1; \"exit=$LASTEXITCODE\")",
-      "PowerShell(npx eslint src/components/review/ReviewSession.tsx src/pages/review.astro src/middleware.ts src/pages/dashboard.astro)"
+      "PowerShell(npx eslint src/components/review/ReviewSession.tsx src/pages/review.astro src/middleware.ts src/pages/dashboard.astro)",
+      "PowerShell(\"---current branch---\"; git rev-parse --abbrev-ref HEAD; \"---status---\"; git status --porcelain; \"---roadmap diff \\(if any\\)---\"; git diff --stat context/foundation/roadmap.md)",
+      "PowerShell(git checkout *)",
+      "PowerShell(git stash *)",
+      "PowerShell(git restore *)",
+      "Bash(command -v gh)",
+      "Bash(echo \"check_exit=$?\")",
+      "Bash(echo \"check_exit=$? \\(0 = quiet\\)\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
@@ -89,20 +96,6 @@
       "Bash(wget *)",
       "Bash(git push *)",
       "Bash(git push)"
-    ]
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/roadmap-drift-check.mjs",
-            "timeout": 15,
-            "statusMessage": "Checking roadmap.md sync…"
-          }
-        ]
-      }
     ]
   }
 }
