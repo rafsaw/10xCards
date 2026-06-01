@@ -120,7 +120,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Kasowanie jest hard-delete per FR-012 — przypadkowe skasowanie niszczy postęp nauki bez odzyskania. UI musi wystawiać jednoznaczny krok potwierdzenia (PRD FR-012 Socratic dopuszcza confirm step bez rozszerzania zakresu). Drugie ryzyko: manual create + edit + delete + browse to czterokrotne wystawienie tej samej powierzchni dostępu do `cards` — każdy z tych endpointów musi iść przez user-scoped klienta Supabase, inaczej RLS z F-01 nie trzyma. Trzecie: scope crepe — łatwo "skoro już jesteśmy w bibliotece, dodajmy filtry/sortowanie". Trzymać się PRD FR-010 (lista, kropka).
-- **Status:** done (zaimplementowany 2026-06-01, 3 fazy: API mutacji + `/library` + inline edit/delete — `665925b`; change `impl_reviewed`, czeka na `/10x-archive`; trackery #9 / RAF-13)
+- **Status:** done (zaimplementowany 2026-06-01, 3 fazy: API mutacji + `/library` + inline edit/delete — `665925b`; archived 2026-06-01 → `context/archive/2026-06-01-deck-edit-delete/`; trackery #9 / RAF-13)
 
 ### S-04: Sesja powtórek SRS
 
@@ -187,3 +187,4 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 ## Done
 
 - **S-04: rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami** — Archived 2026-05-31 → `context/archive/2026-05-30-srs-review-session/`. Lesson: —.
+- **S-03: utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę** — Archived 2026-06-01 → `context/archive/2026-06-01-deck-edit-delete/`. Lesson: —.
