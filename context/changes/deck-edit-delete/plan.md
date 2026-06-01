@@ -273,28 +273,28 @@ None — no schema changes.
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint` — c837366
+- [x] 2.2 Production build passes: `npm run build` — c837366
 
 #### Manual
 
-- [x] 2.3 Logged-out visit to /library redirects to /auth/signin
-- [x] 2.4 /library shows create form and saved cards newest-first
-- [x] 2.5 Create form saves a valid card (visible after reload); empty fields blocked
-- [x] 2.6 Empty library shows empty-state message
-- [x] 2.7 Dashboard "Card library" CTA navigates to /library
+- [x] 2.3 Logged-out visit to /library redirects to /auth/signin — c837366
+- [x] 2.4 /library shows create form and saved cards newest-first — c837366
+- [x] 2.5 Create form saves a valid card (visible after reload); empty fields blocked — c837366
+- [x] 2.6 Empty library shows empty-state message — c837366
+- [x] 2.7 Dashboard "Card library" CTA navigates to /library — c837366
 
 ### Phase 3: Inline edit + delete actions
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
-- [ ] 3.2 Production build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint`
+- [x] 3.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.3 Inline Edit Save persists front/back; Cancel discards
-- [ ] 3.4 Saving an edit with an empty field is blocked
-- [ ] 3.5 After edit, review schedule unchanged and updated_at advanced
-- [ ] 3.6 Delete prompts confirmation; confirm removes, dismiss keeps
-- [ ] 3.7 No regressions on /generate or /review
+- [x] 3.3 Inline Edit Save persists front/back; Cancel discards
+- [x] 3.4 Saving an edit with an empty field is blocked
+- [x] 3.5 After edit, review schedule unchanged and updated_at advanced
+- [x] 3.6 Delete prompts confirmation; confirm removes, dismiss keeps
+- [x] 3.7 No regressions on /generate or /review

@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
 import CreateCardForm from "@/components/library/CreateCardForm";
+import CardList from "@/components/library/CardList";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
@@ -66,14 +67,7 @@ if (supabase) {
           cards.length === 0 ? (
             <p class="text-sm text-blue-100/70">You have no saved cards yet. Create your first card above.</p>
           ) : (
-            <ul class="space-y-3">
-              {cards.map((card) => (
-                <li class="rounded-lg border border-white/10 bg-white/5 p-4">
-                  <p class="font-medium text-white">{card.front}</p>
-                  <p class="mt-1 text-sm text-blue-100/70">{card.back}</p>
-                </li>
-              ))}
-            </ul>
+            <CardList client:load cards={cards} />
           )
         }
       </section>

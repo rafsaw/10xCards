@@ -90,7 +90,14 @@
       "Bash(GIT_LITERAL_PATHSPECS=1 git add \"src/pages/api/cards/[id].ts\")",
       "Bash(echo \"empty-diff exit: $?\")",
       "Bash(echo \"ESLINT EXIT: $?\")",
-      "Bash(echo \"NEW-FILES ESLINT EXIT: $?\")"
+      "Bash(echo \"NEW-FILES ESLINT EXIT: $?\")",
+      "PowerShell(npx eslint src/components/library/CardRow.tsx src/components/library/CardList.tsx src/pages/library.astro 2>&1 | Select-Object -First 40)",
+      "PowerShell(npx eslint src/components/library/CardRow.tsx src/components/library/CardList.tsx src/pages/library.astro src/components/library/CreateCardForm.tsx; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell(Out-Null *)",
+      "PowerShell(\"--- show first lines of diff with whitespace markers ---\")",
+      "PowerShell(git diff *)",
+      "PowerShell(git update-index *)",
+      "PowerShell(npx eslint src/components/library/CardRow.tsx src/components/library/CardList.tsx src/pages/library.astro 2>$null; \"MY_FILES_LINT_EXIT=$LASTEXITCODE\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
