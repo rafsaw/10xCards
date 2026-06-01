@@ -1,9 +1,9 @@
 ---
 project: 10xCards
-version: 4
+version: 5
 status: active
 created: 2026-05-26
-updated: 2026-05-30
+updated: 2026-06-01
 source: context/foundation/roadmap.md
 mirrors:
   - github-issues (rafsaw/10xCards)
@@ -44,9 +44,9 @@ GitHub Issues and Linear Issues are parallel mirrors of the roadmap. `context/fo
 | S-02 | `atomic-save-to-deck` | [#8](https://github.com/rafsaw/10xCards/issues/8) | [RAF-12](https://linear.app/rafsaw/issue/RAF-12) | `roadmap:slice`, `stream:a-core-loop`, `north-star` | A | **done** (closed 2026-05-30) |
 | S-03 | `deck-edit-delete` | [#9](https://github.com/rafsaw/10xCards/issues/9) | [RAF-13](https://linear.app/rafsaw/issue/RAF-13) | `roadmap:slice`, `stream:b-library` | B | proposed |
 | S-04 | `srs-review-session` | [#10](https://github.com/rafsaw/10xCards/issues/10) | [RAF-14](https://linear.app/rafsaw/issue/RAF-14) | `roadmap:slice`, `stream:c-review` | C | **done** (closed 2026-05-31) |
-| S-05 | `account-deletion-with-retention` | [#11](https://github.com/rafsaw/10xCards/issues/11) | [RAF-15](https://linear.app/rafsaw/issue/RAF-15) | `roadmap:slice`, `stream:d-compliance` | D | **blocked** (wymaga update PRD) |
+| S-05 | `account-deletion-with-retention` | [#11](https://github.com/rafsaw/10xCards/issues/11) | [RAF-15](https://linear.app/rafsaw/issue/RAF-15) | `roadmap:slice`, `stream:d-compliance` | D | **planned** (PRD v2 odblokował — FR-016/017/018) |
 
-Linear-specific: dependencies kodowane jako `Blocked by` relations na issue (RAF-11 ← RAF-10; RAF-12 ← RAF-10, RAF-11; RAF-13 ← RAF-10; RAF-14 ← RAF-10, RAF-12; RAF-15 ← RAF-10 + zewnętrzny blocker: PRD update). Każdy Linear issue linkuje z powrotem do GitHub mirror via attachment. Pełniejsze omówienie w `context/foundation/tasks-linear.md`.
+Linear-specific: dependencies kodowane jako `Blocked by` relations na issue (RAF-11 ← RAF-10; RAF-12 ← RAF-10, RAF-11; RAF-13 ← RAF-10; RAF-14 ← RAF-10, RAF-12; RAF-15 ← RAF-10; zewnętrzny blocker "PRD update" rozwiązany 2026-06-01 przez PRD v2). Każdy Linear issue linkuje z powrotem do GitHub mirror via attachment. Pełniejsze omówienie w `context/foundation/tasks-linear.md`.
 
 ## Sync rules
 

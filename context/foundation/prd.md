@@ -1,6 +1,6 @@
 ---
 project: "10xCards"
-version: 1
+version: 2
 status: draft
 created: 2026-05-20
 context_type: greenfield
@@ -126,6 +126,19 @@ For v1 the persona is literally one user — dogfooding. The product is intentio
 - FR-015: User's review progress persists across sessions (next-due dates update per the scheduling model). Priority: must-have
   > Socratic: Counter considered — purely local persistence instead of central persistence. Resolution: stands. Authenticated, per-user data already implies central persistence; local-only would break cross-device support and lose progress on browser-data clears.
 
+### Account lifecycle
+
+> Added in PRD v2 (2026-06-01) to unblock roadmap slice S-05 (`account-deletion-with-retention`). Origin: roadmap Open Roadmap Question #2 — v1 shipped without a deletion path, which leaves user data with no user-initiated exit. The retention model below was chosen over immediate hard-delete to make the destructive action recoverable.
+
+- FR-016: User can request deletion of their own account from settings. Priority: must-have
+  > Socratic: Counter considered — skip a dedicated deletion path entirely; for a single-author dogfood v1 the operator can drop the row manually. Resolution: stands. The product is multi-user-from-day-one by design (see Persona); a user-initiated exit is the minimum self-service obligation and is the entry point the retention flow hangs off. Manual row-drops do not scale past the author.
+
+- FR-017: A deletion request places the account in a 30-day retention state before any data is destroyed; during retention the account is locked to read-only (the user may log in and view their cards but cannot create, edit, delete, generate, or review), and after the window elapses all of the user's cards and the account itself are hard-deleted. Priority: must-have
+  > Socratic: Strongest counter — fully block login during retention (no read-only view) for a simpler auth surface. Resolution: stands. Read-only access lets the user see exactly what they are about to lose and recover from a regretted click without a support loop; the read-only lock still prevents fresh investment into an account being torn down. Immediate hard-delete on request was rejected because it is irreversible — the retention window exists precisely to make the destructive action recoverable.
+
+- FR-018: User can cancel a pending deletion during the retention window by logging back in, which restores full (read-write) access. Priority: must-have
+  > Socratic: Counter considered — require a magic-link email to confirm cancellation. Resolution: stands. Re-login is sufficient proof of ownership for a single-tenant tool and avoids a hard dependency on email deliverability (Supabase shared SMTP is rate-limited — see roadmap Open Roadmap Question #1). An email-link cancel can be revisited if real non-author signups arrive.
+
 ## Non-Functional Requirements
 
 - Authentication protects against common abuse patterns without degrading normal user access (legitimate retypes after a mistype still succeed; high-volume credential guessing at scale is rejected before reaching the auth check).
@@ -153,6 +166,8 @@ Each user's cards are isolated from every other user's cards. Unauthenticated re
 
 Password reset and email verification flows are explicitly deferred from MVP scope (see Non-Goals); the authentication mechanism above stands regardless.
 
+An account additionally has a retention state (per FR-016–FR-018): a user who has requested deletion may still authenticate during the 30-day window but is restricted to read-only access until they either cancel (by logging back in, which restores read-write) or the window elapses and the account is hard-deleted. No other role or state exists.
+
 ## Non-Goals
 
 - **Avoid: advanced spaced-repetition algorithm engineering.** The MVP uses a deliberately simple scheduling model rather than sophisticated optimization logic. Sophistication is a v2 lever.
@@ -166,3 +181,5 @@ Password reset and email verification flows are explicitly deferred from MVP sco
 ## Open Questions
 
 No open questions at PRD finalization — shape-notes Phase 7 cross-check landed at `quality_check_status: accepted` on 2026-05-20 with no surfaced gaps. New unknowns discovered during downstream tech-stack selection or implementation should be added here as numbered entries with owner and resolution date.
+
+1. ✅ **RESOLVED (PRD v2, 2026-06-01)** — Account deletion + retention had no functional requirements in v1, blocking roadmap slice S-05. Added FR-016 (request deletion), FR-017 (30-day read-only retention then hard-delete), FR-018 (cancel via re-login). Decisions: retention is read-only-locked (not full login block); cancellation is re-login (no magic-link email); a pre-hard-delete email notice stays out of scope (roadmap §Parked). The scheduled-sweep mechanism (Cloudflare Cron vs Supabase pg_cron) is an implementation choice deferred to `/10x-plan`. — Owner: user. Resolved: 2026-06-01.

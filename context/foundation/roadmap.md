@@ -1,10 +1,10 @@
 ---
 project: 10xCards
-version: 2
+version: 4
 status: active
 created: 2026-05-26
 updated: 2026-06-01
-prd_version: 1
+prd_version: 2
 main_goal: speed
 top_blocker: time
 ---
@@ -13,6 +13,8 @@ top_blocker: time
 
 > Powstała z `context/foundation/prd.md` (v1) + auto-researched baseline kodu (2026-05-26, potwierdzony 2026-05-27).
 > v2 restruktryzuje pętlę przechwytywania kart (split S-01 → S-01 draft + S-02 atomic save) i dodaje stream compliance (S-05). Wersja poprzednia: `context/foundation/archive/2026-05-27-roadmap.md`.
+> v3 dodaje S-06 (UX improvements) — usprawnienia zaobserwowane podczas budowy S-01…S-04, równoległe z S-05.
+> v4 odblokowuje S-05: PRD v2 dodał FR-016/017/018 (account deletion + 30-dniowa read-only retencja + cancel przez re-login), więc S-05 `blocked` → `planned`. Patrz Open Roadmap Question #2 (rozstrzygnięte).
 > Edytuj in-place; archiwizuj gdy zdezaktualizowana.
 > Slice'y poniżej są ułożone w kolejności zależności. Tabela "At a glance" jest indeksem.
 
@@ -39,7 +41,8 @@ Wedge produktu — jedna cecha, której odjęcie sprawia, że produkt staje się
 | S-02  | atomic-save-to-deck                | atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)                       | F-01, S-01       | US-01 (część), FR-006, FR-007                  | done     |
 | S-03  | deck-edit-delete                   | utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę                                  | F-01             | US-03, FR-009, FR-010, FR-011, FR-012          | done     |
 | S-04  | srs-review-session                 | rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami                                        | F-01, S-02       | US-02, FR-013, FR-014, FR-015                  | done     |
-| S-05  | account-deletion-with-retention    | zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie blokowane, możliwa kancelacja), po retencji dane twardo usuwane                      | F-01             | **brak — wymaga update PRD**                   | blocked  |
+| S-05  | account-deletion-with-retention    | zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie dozwolone, dostęp read-only, kancelacja przez re-login), po retencji dane twardo usuwane | F-01             | FR-016, FR-017, FR-018 (PRD v2)                | planned  |
+| S-06  | ux-improvements                    | dopracować UX powierzchni S-01…S-04: bulk actions w review, reset sesji powtórek, loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece | F-01             | NFR, US-01/FR-006-007, US-02/FR-013, FR-010 (rozszerzony) | planned  |
 
 ## Streams
 
@@ -50,7 +53,8 @@ Pomoc nawigacyjna — grupuje elementy dzielące łańcuch Prerequisites. Kanoni
 | A      | Pętla AI capture (north-star)    | `F-01` → `S-01` → `S-02`       | ✅ **Domknięty 2026-05-30** — F-01/S-01/S-02 wszystkie `done`. North star osiągnięty.                                                              |
 | B      | Biblioteka kart (manualna + CRUD) | `S-03`                         | ✅ **Domknięty 2026-06-01** — `S-03` `done`. Manual create + browse + edit + hard-delete na `/library`. Pokrywa FR-009/010/011/012.                  |
 | C      | Pętla powtórek (research-pending) | `S-04`                         | ✅ **Domknięty 2026-05-31** — `S-04` `done`. Model SR rozstrzygnięty (Leitner, `/10x-research`); review loop + harmonogram utrwalony.              |
-| D      | Lifecycle konta / compliance      | `S-05`                         | Branches z `F-01`. Aktualnie zablokowany na update PRD (brak FR dla account deletion + retention) — patrz Open Roadmap Questions.                  |
+| D      | Lifecycle konta / compliance      | `S-05`                         | Branches z `F-01`. ✅ **Odblokowany 2026-06-01** — PRD v2 dodał FR-016/017/018; `S-05` `planned`, gotowy do `/10x-plan`. Patrz Open Roadmap Question #2 (rozstrzygnięte).        |
+| E      | UX / polish                       | `S-06`                         | Branches z `F-01`. Zbiera usprawnienia zaobserwowane podczas S-01…S-04; równoległy z S-05. Dotyka powierzchni już `done`, więc nie konkuruje o pliki z aktywnym slice'em. |
 
 ## Baseline
 
@@ -137,18 +141,36 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 
 ### S-05: Usunięcie konta z 30-dniową retencją
 
-- **Outcome:** zalogowany użytkownik znajduje akcję "Usuń konto" w settings, potwierdza decyzję, konto wchodzi w stan `pending_deletion` z `retention_until = now + 30 dni`. W tym oknie: logowanie jest blokowane (z komunikatem "konto w trakcie usuwania, klik aby anulować") + user może anulować jednym kliknięciem (np. przez special token w mailu lub re-login flow), co przywraca konto. Po 30 dniach: hard-delete wszystkich kart usera (cascade z RLS) + usunięcie samego konta z `auth.users`. Mechanizm cron / scheduled task wykonuje hard-delete (Cloudflare Workers Cron Triggers lub Supabase pg_cron).
+- **Outcome:** zalogowany użytkownik znajduje akcję "Usuń konto" w settings, potwierdza decyzję, konto wchodzi w stan `pending_deletion` z `retention_until = now + 30 dni`. W tym oknie: logowanie jest **dozwolone, ale dostęp jest read-only** — user może się zalogować i zobaczyć swoje karty, ale nie może tworzyć / edytować / kasować / generować / robić review; trwały banner ("konto w trakcie usuwania do <data>, klik aby anulować") wystawia akcję anulowania. **Anulowanie = re-login flow**: ponowne zalogowanie (klik "anuluj" na bannerze) przywraca pełny read-write dostęp, bez zależności od maila. Po 30 dniach: hard-delete wszystkich kart usera (cascade z RLS) + usunięcie samego konta z `auth.users`. Mechanizm cron / scheduled task wykonuje hard-delete (Cloudflare Workers Cron Triggers lub Supabase pg_cron).
 - **Change ID:** `account-deletion-with-retention`
-- **PRD refs:** **BRAK** — PRD v1 nie zawiera FR dla account deletion ani retention policy. Slice wymaga update PRD (proponowane FR-016: User can request account deletion; FR-017: Deletion enters 30-day retention before hard delete; FR-018: User can cancel deletion during retention). Patrz Open Roadmap Question #2.
-- **Prerequisites:** F-01 (soft-delete mechanizm + cron lub scheduled job to PRD-pending decyzje, ale schemat już je wspiera)
-- **Parallel with:** S-01, S-02, S-03, S-04 (po odblokowaniu PRD)
-- **Blockers:** PRD update — brak FR dla account deletion + retention. Slice nie może iść do `/10x-plan` z `PRD refs: brak`.
+- **PRD refs:** FR-016 (user can request account deletion), FR-017 (30-dniowa read-only retencja → hard-delete), FR-018 (cancel przez re-login) — dodane w **PRD v2 (2026-06-01)**. Patrz Open Roadmap Question #2 (rozstrzygnięte).
+- **Prerequisites:** F-01 (schemat już wspiera soft-delete: flaga + `retention_until`; mechanizm scheduled hard-delete to decyzja `/10x-plan`)
+- **Parallel with:** S-01, S-02, S-03, S-04, S-06
+- **Blockers:** —
 - **Unknowns:**
-  - Co dokładnie "30-day retention" obejmuje: czy user może w tym oknie się zalogować i zobaczyć swoje dane (read-only), czy logowanie zablokowane całkowicie + tylko email-link do anulowania. — Owner: user. Block: yes (definiuje UX i powierzchnię auth).
-  - Mechanizm scheduled hard-delete: Cloudflare Workers Cron Triggers (jeden cron dla całej aplikacji, codziennie sweepuje due deletions) vs Supabase pg_cron (DB-side, mniej ruchomych części) vs ręczny worker uruchamiany manualnie. — Owner: TBD. Block: no (rozstrzygnięcie w `/10x-plan` po odblokowaniu PRD).
-  - Czy w okresie retencji wymagana jest jakaś forma notyfikacji (np. mail "twoje konto zostanie skasowane za X dni"). — Owner: user. Block: no (nice-to-have).
-- **Risk:** Bug w cron / scheduled hard-delete = albo dane zostają na zawsze (user nie został skasowany, mimo prośby — naruszenie obietnicy / potencjalnie regulacyjne), albo dane skasowane przedwcześnie (user nie może anulować). Drugie ryzyko: scope creep — "skoro robimy retention, dorzućmy export danych przed kasowaniem" → to osobna decyzja, osobny FR, osobny slice. Trzecie: bez tracingu w PRD nie wiadomo, co dokładnie jest must-have, a co nice-to-have; planowanie ślepe jest gorsze niż żadne.
-- **Status:** blocked
+  - Mechanizm scheduled hard-delete: Cloudflare Workers Cron Triggers (jeden cron dla całej aplikacji, codziennie sweepuje due deletions) vs Supabase pg_cron (DB-side, mniej ruchomych części) vs ręczny worker uruchamiany manualnie. — Owner: TBD. Block: no (rozstrzygnięcie w `/10x-plan`).
+  - Jak egzekwować read-only lock w okresie retencji — guard w `src/middleware.ts` na mutujących route'ach + ukrycie akcji w UI, czy osobna polityka. — Owner: TBD. Block: no (rozstrzygnięcie w `/10x-plan`).
+- **Resolved (PRD v2, 2026-06-01):**
+  - Zakres "30-day retention": **read-only-locked** (logowanie dozwolone, dane widoczne, mutacje zablokowane) — nie całkowita blokada logowania. (Był: Block yes.)
+  - Anulowanie: **re-login flow** — bez magic-link maila (unika zależności od Supabase shared SMTP, patrz Open Roadmap Question #1).
+  - Notyfikacja przed hard-delete: **poza zakresem** S-05 — pozostaje w §Parked, do rewizji w v2.
+- **Risk:** Bug w cron / scheduled hard-delete = albo dane zostają na zawsze (user nie został skasowany, mimo prośby — naruszenie obietnicy / potencjalnie regulacyjne), albo dane skasowane przedwcześnie (user nie może anulować). Drugie ryzyko: scope creep — "skoro robimy retention, dorzućmy export danych przed kasowaniem" → to osobna decyzja, osobny FR, osobny slice (świadomie zaparkowane). Trzecie: read-only lock dotyka tych samych mutujących powierzchni co S-02/S-03/S-04 — guard musi pokryć wszystkie write-route'y, inaczej "read-only" przecieka (analogicznie do RLS-discipline z F-01).
+- **Status:** planned
+
+### S-06: Usprawnienia UX
+
+- **Outcome:** zalogowany użytkownik korzysta z dopracowanej powierzchni produktu — slice zbiera friction-pointy zaobserwowane podczas budowy S-01…S-04: (a) **bulk actions** na ekranie review kandydatów (accept-all / reject-all / zaznacz wiele zamiast wyłącznie decyzji per-karta); (b) **reset sesji powtórek** — możliwość wyczyszczenia / zrestartowania bieżącej sesji bez przeładowania strony; (c) **lepsze loading states** na kluczowych ścieżkach (generacja AI, atomic save, ładowanie biblioteki, sesja review); (d) **post-login redirect** — po zalogowaniu user trafia wprost do dashboardu zamiast zostawać na home z wciąż widocznym ekranem sign in / sign up (alternatywnie: home renderuje dashboard warunkowo wg sesji); (e) **banner nawigacyjny** — trzy akcje z boxa na dashboardzie wyniesione na górny banner, by przeskakiwać między ekranami bez powrotu na dashboard; (f) **paginacja + proste wyszukiwanie po słowie kluczowym** w bibliotece kart. Każde usprawnienie jest niezależne — slice można dostarczać przyrostowo, bez stanu "połowicznie wdrożone".
+- **Change ID:** `ux-improvements`
+- **PRD refs:** NFR (użyteczność, mobile-baseline), US-01 + FR-006/FR-007 (bulk accept/reject to ergonomia istniejącego kontraktu accept-or-reject), US-02 + FR-013 (reset sesji review), FR-010 (browse list — **paginacja + search rozszerzają** "lista, kropka" poza literę FR-010). Część pozycji (loading states, post-login redirect, banner) to czysty UX-polish bez własnego FR — slice jest częściowo invented względem PRD v1, podobnie jak S-05.
+- **Prerequisites:** F-01
+- **Parallel with:** S-05 (oba branches z `F-01`; S-06 dotyka powierzchni S-01…S-04, które są już `done`, więc nie konkuruje o pliki z aktywnym slice'em)
+- **Blockers:** —
+- **Unknowns:**
+  - Czy home dla zalogowanego usera ma być twardym redirectem na `/dashboard`, czy `/` ma renderować dashboard warunkowo wg sesji (wpływa na middleware vs. komponent). — Owner: user. Block: no.
+  - Czy keyword search w bibliotece to client-side filter po załadowanej stronie, czy server-side query — wpływa na interakcję z paginacją (filtr po stronie vs. po całym zbiorze). — Owner: TBD. Block: no.
+  - Czy paginacja offset-based czy cursor-based — przy skali MVP offset wystarczy. — Owner: TBD. Block: no.
+- **Risk:** Scope creep — "usprawnienia UX" to worek bez naturalnej granicy; każda pozycja musi traceować do konkretnej obserwacji z S-01…S-04, inaczej slice puchnie w nieskończoność. Drugie ryzyko: paginacja + search rozszerzają FR-010 ("lista, kropka") — granicę explicite oznaczoną jako scope-guard w S-03 — więc wymagają świadomej decyzji "MVP-worthy czy parkować". Trzecie: bulk actions i reset sesji dotykają atomic-finalize (S-02) oraz schedulera (S-04) — zmiana ergonomii nie może złamać istniejących kontraktów (atomowość accept/reject, trwałość harmonogramu).
+- **Status:** planned
 
 ## Backlog Handoff
 
@@ -159,13 +181,14 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 | S-02       | atomic-save-to-deck                | Atomowy accept/reject draftów (north star — domyka PRD Primary Success Criterion)    | — (done)              | ✅ done — #8 zamknięty 2026-05-30 (north star)                          |
 | S-03       | deck-edit-delete                   | Biblioteka kart: manual create + browse + edit + hard-delete                         | — (done)              | ✅ done — zaimplementowany 2026-06-01 (`665925b`); change `impl_reviewed` |
 | S-04       | srs-review-session                 | Sesja powtórek SRS                                                                   | yes (done)            | ✅ done — review loop + Leitner scheduler (c784b2d); change zaimplementowany 2026-05-31 |
-| S-05       | account-deletion-with-retention    | Usunięcie konta z 30-dniową retencją                                                 | no                    | **Zablokowane na update PRD** — brak FR dla account deletion           |
+| S-05       | account-deletion-with-retention    | Usunięcie konta z 30-dniową retencją                                                 | yes                   | ✅ Odblokowane 2026-06-01 — PRD v2 dodał FR-016/017/018; gotowe do `/10x-plan` |
+| S-06       | ux-improvements                    | Usprawnienia UX: bulk review, reset sesji, loading states, redirect, banner nav, paginacja+search | yes                   | Polish na powierzchniach S-01…S-04 (już `done`); search/paginacja rozszerzają FR-010 — patrz Risk |
 
 ## Open Roadmap Questions
 
 1. **Czy podczas MVP będą się rejestrować realni (nie-autor) użytkownicy, czy v1 to ściśle dogfood autora?** Per `context/deployment/deploy-plan.md` lessons, Supabase free-tier shared SMTP ma cap ~3–4 mailów potwierdzających na godzinę — w porządku do dogfood, łamie się przy jakimkolwiek realnym ruchu rejestracyjnym. Jeśli realni użytkownicy mają się rejestrować przed zamknięciem v1, własne SMTP (Resend / SendGrid / SES) staje się twardym prerequisitem launchu. — Owner: user. Block: roadmap-wide (dotyka gotowości do launchu, nie planów per slice).
 
-2. **PRD nie ma FR dla account deletion + retention, a S-05 ich wymaga.** Slice S-05 jest invented względem PRD v1 (Roadmap guardrail: każdy slice traceuje do PRD ID). Proponowane FR do dodania: FR-016 (user can request account deletion), FR-017 (deletion enters 30-day retention before hard delete), FR-018 (user can cancel deletion during retention). Decyzje do podjęcia w PRD: czy retention to read-only-locked czy całkowicie zablokowane logowanie; czy anulowanie wymaga magic-link maila czy re-login wystarczy; czy potrzebna jest notyfikacja przed hard-delete. Po update'cie PRD do v2: status S-05 → `proposed`, `PRD refs` wypełnione, slice gotowy do `/10x-plan`. — Owner: user. Block: S-05.
+2. ✅ **ROZSTRZYGNIĘTE (PRD v2, 2026-06-01).** PRD v1 nie miał FR dla account deletion + retention, a S-05 ich wymagał (Roadmap guardrail: każdy slice traceuje do PRD ID). PRD v2 dodał **FR-016** (user can request account deletion), **FR-017** (30-dniowa read-only retencja → hard-delete) i **FR-018** (cancel przez re-login). Podjęte decyzje: retencja to **read-only-locked** (logowanie dozwolone, mutacje zablokowane), **nie** całkowita blokada logowania; anulowanie przez **re-login** (bez magic-link maila — unika zależności od shared SMTP, patrz #1); notyfikacja przed hard-delete **poza zakresem** (pozostaje w §Parked). Mechanizm scheduled-sweep (Cloudflare Cron vs Supabase pg_cron) odroczony do `/10x-plan`. Efekt: S-05 `blocked` → `planned`, `PRD refs` wypełnione, gotowy do `/10x-plan`. — Owner: user. Resolved: 2026-06-01.
 
 3. ✅ **ROZSTRZYGNIĘTE (S-02 wdrożony 2026-05-30, #8).** Rozstrzygnięcie i uzasadnienie w `context/changes/atomic-save-to-deck/` (plan + impl review). — Czy "atomic" w S-02 oznacza DB transakcję, czy server-side guard wystarczy? Słowo "atomic" jest celowo użyte w S-02 — PRD FR-006/007 wymagają, by każdy kandydat skończył albo jako saved albo jako discarded, bez stanu pośredniego. Czy ta gwarancja jest zapewniana przez DB transaction (jeden BEGIN/COMMIT obejmujący wszystkie UPDATE/DELETE), czy przez batch + idempotency-key + reconciliation, jest decyzją architektoniczną dla `/10x-plan` — ale warto rozstrzygnąć ją *przed* startem S-02, żeby uniknąć refactoru w środku. — Owner: TBD. Block: S-02 (technically), no (formally — `/10x-plan` może rozstrzygnąć).
 
