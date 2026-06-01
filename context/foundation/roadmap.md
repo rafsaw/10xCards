@@ -3,7 +3,7 @@ project: 10xCards
 version: 2
 status: active
 created: 2026-05-26
-updated: 2026-05-31
+updated: 2026-06-01
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -37,7 +37,7 @@ Wedge produktu — jedna cecha, której odjęcie sprawia, że produkt staje się
 | F-01  | cards-schema-and-rls               | (foundation) schema kart (z polem `status` rozróżniającym draft / saved) + soft-delete na koncie + RLS izolujące dane każdego użytkownika                  | —                | Access Control, NFR (izolacja), Guardrails     | done     |
 | S-01  | first-gated-generation             | wkleić fragment tekstu i zobaczyć karty-kandydatów z AI zapisane jako draft w bazie (gated UI accept/reject, ale finalizacja w S-02)                       | F-01             | US-01 (część), FR-004, FR-005, FR-008          | done     |
 | S-02  | atomic-save-to-deck                | atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)                       | F-01, S-01       | US-01 (część), FR-006, FR-007                  | done     |
-| S-03  | deck-edit-delete                   | utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę                                  | F-01             | US-03, FR-009, FR-010, FR-011, FR-012          | proposed |
+| S-03  | deck-edit-delete                   | utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę                                  | F-01             | US-03, FR-009, FR-010, FR-011, FR-012          | done     |
 | S-04  | srs-review-session                 | rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami                                        | F-01, S-02       | US-02, FR-013, FR-014, FR-015                  | done     |
 | S-05  | account-deletion-with-retention    | zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie blokowane, możliwa kancelacja), po retencji dane twardo usuwane                      | F-01             | **brak — wymaga update PRD**                   | blocked  |
 
@@ -48,7 +48,7 @@ Pomoc nawigacyjna — grupuje elementy dzielące łańcuch Prerequisites. Kanoni
 | Stream | Theme                            | Chain                          | Note                                                                                                                                                |
 | ------ | -------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A      | Pętla AI capture (north-star)    | `F-01` → `S-01` → `S-02`       | ✅ **Domknięty 2026-05-30** — F-01/S-01/S-02 wszystkie `done`. North star osiągnięty.                                                              |
-| B      | Biblioteka kart (manualna + CRUD) | `S-03`                         | Niezależny od pętli AI: depends tylko od `F-01`. Może iść równolegle ze Stream A natychmiast po wylądowaniu foundation. Pokrywa FR-009/010/011/012. |
+| B      | Biblioteka kart (manualna + CRUD) | `S-03`                         | ✅ **Domknięty 2026-06-01** — `S-03` `done`. Manual create + browse + edit + hard-delete na `/library`. Pokrywa FR-009/010/011/012.                  |
 | C      | Pętla powtórek (research-pending) | `S-04`                         | ✅ **Domknięty 2026-05-31** — `S-04` `done`. Model SR rozstrzygnięty (Leitner, `/10x-research`); review loop + harmonogram utrwalony.              |
 | D      | Lifecycle konta / compliance      | `S-05`                         | Branches z `F-01`. Aktualnie zablokowany na update PRD (brak FR dla account deletion + retention) — patrz Open Roadmap Questions.                  |
 
@@ -120,7 +120,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Kasowanie jest hard-delete per FR-012 — przypadkowe skasowanie niszczy postęp nauki bez odzyskania. UI musi wystawiać jednoznaczny krok potwierdzenia (PRD FR-012 Socratic dopuszcza confirm step bez rozszerzania zakresu). Drugie ryzyko: manual create + edit + delete + browse to czterokrotne wystawienie tej samej powierzchni dostępu do `cards` — każdy z tych endpointów musi iść przez user-scoped klienta Supabase, inaczej RLS z F-01 nie trzyma. Trzecie: scope crepe — łatwo "skoro już jesteśmy w bibliotece, dodajmy filtry/sortowanie". Trzymać się PRD FR-010 (lista, kropka).
-- **Status:** proposed
+- **Status:** done (zaimplementowany 2026-06-01, 3 fazy: API mutacji + `/library` + inline edit/delete — `665925b`; change `impl_reviewed`, czeka na `/10x-archive`; trackery #9 / RAF-13)
 
 ### S-04: Sesja powtórek SRS
 
@@ -157,7 +157,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 | F-01       | cards-schema-and-rls               | Schemat kart (z draft status) + soft-delete konta + polityki RLS                     | — (done)              | ✅ done — #6 zamknięty 2026-05-28                                       |
 | S-01       | first-gated-generation             | Pierwsza gated generacja AI — kandydaci zapisywani jako drafty                       | — (done)              | ✅ done — #7 zamknięty 2026-05-28                                       |
 | S-02       | atomic-save-to-deck                | Atomowy accept/reject draftów (north star — domyka PRD Primary Success Criterion)    | — (done)              | ✅ done — #8 zamknięty 2026-05-30 (north star)                          |
-| S-03       | deck-edit-delete                   | Biblioteka kart: manual create + browse + edit + hard-delete                         | yes                   | ✅ Odblokowane (F-01 done) — uruchom `/10x-plan deck-edit-delete`       |
+| S-03       | deck-edit-delete                   | Biblioteka kart: manual create + browse + edit + hard-delete                         | — (done)              | ✅ done — zaimplementowany 2026-06-01 (`665925b`); change `impl_reviewed` |
 | S-04       | srs-review-session                 | Sesja powtórek SRS                                                                   | yes (done)            | ✅ done — review loop + Leitner scheduler (c784b2d); change zaimplementowany 2026-05-31 |
 | S-05       | account-deletion-with-retention    | Usunięcie konta z 30-dniową retencją                                                 | no                    | **Zablokowane na update PRD** — brak FR dla account deletion           |
 
