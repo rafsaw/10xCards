@@ -26,6 +26,12 @@ const { user } = Astro.locals;
         >
           Start review session
         </a>
+        <a
+          href="/library"
+          class="inline-block rounded-lg border border-white/20 bg-gradient-to-r from-emerald-500/30 to-blue-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-emerald-500/40 hover:to-blue-500/40"
+        >
+          Card library
+        </a>
       </div>
       <form method="POST" action="/api/auth/signout" class="mt-6">
         <button

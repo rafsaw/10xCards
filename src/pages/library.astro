@@ -1,0 +1,82 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import CreateCardForm from "@/components/library/CreateCardForm";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+interface SavedCard {
+  id: string;
+  front: string;
+  back: string;
+}
+
+let cards: SavedCard[] = [];
+let loadError = false;
+
+if (supabase) {
+  const { data, error } = await supabase
+    .from("cards")
+    .select("id, front, back")
+    .eq("status", "saved")
+    .order("created_at", { ascending: false })
+    .overrideTypes<SavedCard[], { merge: false }>();
+  if (error) {
+    loadError = true;
+  } else {
+    cards = data;
+  }
+}
+---
+
+<Layout title="Card library">
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-3xl space-y-6 py-8">
+      <header class="flex items-center justify-between">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+          Card library
+        </h1>
+        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
+      </header>
+
+      {
+        !supabase && (
+          <p class="rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
+            Supabase is not configured — your library cannot be loaded.
+          </p>
+        )
+      }
+
+      {
+        loadError && (
+          <p class="rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
+            Could not load your cards. Try refreshing the page.
+          </p>
+        )
+      }
+
+      <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+        <h2 class="text-xl font-semibold">Create a card</h2>
+        <CreateCardForm client:load />
+      </section>
+
+      <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+        <h2 class="text-xl font-semibold">Saved cards ({cards.length})</h2>
+        {
+          cards.length === 0 ? (
+            <p class="text-sm text-blue-100/70">You have no saved cards yet. Create your first card above.</p>
+          ) : (
+            <ul class="space-y-3">
+              {cards.map((card) => (
+                <li class="rounded-lg border border-white/10 bg-white/5 p-4">
+                  <p class="font-medium text-white">{card.front}</p>
+                  <p class="mt-1 text-sm text-blue-100/70">{card.back}</p>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </section>
+    </div>
+  </div>
+</Layout>

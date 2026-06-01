@@ -258,31 +258,31 @@ None — no schema changes.
 
 #### Automated
 
-- [x] 1.1 Linting passes: `npm run lint`
-- [x] 1.2 Production build passes: `npm run build`
+- [x] 1.1 Linting passes: `npm run lint` — 3b6c6bd
+- [x] 1.2 Production build passes: `npm run build` — 3b6c6bd
 
 #### Manual
 
-- [x] 1.3 POST /api/cards creates a saved card with non-null next_due_at
-- [x] 1.4 POST /api/cards rejects empty front/back (400) and unauthenticated (401)
-- [x] 1.5 PATCH /api/cards/[id] updates only front/back; schedule unchanged, updated_at advances
-- [x] 1.6 DELETE /api/cards/[id] removes the row; repeat returns 404
-- [x] 1.7 Cross-account request for another user's card id returns 404 (RLS)
+- [x] 1.3 POST /api/cards creates a saved card with non-null next_due_at — 3b6c6bd
+- [x] 1.4 POST /api/cards rejects empty front/back (400) and unauthenticated (401) — 3b6c6bd
+- [x] 1.5 PATCH /api/cards/[id] updates only front/back; schedule unchanged, updated_at advances — 3b6c6bd
+- [x] 1.6 DELETE /api/cards/[id] removes the row; repeat returns 404 — 3b6c6bd
+- [x] 1.7 Cross-account request for another user's card id returns 404 (RLS) — 3b6c6bd
 
 ### Phase 2: `/library` page — browse + create
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Logged-out visit to /library redirects to /auth/signin
-- [ ] 2.4 /library shows create form and saved cards newest-first
-- [ ] 2.5 Create form saves a valid card (visible after reload); empty fields blocked
-- [ ] 2.6 Empty library shows empty-state message
-- [ ] 2.7 Dashboard "Card library" CTA navigates to /library
+- [x] 2.3 Logged-out visit to /library redirects to /auth/signin
+- [x] 2.4 /library shows create form and saved cards newest-first
+- [x] 2.5 Create form saves a valid card (visible after reload); empty fields blocked
+- [x] 2.6 Empty library shows empty-state message
+- [x] 2.7 Dashboard "Card library" CTA navigates to /library
 
 ### Phase 3: Inline edit + delete actions
 

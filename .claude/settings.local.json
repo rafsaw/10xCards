@@ -86,7 +86,11 @@
       "PowerShell(git restore *)",
       "Bash(command -v gh)",
       "Bash(echo \"check_exit=$?\")",
-      "Bash(echo \"check_exit=$? \\(0 = quiet\\)\")"
+      "Bash(echo \"check_exit=$? \\(0 = quiet\\)\")",
+      "Bash(GIT_LITERAL_PATHSPECS=1 git add \"src/pages/api/cards/[id].ts\")",
+      "Bash(echo \"empty-diff exit: $?\")",
+      "Bash(echo \"ESLINT EXIT: $?\")",
+      "Bash(echo \"NEW-FILES ESLINT EXIT: $?\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
