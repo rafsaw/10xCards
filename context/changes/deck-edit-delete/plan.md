@@ -288,13 +288,13 @@ None — no schema changes.
 
 #### Automated
 
-- [x] 3.1 Linting passes: `npm run lint`
-- [x] 3.2 Production build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint` — 665925b
+- [x] 3.2 Production build passes: `npm run build` — 665925b
 
 #### Manual
 
-- [x] 3.3 Inline Edit Save persists front/back; Cancel discards
-- [x] 3.4 Saving an edit with an empty field is blocked
-- [x] 3.5 After edit, review schedule unchanged and updated_at advanced
-- [x] 3.6 Delete prompts confirmation; confirm removes, dismiss keeps
-- [x] 3.7 No regressions on /generate or /review
+- [x] 3.3 Inline Edit Save persists front/back; Cancel discards — 665925b
+- [x] 3.4 Saving an edit with an empty field is blocked — 665925b
+- [x] 3.5 After edit, review schedule unchanged and updated_at advanced — 665925b
+- [x] 3.6 Delete prompts confirmation; confirm removes, dismiss keeps — 665925b
+- [x] 3.7 No regressions on /generate or /review — 665925b
