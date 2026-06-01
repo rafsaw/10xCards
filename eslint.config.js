@@ -70,6 +70,10 @@ const astroConfig = tseslint.config({
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  // Claude Code agent tooling (hooks, skills, commands) is not application
+  // source and is not part of any tsconfig project — exclude it from the
+  // type-checked lint pass.
+  { ignores: [".claude/**"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
