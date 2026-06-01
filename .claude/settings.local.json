@@ -97,7 +97,14 @@
       "PowerShell(\"--- show first lines of diff with whitespace markers ---\")",
       "PowerShell(git diff *)",
       "PowerShell(git update-index *)",
-      "PowerShell(npx eslint src/components/library/CardRow.tsx src/components/library/CardList.tsx src/pages/library.astro 2>$null; \"MY_FILES_LINT_EXIT=$LASTEXITCODE\")"
+      "PowerShell(npx eslint src/components/library/CardRow.tsx src/components/library/CardList.tsx src/pages/library.astro 2>$null; \"MY_FILES_LINT_EXIT=$LASTEXITCODE\")",
+      "PowerShell(git status --short; \"--- HEAD ---\"; git log --oneline -1)",
+      "Skill(10x-archive)",
+      "PowerShell(\"=== branch + status ===\")",
+      "PowerShell(\"=== commits on dev ahead of main ===\")",
+      "PowerShell(\"=== remotes ===\")",
+      "PowerShell(\"=== is main pushed / tracking? ===\")",
+      "PowerShell(\"\\(upstream of dev above, if any\\)\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
