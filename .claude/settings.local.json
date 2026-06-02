@@ -104,7 +104,10 @@
       "PowerShell(\"=== commits on dev ahead of main ===\")",
       "PowerShell(\"=== remotes ===\")",
       "PowerShell(\"=== is main pushed / tracking? ===\")",
-      "PowerShell(\"\\(upstream of dev above, if any\\)\")"
+      "PowerShell(\"\\(upstream of dev above, if any\\)\")",
+      "Bash(awk *)",
+      "WebSearch",
+      "mcp__exa__web_fetch_exa"
     ],
     "deny": [
       "Bash(rm -rf *)"
