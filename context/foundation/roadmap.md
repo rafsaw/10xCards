@@ -1,9 +1,9 @@
 ---
 project: 10xCards
-version: 4
+version: 5
 status: active
 created: 2026-05-26
-updated: 2026-06-01
+updated: 2026-06-02
 prd_version: 2
 main_goal: speed
 top_blocker: time
@@ -15,6 +15,7 @@ top_blocker: time
 > v2 restruktryzuje pętlę przechwytywania kart (split S-01 → S-01 draft + S-02 atomic save) i dodaje stream compliance (S-05). Wersja poprzednia: `context/foundation/archive/2026-05-27-roadmap.md`.
 > v3 dodaje S-06 (UX improvements) — usprawnienia zaobserwowane podczas budowy S-01…S-04, równoległe z S-05.
 > v4 odblokowuje S-05: PRD v2 dodał FR-016/017/018 (account deletion + 30-dniowa read-only retencja + cancel przez re-login), więc S-05 `blocked` → `planned`. Patrz Open Roadmap Question #2 (rozstrzygnięte).
+> v5 startuje S-06: `/10x-new ux-improvements` (2026-06-02) założył change folder `context/changes/ux-improvements/`, więc S-06 `planned` → `in progress`. Gotowy do `/10x-plan`.
 > Edytuj in-place; archiwizuj gdy zdezaktualizowana.
 > Slice'y poniżej są ułożone w kolejności zależności. Tabela "At a glance" jest indeksem.
 
@@ -42,7 +43,7 @@ Wedge produktu — jedna cecha, której odjęcie sprawia, że produkt staje się
 | S-03  | deck-edit-delete                   | utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę                                  | F-01             | US-03, FR-009, FR-010, FR-011, FR-012          | done     |
 | S-04  | srs-review-session                 | rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami                                        | F-01, S-02       | US-02, FR-013, FR-014, FR-015                  | done     |
 | S-05  | account-deletion-with-retention    | zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie dozwolone, dostęp read-only, kancelacja przez re-login), po retencji dane twardo usuwane | F-01             | FR-016, FR-017, FR-018 (PRD v2)                | planned  |
-| S-06  | ux-improvements                    | dopracować UX powierzchni S-01…S-04: bulk actions w review, reset sesji powtórek, loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece | F-01             | NFR, US-01/FR-006-007, US-02/FR-013, FR-010 (rozszerzony) | planned  |
+| S-06  | ux-improvements                    | dopracować UX powierzchni S-01…S-04: bulk actions w review, reset sesji powtórek, loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece | F-01             | NFR, US-01/FR-006-007, US-02/FR-013, FR-010 (rozszerzony) | in progress |
 
 ## Streams
 
@@ -54,7 +55,7 @@ Pomoc nawigacyjna — grupuje elementy dzielące łańcuch Prerequisites. Kanoni
 | B      | Biblioteka kart (manualna + CRUD) | `S-03`                         | ✅ **Domknięty 2026-06-01** — `S-03` `done`. Manual create + browse + edit + hard-delete na `/library`. Pokrywa FR-009/010/011/012.                  |
 | C      | Pętla powtórek (research-pending) | `S-04`                         | ✅ **Domknięty 2026-05-31** — `S-04` `done`. Model SR rozstrzygnięty (Leitner, `/10x-research`); review loop + harmonogram utrwalony.              |
 | D      | Lifecycle konta / compliance      | `S-05`                         | Branches z `F-01`. ✅ **Odblokowany 2026-06-01** — PRD v2 dodał FR-016/017/018; `S-05` `planned`, gotowy do `/10x-plan`. Patrz Open Roadmap Question #2 (rozstrzygnięte).        |
-| E      | UX / polish                       | `S-06`                         | Branches z `F-01`. Zbiera usprawnienia zaobserwowane podczas S-01…S-04; równoległy z S-05. Dotyka powierzchni już `done`, więc nie konkuruje o pliki z aktywnym slice'em. |
+| E      | UX / polish                       | `S-06`                         | Branches z `F-01`. 🚧 **W toku od 2026-06-02** — change folder założony (`/10x-new ux-improvements`); `S-06` `in progress`, gotowy do `/10x-plan`. Zbiera usprawnienia zaobserwowane podczas S-01…S-04; równoległy z S-05. Dotyka powierzchni już `done`, więc nie konkuruje o pliki z aktywnym slice'em. |
 
 ## Baseline
 
@@ -170,7 +171,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
   - Czy keyword search w bibliotece to client-side filter po załadowanej stronie, czy server-side query — wpływa na interakcję z paginacją (filtr po stronie vs. po całym zbiorze). — Owner: TBD. Block: no.
   - Czy paginacja offset-based czy cursor-based — przy skali MVP offset wystarczy. — Owner: TBD. Block: no.
 - **Risk:** Scope creep — "usprawnienia UX" to worek bez naturalnej granicy; każda pozycja musi traceować do konkretnej obserwacji z S-01…S-04, inaczej slice puchnie w nieskończoność. Drugie ryzyko: paginacja + search rozszerzają FR-010 ("lista, kropka") — granicę explicite oznaczoną jako scope-guard w S-03 — więc wymagają świadomej decyzji "MVP-worthy czy parkować". Trzecie: bulk actions i reset sesji dotykają atomic-finalize (S-02) oraz schedulera (S-04) — zmiana ergonomii nie może złamać istniejących kontraktów (atomowość accept/reject, trwałość harmonogramu).
-- **Status:** planned
+- **Status:** in progress (change folder założony 2026-06-02 przez `/10x-new` → `context/changes/ux-improvements/`; gotowy do `/10x-plan`)
 
 ## Backlog Handoff
 
@@ -182,7 +183,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 | S-03       | deck-edit-delete                   | Biblioteka kart: manual create + browse + edit + hard-delete                         | — (done)              | ✅ done — zaimplementowany 2026-06-01 (`665925b`); change `impl_reviewed` |
 | S-04       | srs-review-session                 | Sesja powtórek SRS                                                                   | yes (done)            | ✅ done — review loop + Leitner scheduler (c784b2d); change zaimplementowany 2026-05-31 |
 | S-05       | account-deletion-with-retention    | Usunięcie konta z 30-dniową retencją                                                 | yes                   | ✅ Odblokowane 2026-06-01 — PRD v2 dodał FR-016/017/018; gotowe do `/10x-plan` |
-| S-06       | ux-improvements                    | Usprawnienia UX: bulk review, reset sesji, loading states, redirect, banner nav, paginacja+search | yes                   | Polish na powierzchniach S-01…S-04 (już `done`); search/paginacja rozszerzają FR-010 — patrz Risk |
+| S-06       | ux-improvements                    | Usprawnienia UX: bulk review, reset sesji, loading states, redirect, banner nav, paginacja+search | yes (in progress)     | 🚧 change folder założony 2026-06-02 (`/10x-new`); gotowy do `/10x-plan`. Polish na powierzchniach S-01…S-04 (już `done`); search/paginacja rozszerzają FR-010 — patrz Risk |
 
 ## Open Roadmap Questions
 
