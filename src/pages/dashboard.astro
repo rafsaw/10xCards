@@ -13,34 +13,7 @@ const { user } = Astro.locals;
       <p class="text-blue-100/80">
         Welcome, <span class="font-semibold text-white">{user?.email}</span>
       </p>
-      <div class="mt-6 flex flex-wrap justify-center gap-3">
-        <a
-          href="/generate"
-          class="inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40"
-        >
-          Generate cards from text
-        </a>
-        <a
-          href="/review"
-          class="inline-block rounded-lg border border-white/20 bg-gradient-to-r from-purple-500/30 to-pink-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-purple-500/40 hover:to-pink-500/40"
-        >
-          Start review session
-        </a>
-        <a
-          href="/library"
-          class="inline-block rounded-lg border border-white/20 bg-gradient-to-r from-emerald-500/30 to-blue-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-emerald-500/40 hover:to-blue-500/40"
-        >
-          Card library
-        </a>
-      </div>
-      <form method="POST" action="/api/auth/signout" class="mt-6">
-        <button
-          type="submit"
-          class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
-        >
-          Sign out
-        </button>
-      </form>
+      <p class="mt-4 text-sm text-blue-100/60">Use the navigation above to generate, review, or browse your cards.</p>
     </div>
   </div>
 </Layout>
