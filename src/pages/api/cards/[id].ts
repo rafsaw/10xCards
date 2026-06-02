@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { readOnlyGuard } from "@/lib/account-retention";
 
 // No generated Supabase types in this codebase; narrow the .select() result
 // locally and apply via .overrideTypes (consistent with save.ts).
@@ -25,6 +26,9 @@ export const PATCH: APIRoute = async (context) => {
   if (!user) {
     return json({ error: "unauthorized", message: "Login required." }, 401);
   }
+
+  const readOnly = readOnlyGuard(context.locals);
+  if (readOnly) return readOnly;
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
@@ -78,6 +82,9 @@ export const DELETE: APIRoute = async (context) => {
   if (!user) {
     return json({ error: "unauthorized", message: "Login required." }, 401);
   }
+
+  const readOnly = readOnlyGuard(context.locals);
+  if (readOnly) return readOnly;
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {

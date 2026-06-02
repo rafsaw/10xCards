@@ -42,7 +42,7 @@ Wedge produktu — jedna cecha, której odjęcie sprawia, że produkt staje się
 | S-02  | atomic-save-to-deck                | atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)                       | F-01, S-01       | US-01 (część), FR-006, FR-007                  | done     |
 | S-03  | deck-edit-delete                   | utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę                                  | F-01             | US-03, FR-009, FR-010, FR-011, FR-012          | done     |
 | S-04  | srs-review-session                 | rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami                                        | F-01, S-02       | US-02, FR-013, FR-014, FR-015                  | done     |
-| S-05  | account-deletion-with-retention    | zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie dozwolone, dostęp read-only, kancelacja przez re-login), po retencji dane twardo usuwane | F-01             | FR-016, FR-017, FR-018 (PRD v2)                | planned  |
+| S-05  | account-deletion-with-retention    | zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie dozwolone, dostęp read-only, kancelacja przez re-login), po retencji dane twardo usuwane | F-01             | FR-016, FR-017, FR-018 (PRD v2)                | done     |
 | S-06  | ux-improvements                    | dopracować UX powierzchni S-01…S-04: bulk actions w review, reset sesji powtórek, loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece | F-01             | NFR, US-01/FR-006-007, US-02/FR-013, FR-010 (rozszerzony) | done |
 
 ## Streams
@@ -156,7 +156,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
   - Anulowanie: **re-login flow** — bez magic-link maila (unika zależności od Supabase shared SMTP, patrz Open Roadmap Question #1).
   - Notyfikacja przed hard-delete: **poza zakresem** S-05 — pozostaje w §Parked, do rewizji w v2.
 - **Risk:** Bug w cron / scheduled hard-delete = albo dane zostają na zawsze (user nie został skasowany, mimo prośby — naruszenie obietnicy / potencjalnie regulacyjne), albo dane skasowane przedwcześnie (user nie może anulować). Drugie ryzyko: scope creep — "skoro robimy retention, dorzućmy export danych przed kasowaniem" → to osobna decyzja, osobny FR, osobny slice (świadomie zaparkowane). Trzecie: read-only lock dotyka tych samych mutujących powierzchni co S-02/S-03/S-04 — guard musi pokryć wszystkie write-route'y, inaczej "read-only" przecieka (analogicznie do RLS-discipline z F-01).
-- **Status:** planned
+- **Status:** done (zarchiwizowany 2026-06-02 → `context/archive/2026-06-01-account-deletion-with-retention/`)
 
 ### S-06: Usprawnienia UX
 
@@ -182,7 +182,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 | S-02       | atomic-save-to-deck                | Atomowy accept/reject draftów (north star — domyka PRD Primary Success Criterion)    | — (done)              | ✅ done — #8 zamknięty 2026-05-30 (north star)                          |
 | S-03       | deck-edit-delete                   | Biblioteka kart: manual create + browse + edit + hard-delete                         | — (done)              | ✅ done — zaimplementowany 2026-06-01 (`665925b`); change `impl_reviewed` |
 | S-04       | srs-review-session                 | Sesja powtórek SRS                                                                   | yes (done)            | ✅ done — review loop + Leitner scheduler (c784b2d); change zaimplementowany 2026-05-31 |
-| S-05       | account-deletion-with-retention    | Usunięcie konta z 30-dniową retencją                                                 | yes                   | ✅ Odblokowane 2026-06-01 — PRD v2 dodał FR-016/017/018; gotowe do `/10x-plan` |
+| S-05       | account-deletion-with-retention    | Usunięcie konta z 30-dniową retencją                                                 | — (done)              | ✅ done — pg_cron sweep + read-only guard + /settings UI (`cbcccca`); #11 zamknięty, zarchiwizowany 2026-06-02 |
 | S-06       | ux-improvements                    | Usprawnienia UX: bulk review, reset sesji, loading states, redirect, banner nav, paginacja+search | — (done)              | ✅ done — zaimplementowany 2026-06-02 (6 faz, `ced27c8`…`3c5e501`); change `impl_reviewed` (review APPROVED). Polish na powierzchniach S-01…S-04; search/paginacja rozszerzają FR-010 |
 
 ## Open Roadmap Questions
@@ -212,4 +212,5 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 
 - **S-04: rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami** — Archived 2026-05-31 → `context/archive/2026-05-30-srs-review-session/`. Lesson: —.
 - **S-03: utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę** — Archived 2026-06-01 → `context/archive/2026-06-01-deck-edit-delete/`. Lesson: —.
+- **S-05: zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie dozwolone, dostęp read-only, kancelacja przez re-login), po retencji dane twardo usuwane** — Archived 2026-06-02 → `context/archive/2026-06-01-account-deletion-with-retention/`. Lesson: —.
 - **S-06: zalogowany użytkownik korzysta z dopracowanej powierzchni produktu — bulk actions w review, reset sesji powtórek, lepsze loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece** — Archived 2026-06-02 → `context/archive/2026-06-02-ux-improvements/`. Lesson: —.

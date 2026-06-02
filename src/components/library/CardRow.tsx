@@ -39,7 +39,7 @@ async function parseError(response: Response): Promise<RowError> {
   return { code, message: message || FALLBACK_MESSAGES[code] };
 }
 
-export default function CardRow({ card }: { card: SavedCard }) {
+export default function CardRow({ card, readOnly = false }: { card: SavedCard; readOnly?: boolean }) {
   const [editing, setEditing] = useState(false);
   const [front, setFront] = useState(card.front);
   const [back, setBack] = useState(card.back);
@@ -170,24 +170,26 @@ export default function CardRow({ card }: { card: SavedCard }) {
             <p className="font-medium break-words text-white">{card.front}</p>
             <p className="mt-1 text-sm break-words text-blue-100/70">{card.back}</p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button type="button" size="sm" variant="ghost" onClick={startEdit} disabled={pending}>
-              <Pencil className="size-4" />
-              Edit
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="destructive"
-              onClick={() => {
-                void handleDelete();
-              }}
-              disabled={pending}
-            >
-              {pending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-              Delete
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex shrink-0 items-center gap-2">
+              <Button type="button" size="sm" variant="ghost" onClick={startEdit} disabled={pending}>
+                <Pencil className="size-4" />
+                Edit
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                onClick={() => {
+                  void handleDelete();
+                }}
+                disabled={pending}
+              >
+                {pending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                Delete
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </li>

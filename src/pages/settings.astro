@@ -1,0 +1,52 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import DeleteAccountButton from "@/components/settings/DeleteAccountButton";
+import CancelDeletionButton from "@/components/settings/CancelDeletionButton";
+import { formatRetentionDate } from "@/lib/account-retention";
+
+const { user, isReadOnly, retentionUntil } = Astro.locals;
+const formatted = formatRetentionDate(retentionUntil);
+---
+
+<Layout title="Settings">
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-3xl space-y-6 py-8">
+      <header class="flex items-center justify-between">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+          Settings
+        </h1>
+        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
+      </header>
+
+      <p class="text-sm text-blue-100/70">
+        Signed in as <span class="font-semibold text-white">{user?.email}</span>
+      </p>
+
+      <section class="space-y-4 rounded-2xl border border-red-500/30 bg-red-900/10 p-6 text-white backdrop-blur-xl">
+        <div>
+          <h2 class="text-xl font-semibold text-red-200">Danger zone</h2>
+          <p class="mt-1 text-sm text-blue-100/70">
+            Deleting your account starts a 30-day retention window. During that time your account stays read-only and
+            you can cancel any time. After it elapses, your account and all your cards are permanently deleted.
+          </p>
+        </div>
+
+        {
+          isReadOnly ? (
+            <div class="space-y-3 rounded-lg border border-amber-500/30 bg-amber-900/20 p-4">
+              <p class="text-sm text-amber-200">
+                Your account is scheduled for deletion on <strong>{formatted}</strong>. Until then it's read-only.
+              </p>
+              <CancelDeletionButton
+                client:load
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-sm font-semibold text-amber-100 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+          ) : (
+            <DeleteAccountButton client:load />
+          )
+        }
+      </section>
+    </div>
+  </div>
+</Layout>

@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
 import Topbar from "@/components/Topbar.astro";
+import RetentionBanner from "@/components/RetentionBanner.astro";
 import { missingConfigs } from "@/lib/config-status";
 
 interface Props {
@@ -9,7 +10,7 @@ interface Props {
 }
 
 const { title = "10x Astro Starter" } = Astro.props;
-const { user } = Astro.locals;
+const { user, isReadOnly } = Astro.locals;
 ---
 
 <!doctype html>
@@ -44,6 +45,7 @@ const { user } = Astro.locals;
         </div>
       )
     }
+    {isReadOnly && <RetentionBanner />}
     <slot />
   </body>
 </html>

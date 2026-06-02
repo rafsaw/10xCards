@@ -5,6 +5,7 @@ import CreateCardForm from "@/components/library/CreateCardForm";
 import CardList from "@/components/library/CardList";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
+const { isReadOnly } = Astro.locals;
 
 const PAGE_SIZE = 20;
 
@@ -99,7 +100,15 @@ const hasNext = page < totalPages;
 
       <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
         <h2 class="text-xl font-semibold">Create a card</h2>
-        <CreateCardForm client:load />
+        {
+          isReadOnly ? (
+            <p class="rounded-lg border border-amber-500/30 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+              Your account is pending deletion and is read-only. Cancel the deletion to create cards.
+            </p>
+          ) : (
+            <CreateCardForm client:load />
+          )
+        }
       </section>
 
       <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
@@ -135,7 +144,7 @@ const hasNext = page < totalPages;
             </p>
           ) : (
             <>
-              <CardList client:load cards={cards} />
+              <CardList client:load cards={cards} readOnly={isReadOnly} />
               {totalPages > 1 && (
                 <nav class="flex items-center justify-between pt-2 text-sm" aria-label="Library pagination">
                   {hasPrev ? (

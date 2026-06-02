@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { readOnlyGuard } from "@/lib/account-retention";
 
 // Shape returned by the public.finalize_drafts(uuid[], uuid[]) rpc. No generated
 // Supabase types in this codebase, so the loosely-typed rpc result is narrowed
@@ -34,6 +35,9 @@ export const POST: APIRoute = async (context) => {
   if (!user) {
     return json({ error: "unauthorized", message: "Login required." }, 401);
   }
+
+  const readOnly = readOnlyGuard(context.locals);
+  if (readOnly) return readOnly;
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {

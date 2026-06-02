@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { OPENROUTER_API_KEY, OPENROUTER_MODEL } from "astro:env/server";
 import { createClient } from "@/lib/supabase";
+import { readOnlyGuard } from "@/lib/account-retention";
 import { generateCandidateCards, OpenRouterError } from "@/lib/openrouter";
 
 const MIN_SOURCE_LENGTH = 200;
@@ -19,6 +20,9 @@ export const POST: APIRoute = async (context) => {
   if (!user) {
     return json({ error: "unauthorized", message: "Login required." }, 401);
   }
+
+  const readOnly = readOnlyGuard(context.locals);
+  if (readOnly) return readOnly;
 
   if (!OPENROUTER_API_KEY || !OPENROUTER_MODEL) {
     return json({ error: "ai_unconfigured", message: "AI generation is not configured." }, 503);
