@@ -5,6 +5,7 @@ import ReviewSession from "@/components/review/ReviewSession";
 import type { DueCard } from "@/components/review/ReviewSession";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
+const { isReadOnly } = Astro.locals;
 
 let dueCards: DueCard[] = [];
 let loadError = false;
@@ -38,7 +39,17 @@ if (supabase) {
         <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
       </header>
 
-      <ReviewSession client:load dueCards={dueCards} loadError={loadError} />
+      {
+        isReadOnly ? (
+          <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+            <p class="rounded-lg border border-amber-500/30 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+              Your account is pending deletion and is read-only. Cancel the deletion to review cards.
+            </p>
+          </section>
+        ) : (
+          <ReviewSession client:load dueCards={dueCards} loadError={loadError} />
+        )
+      }
     </div>
   </div>
 </Layout>

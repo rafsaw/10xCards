@@ -5,6 +5,7 @@ import PasteAndGenerateForm from "@/components/generate/PasteAndGenerateForm";
 import DraftReviewList from "@/components/generate/DraftReviewList";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
+const { isReadOnly } = Astro.locals;
 
 interface DraftRow {
   id: string;
@@ -57,12 +58,25 @@ if (supabase) {
         )
       }
 
-      {drafts.length > 0 && <DraftReviewList client:load drafts={drafts} />}
+      {
+        isReadOnly ? (
+          <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+            <h2 class="text-xl font-semibold">Generate new cards from text</h2>
+            <p class="rounded-lg border border-amber-500/30 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+              Your account is pending deletion and is read-only. Cancel the deletion to generate cards.
+            </p>
+          </section>
+        ) : (
+          <>
+            {drafts.length > 0 && <DraftReviewList client:load drafts={drafts} />}
 
-      <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-        <h2 class="text-xl font-semibold">Generate new cards from text</h2>
-        <PasteAndGenerateForm client:load />
-      </section>
+            <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+              <h2 class="text-xl font-semibold">Generate new cards from text</h2>
+              <PasteAndGenerateForm client:load />
+            </section>
+          </>
+        )
+      }
     </div>
   </div>
 </Layout>

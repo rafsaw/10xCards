@@ -320,31 +320,31 @@ The middleware retention lookup is a single indexed PK (`account_deletion_reques
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npm run build` passes
-- [x] 2.3 `npx astro sync` regenerates types without error
-- [x] 2.4 All 7 mutating routes return 403 `account_read_only` when pending; behave normally when not
-- [x] 2.5 `POST /api/account/delete` creates one row at ~now+30d; re-request does not move `retention_until`
-- [x] 2.6 `POST /api/account/cancel` removes the row and is idempotent
+- [x] 2.1 `npm run lint` passes — 26c850a
+- [x] 2.2 `npm run build` passes — 26c850a
+- [x] 2.3 `npx astro sync` regenerates types without error — 26c850a
+- [x] 2.4 All 7 mutating routes return 403 `account_read_only` when pending; behave normally when not — 26c850a
+- [x] 2.5 `POST /api/account/delete` creates one row at ~now+30d; re-request does not move `retention_until` — 26c850a
+- [x] 2.6 `POST /api/account/cancel` removes the row and is idempotent — 26c850a
 
 #### Manual
 
-- [x] 2.7 In a real session, all write actions fail with the read-only message while pending
-- [x] 2.8 After cancel, all write actions succeed again
-- [x] 2.9 Reviewer cross-checks all 7 write files carry the guard
+- [x] 2.7 In a real session, all write actions fail with the read-only message while pending — 26c850a
+- [x] 2.8 After cancel, all write actions succeed again — 26c850a
+- [x] 2.9 Reviewer cross-checks all 7 write files carry the guard — 26c850a
 
 ### Phase 3: Frontend — /settings Page, Global Banner, UI Gating
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes
-- [ ] 3.2 `npm run build` passes
-- [ ] 3.3 `/settings` redirects to `/auth/signin` when unauthenticated
+- [x] 3.1 `npm run lint` passes
+- [x] 3.2 `npm run build` passes
+- [x] 3.3 `/settings` redirects to `/auth/signin` when unauthenticated
 
 #### Manual
 
-- [ ] 3.4 Request deletion from `/settings` → redirect to dashboard read-only with correct date banner
-- [ ] 3.5 Banner + Cancel appear on dashboard, generate, review, library, settings
-- [ ] 3.6 Cancel (from banner and settings) restores read-write; banner clears; writes work
-- [ ] 3.7 Write affordances hidden/disabled across generate/library/review while pending
-- [ ] 3.8 No regressions to existing flows when not pending
+- [x] 3.4 Request deletion from `/settings` → redirect to dashboard read-only with correct date banner
+- [x] 3.5 Banner + Cancel appear on dashboard, generate, review, library, settings
+- [x] 3.6 Cancel (from banner and settings) restores read-write; banner clears; writes work
+- [x] 3.7 Write affordances hidden/disabled across generate/library/review while pending
+- [x] 3.8 No regressions to existing flows when not pending

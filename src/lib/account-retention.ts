@@ -17,3 +17,13 @@ export function readOnlyGuard(locals: App.Locals): Response | null {
     },
   );
 }
+
+// Human-readable retention date for the banner and settings page. Single source
+// so the deletion date renders identically everywhere. `null`/missing → "soon"
+// (only reached transiently; a present request row always carries a date).
+export function formatRetentionDate(iso: string | null): string {
+  if (!iso) {
+    return "soon";
+  }
+  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}

@@ -1,0 +1,20 @@
+---
+import Banner from "@/components/Banner.astro";
+import CancelDeletionButton from "@/components/settings/CancelDeletionButton";
+import { formatRetentionDate } from "@/lib/account-retention";
+
+// Global pending-deletion banner. Rendered by Layout.astro whenever the account
+// is read-only, so the retention state + a Cancel control follow the user across
+// every protected page (dashboard/generate/review/library/settings).
+const { retentionUntil } = Astro.locals;
+const formatted = formatRetentionDate(retentionUntil);
+---
+
+<Banner variant="warning">
+  <span class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+    <span>
+      Your account is scheduled for deletion on <strong>{formatted}</strong>. Until then it's read-only.
+    </span>
+    <CancelDeletionButton client:load />
+  </span>
+</Banner>
