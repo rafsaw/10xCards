@@ -143,7 +143,7 @@ Make the app aware of retention state and enforce it. Middleware computes `local
 
 **Intent**: Place the account into the 30-day retention state (FR-016).
 
-**Contract**: `POST`. Standard 401/503 guards. **Does not** call the read-only guard (a pending user re-requesting is a no-op). Upsert into `account_deletion_requests` `{ user_id: user.id, requested_at: now(), retention_until: now() + 30 days }` on the user-scoped client (RLS allows own-row insert). On conflict (already pending) keep the existing row — do not reset the window. Returns `{ ok: true, retention_until }` (200/201).
+**Contract**: `POST`. Standard 401/503 guards. **Does not** call the read-only guard (a pending user re-requesting is a no-op). **Insert-or-select (not upsert)** on the user-scoped client (RLS allows own-row insert): `insert` `{ user_id: user.id, requested_at: now(), retention_until: now() + 30 days }` and `.select("retention_until")`. If the insert hits a duplicate-key conflict (Postgres `23505` / PostgREST 409 — the user is already pending), do **not** update; instead `select retention_until from account_deletion_requests where user_id = <user.id>` and return that existing value. Never overwrite `requested_at` or `retention_until` for an existing pending request (a plain `.upsert()` would move the window on every re-request and fail success criterion 2.5). Returns `{ ok: true, retention_until }` (201 on fresh insert, 200 when already pending).
 
 #### 6. Cancel-deletion endpoint
 
