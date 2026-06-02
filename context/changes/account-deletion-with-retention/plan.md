@@ -306,32 +306,32 @@ The middleware retention lookup is a single indexed PK (`account_deletion_reques
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly against remote
-- [x] 1.2 pg_cron job `account-deletion-sweep` is registered
-- [x] 1.3 Backdated-user cascade test passes (user + cards + request row gone; control untouched)
-- [x] 1.4 `npm run lint` and `npm run build` pass
+- [x] 1.1 Migration applies cleanly against remote — 130980a
+- [x] 1.2 pg_cron job `account-deletion-sweep` is registered — 130980a
+- [x] 1.3 Backdated-user cascade test passes (user + cards + request row gone; control untouched) — 130980a
+- [x] 1.4 `npm run lint` and `npm run build` pass — 130980a
 
 #### Manual
 
-- [x] 1.5 Sweep function not callable by `authenticated`
-- [x] 1.6 Reviewer confirms cascade emptied `public.cards` for test user; only expired user deleted
+- [x] 1.5 Sweep function not callable by `authenticated` — 130980a
+- [x] 1.6 Reviewer confirms cascade emptied `public.cards` for test user; only expired user deleted — 130980a
 
 ### Phase 2: Backend — Request/Cancel Endpoints + Read-Only Guard
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npm run build` passes
-- [ ] 2.3 `npx astro sync` regenerates types without error
-- [ ] 2.4 All 7 mutating routes return 403 `account_read_only` when pending; behave normally when not
-- [ ] 2.5 `POST /api/account/delete` creates one row at ~now+30d; re-request does not move `retention_until`
-- [ ] 2.6 `POST /api/account/cancel` removes the row and is idempotent
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npm run build` passes
+- [x] 2.3 `npx astro sync` regenerates types without error
+- [x] 2.4 All 7 mutating routes return 403 `account_read_only` when pending; behave normally when not
+- [x] 2.5 `POST /api/account/delete` creates one row at ~now+30d; re-request does not move `retention_until`
+- [x] 2.6 `POST /api/account/cancel` removes the row and is idempotent
 
 #### Manual
 
-- [ ] 2.7 In a real session, all write actions fail with the read-only message while pending
-- [ ] 2.8 After cancel, all write actions succeed again
-- [ ] 2.9 Reviewer cross-checks all 7 write files carry the guard
+- [x] 2.7 In a real session, all write actions fail with the read-only message while pending
+- [x] 2.8 After cancel, all write actions succeed again
+- [x] 2.9 Reviewer cross-checks all 7 write files carry the guard
 
 ### Phase 3: Frontend — /settings Page, Global Banner, UI Gating
 

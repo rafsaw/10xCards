@@ -118,7 +118,10 @@
       "PowerShell(npx supabase migration repair --status reverted 20260602120000 2>&1 | Select-String -Pattern \"Repaired|error|ERROR|reverted|Finished\" 2>$null; \"REPAIR_EXIT=$LASTEXITCODE\")",
       "PowerShell(npx supabase db push --yes 2>&1 | Select-String -Pattern \"account_deletion_sweep|Applying|Finished|error|ERROR|Pushing|Connecting|up to date\" 2>$null; \"PUSH_EXIT=$LASTEXITCODE\")",
       "PowerShell(node --env-file=.env phase1-cascade-test.mjs 2>&1; \"TEST_EXIT=$LASTEXITCODE\")",
-      "Bash(echo \"CACHED_EMPTY_EXIT=$?\")"
+      "Bash(echo \"CACHED_EMPTY_EXIT=$?\")",
+      "PowerShell(npx astro sync)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:4321/api/account/delete\" -Method POST -UseBasicParsing } catch { $r = $_.Exception.Response }; $sc = if \\($r.StatusCode\\) { [int]$r.StatusCode } else { \"n/a\" }; \"status=$sc\"; if \\($r.Content\\) { $r.Content })",
+      "Bash(echo \"empty_diff_exit=$?\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
