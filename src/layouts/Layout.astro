@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
+import Topbar from "@/components/Topbar.astro";
 import { missingConfigs } from "@/lib/config-status";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const { title = "10x Astro Starter" } = Astro.props;
+const { user } = Astro.locals;
 ---
 
 <!doctype html>
@@ -18,7 +20,7 @@ const { title = "10x Astro Starter" } = Astro.props;
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
   </head>
-  <body>
+  <body class="bg-cosmic">
     {
       missingConfigs.map((cfg) => (
         <Banner variant="error">
@@ -34,6 +36,13 @@ const { title = "10x Astro Starter" } = Astro.props;
           )}
         </Banner>
       ))
+    }
+    {
+      user && (
+        <div class="px-4 pt-4 sm:px-8">
+          <Topbar />
+        </div>
+      )
     }
     <slot />
   </body>

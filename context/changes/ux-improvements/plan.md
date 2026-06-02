@@ -313,29 +313,29 @@ No schema or data migration. All changes are page/component-level; the `cards` t
 
 #### Automated
 
-- [x] 1.1 Linting passes: `npm run lint`
-- [x] 1.2 Build succeeds: `npm run build`
+- [x] 1.1 Linting passes: `npm run lint` — ced27c8
+- [x] 1.2 Build succeeds: `npm run build` — ced27c8
 
 #### Manual
 
-- [x] 1.3 Signing in lands on `/dashboard`
-- [x] 1.4 Visiting `/` while logged in redirects to `/dashboard`
-- [x] 1.5 Visiting `/` while logged out still shows Welcome (no loop)
+- [x] 1.3 Signing in lands on `/dashboard` — ced27c8
+- [x] 1.4 Visiting `/` while logged in redirects to `/dashboard` — ced27c8
+- [x] 1.5 Visiting `/` while logged out still shows Welcome (no loop) — ced27c8
 
 ### Phase 2: Navigation banner
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Build succeeds: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Banner appears on dashboard/generate/review/library
-- [ ] 2.4 Banner links navigate directly without the dashboard
-- [ ] 2.5 Banner absent/signed-out on auth pages and logged-out home
-- [ ] 2.6 No duplicated nav on the Welcome page
-- [ ] 2.7 Mobile width: banner links remain usable
+- [x] 2.3 Banner appears on dashboard/generate/review/library
+- [x] 2.4 Banner links navigate directly without the dashboard
+- [x] 2.5 Banner absent/signed-out on auth pages and logged-out home
+- [x] 2.6 No duplicated nav on the Welcome page
+- [x] 2.7 Mobile width: banner links remain usable
 
 ### Phase 3: Loading-state gaps
 
