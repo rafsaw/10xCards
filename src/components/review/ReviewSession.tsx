@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { CircleAlert, Eye, Check, X, PartyPopper, Loader2 } from "lucide-react";
+import { CircleAlert, Eye, Check, X, PartyPopper, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ReviewRating } from "@/lib/leitner";
 
@@ -24,18 +24,40 @@ const FALLBACK_MESSAGES: Record<string, string> = {
   network_error: "Network error — please try again.",
 };
 
-function DoneCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+function DoneCard({
+  icon,
+  title,
+  body,
+  onRestart,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  onRestart?: () => void;
+}) {
   return (
     <section className="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl">
       <div className="flex justify-center text-blue-200">{icon}</div>
       <h2 className="text-xl font-semibold">{title}</h2>
       <p className="text-sm text-blue-100/70">{body}</p>
-      <a
-        href="/dashboard"
-        className="inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40"
-      >
-        Back to dashboard
-      </a>
+      <div className="flex flex-wrap justify-center gap-3">
+        {onRestart && (
+          <button
+            type="button"
+            onClick={onRestart}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
+          >
+            <RotateCcw className="size-4" />
+            Restart session
+          </button>
+        )}
+        <a
+          href="/dashboard"
+          className="inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40"
+        >
+          Back to dashboard
+        </a>
+      </div>
     </section>
   );
 }
@@ -77,6 +99,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         icon={<PartyPopper className="size-10" />}
         title="Session complete"
         body={`You reviewed ${dueCards.length} card${dueCards.length === 1 ? "" : "s"}. Nicely done.`}
+        onRestart={handleRestart}
       />
     );
   }
@@ -127,11 +150,30 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
     }
   }
 
+  // Re-walk the same dueCards from the top. Pure client-state reset: ratings
+  // already POSTed stay persisted, so the schedule is untouched (no refetch).
+  function handleRestart() {
+    setIndex(0);
+    setRevealed(false);
+    setError(null);
+  }
+
   return (
     <section className="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-      <p className="text-sm text-blue-100/70">
-        Card {index + 1} of {dueCards.length}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm text-blue-100/70">
+          Card {index + 1} of {dueCards.length}
+        </p>
+        <button
+          type="button"
+          onClick={handleRestart}
+          disabled={submitting}
+          className="flex items-center gap-1.5 text-xs text-blue-100/60 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <RotateCcw className="size-3.5" />
+          Restart
+        </button>
+      </div>
 
       {error && (
         <p className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">

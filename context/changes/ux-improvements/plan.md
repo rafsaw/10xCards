@@ -341,27 +341,27 @@ No schema or data migration. All changes are page/component-level; the `cards` t
 
 #### Automated
 
-- [x] 3.1 Linting passes: `npm run lint`
-- [x] 3.2 Build succeeds: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint` — 49ee7c8
+- [x] 3.2 Build succeeds: `npm run build` — 49ee7c8
 
 #### Manual
 
-- [x] 3.3 "Save to deck" shows a spinner until navigation
-- [x] 3.4 Right/Wrong show a spinner on the pressed button
-- [x] 3.5 No double-submit regression
+- [x] 3.3 "Save to deck" shows a spinner until navigation — 49ee7c8
+- [x] 3.4 Right/Wrong show a spinner on the pressed button — 49ee7c8
+- [x] 3.5 No double-submit regression — 49ee7c8
 
 ### Phase 4: Reset review session
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Build succeeds: `npm run build`
+- [x] 4.1 Linting passes: `npm run lint`
+- [x] 4.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 4.3 "Restart session" returns to card 1 of N, answer hidden
-- [ ] 4.4 Pre-reset rating keeps its new schedule (replay-safe)
-- [ ] 4.5 Reset works mid-session and from "Session complete"
+- [x] 4.3 "Restart session" returns to card 1 of N, answer hidden
+- [x] 4.4 Pre-reset rating keeps its new schedule (replay-safe)
+- [x] 4.5 Reset works mid-session and from "Session complete"
 
 ### Phase 5: Bulk draft actions
 
