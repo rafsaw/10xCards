@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { CircleAlert, Check, Trash2, Save, Loader2 } from "lucide-react";
 
 interface Draft {
@@ -37,6 +37,24 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
 
   function toggle(id: string) {
     setDecisions((prev) => ({ ...prev, [id]: prev[id] === "accept" ? "reject" : "accept" }));
+  }
+
+  function setAll(decision: Decision) {
+    const next: Record<string, Decision> = {};
+    for (const d of drafts) next[d.id] = decision;
+    setDecisions(next);
+  }
+
+  function acceptAll() {
+    setAll("accept");
+  }
+
+  function rejectAll() {
+    // Bulk reject is destructive intent — confirm before marking every draft to discard.
+    // This only sets the selection; permanent removal happens at handleSave (own count confirm).
+    if (!window.confirm(`Mark all ${drafts.length} drafts to discard? You'll still need to "Save to deck" to apply.`))
+      return;
+    setAll("reject");
   }
 
   async function handleSave() {
@@ -86,29 +104,11 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
 
   return (
     <section className="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold">Review draft batch ({drafts.length})</h2>
-          <p className="mt-1 text-sm text-blue-100/70">
-            {acceptCount} to save · {rejectCount} to discard
-          </p>
-        </div>
-        <form
-          method="POST"
-          action="/api/generations/discard"
-          onSubmit={(e: React.SubmitEvent<HTMLFormElement>) => {
-            if (!window.confirm(`Discard all ${drafts.length} drafts? This cannot be undone.`)) {
-              e.preventDefault();
-            }
-          }}
-        >
-          <button
-            type="submit"
-            className="rounded-lg border border-red-500/30 bg-red-900/20 px-3 py-1.5 text-sm text-red-200 transition-colors hover:bg-red-900/40"
-          >
-            Discard all drafts
-          </button>
-        </form>
+      <div>
+        <h2 className="text-xl font-semibold">Review draft batch ({drafts.length})</h2>
+        <p className="mt-1 text-sm text-blue-100/70">
+          {acceptCount} to save · {rejectCount} to discard
+        </p>
       </div>
 
       {error && (
@@ -117,6 +117,31 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           {error.message}
         </p>
       )}
+
+      {/* Bulk selection setters — they only mark every card's Keep/Discard decision;
+          nothing persists until "Save to deck" below. Kept separate from the immediate
+          "Discard all drafts" action above so the deferred intent reads clearly. */}
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-blue-100/70">Set all:</span>
+        <button
+          type="button"
+          onClick={acceptAll}
+          disabled={submitting}
+          className="flex items-center gap-1.5 rounded-lg border border-green-500/30 bg-green-900/20 px-3 py-1.5 text-green-200 transition-colors hover:bg-green-900/40 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Check className="size-4" />
+          Keep all
+        </button>
+        <button
+          type="button"
+          onClick={rejectAll}
+          disabled={submitting}
+          className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-900/20 px-3 py-1.5 text-red-200 transition-colors hover:bg-red-900/40 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Trash2 className="size-4" />
+          Discard all
+        </button>
+      </div>
 
       <ul className="space-y-3">
         {drafts.map((draft) => {
@@ -170,7 +195,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-400/30 bg-blue-600/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600/50 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-        {submitting ? "Saving…" : "Save to deck"}
+        {submitting ? "Saving…" : "Save changes"}
       </button>
     </section>
   );

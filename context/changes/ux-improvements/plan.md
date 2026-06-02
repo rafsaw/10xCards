@@ -354,28 +354,28 @@ No schema or data migration. All changes are page/component-level; the `cards` t
 
 #### Automated
 
-- [x] 4.1 Linting passes: `npm run lint`
-- [x] 4.2 Build succeeds: `npm run build`
+- [x] 4.1 Linting passes: `npm run lint` — 095be1c
+- [x] 4.2 Build succeeds: `npm run build` — 095be1c
 
 #### Manual
 
-- [x] 4.3 "Restart session" returns to card 1 of N, answer hidden
-- [x] 4.4 Pre-reset rating keeps its new schedule (replay-safe)
-- [x] 4.5 Reset works mid-session and from "Session complete"
+- [x] 4.3 "Restart session" returns to card 1 of N, answer hidden — 095be1c
+- [x] 4.4 Pre-reset rating keeps its new schedule (replay-safe) — 095be1c
+- [x] 4.5 Reset works mid-session and from "Session complete" — 095be1c
 
 ### Phase 5: Bulk draft actions
 
 #### Automated
 
-- [ ] 5.1 Linting passes: `npm run lint`
-- [ ] 5.2 Build succeeds: `npm run build`
+- [x] 5.1 Linting passes: `npm run lint`
+- [x] 5.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 5.3 Accept-all / Reject-all set every decision; counts update
-- [ ] 5.4 Per-card toggles still work after a bulk action
-- [ ] 5.5 Saving after bulk persists (no `incomplete_selection`)
-- [ ] 5.6 Save confirm reflects bulk counts; cancel leaves state unchanged
+- [x] 5.3 Accept-all / Reject-all set every decision; counts update
+- [x] 5.4 Per-card toggles still work after a bulk action
+- [x] 5.5 Saving after bulk persists (no `incomplete_selection`)
+- [x] 5.6 Save confirm reflects bulk counts; cancel leaves state unchanged
 
 ### Phase 6: Library pagination + keyword search
 

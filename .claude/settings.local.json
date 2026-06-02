@@ -110,7 +110,8 @@
       "PowerShell(Get-CimInstance *)",
       "PowerShell(foreach \\($pid_ in 23736,20804,16156,10104\\) { try { Stop-Process -Id $pid_ -Force -ErrorAction Stop; \"Stopped $pid_\" } catch { \"Could not stop $pid_ : $\\($_.Exception.Message\\)\" } })",
       "PowerShell($remaining = Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match \"astro|run dev\" }; if \\($remaining\\) { $remaining | Select-Object ProcessId, CommandLine | Format-List } else { \"No astro/dev node processes remaining.\" })",
-      "Bash(echo \"BUILD_EXIT=$?\")"
+      "Bash(echo \"BUILD_EXIT=$?\")",
+      "Bash(echo \"exit=$?\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
