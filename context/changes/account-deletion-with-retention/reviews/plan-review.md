@@ -45,7 +45,7 @@ heading, all phases and success-criteria bullets mapped to `- [ ]` items.
   - Tradeoff: Adds a service_role secret + Edge Function the plan deliberately avoided; more moving parts.
   - Confidence: HIGH — this is the documented mechanism.
   - Blind spot: Reintroduces a secret the team chose to keep out.
-- **Decision**: PENDING
+- **Decision**: FIXED via Fix A (privilege gate added to Phase 1 cascade test + Critical Implementation Details; Edge Function fallback documented in Migration Notes)
 
 ### F2 — SECURITY DEFINER function has no pinned search_path
 
@@ -55,7 +55,7 @@ heading, all phases and success-criteria bullets mapped to `- [ ]` items.
 - **Location**: Phase 1 — Sweep function Contract (plan.md:78)
 - **Detail**: The function Contract specifies `security definer` but no `set search_path`. Supabase's DB linter flags unpinned search_path on SECURITY DEFINER functions as a security footgun (search-path hijacking). Easy now, annoying to retrofit.
 - **Fix**: Add `set search_path = ''` to the function definition and fully-qualify all object names (`auth.users`, `public.account_deletion_requests`). Clears the linter warning.
-- **Decision**: PENDING
+- **Decision**: FIXED (added `set search_path = ''` + fully-qualified names to the Phase 1 function Contract)
 
 ### F3 — FR-018 "cancel by logging back in" read as an explicit Cancel button
 
@@ -65,7 +65,7 @@ heading, all phases and success-criteria bullets mapped to `- [ ]` items.
 - **Location**: Plan "What We're NOT Doing"; Phase 3 banner/cancel
 - **Detail**: PRD FR-018 and §Access Control say the user cancels "by logging back in, which restores read-write." The plan interprets this as: user stays logged in (read-only) and clicks an explicit Cancel button — re-login does NOT itself cancel. Defensible and documented (reconciled with FR-017's "log in → read-only"), arguably safer (deliberate, not accidental). But a stakeholder reading FR-018 literally might expect re-authentication alone to restore read-write; the PRD text is internally tense on this exact point, so the divergence deserves explicit sign-off rather than a silent implementer decision.
 - **Fix**: Confirm the interpretation with the PRD owner and record the chosen reading in plan.md + change.md. (Plan already documents the decision — this is a confirmation, not a rewrite.)
-- **Decision**: PENDING
+- **Decision**: FIXED — PRD owner confirmed explicit-Cancel-button reading (2026-06-02); recorded in plan.md "What We're NOT Doing" + change.md Notes
 
 ### F4 — "Eight handlers total" — there are seven
 
@@ -75,7 +75,7 @@ heading, all phases and success-criteria bullets mapped to `- [ ]` items.
 - **Location**: Critical Implementation Details; Phase 2 #4 (plan.md:137)
 - **Detail**: Plan says "Eight handlers total (two in cards/[id].ts)." Verified count is seven: cards.ts POST, cards/[id].ts PATCH+DELETE, generations.ts POST, generations/save.ts POST, generations/discard.ts POST, reviews.ts POST. An implementer could hunt for a nonexistent 8th handler.
 - **Fix**: Change "Eight handlers" → "Seven handlers (POST + PATCH + DELETE + POST×4)".
-- **Decision**: PENDING
+- **Decision**: FIXED (Phase 2 #4 now reads "Seven handlers total across 6 files")
 
 ### F5 — Middleware retention lookup fails open on DB error
 
@@ -85,4 +85,4 @@ heading, all phases and success-criteria bullets mapped to `- [ ]` items.
 - **Location**: Phase 2 #1 — Retention state in middleware
 - **Detail**: Contract defaults isReadOnly to false "when no user/row." A transient select error returns `{data:null}` → no row → isReadOnly=false → a pending-deletion user can write during the error window. Minor, but it's a read-only guard quietly failing open.
 - **Fix**: Decide fail-open vs fail-closed explicitly. If a pending user writing during a blip is unacceptable, treat a query error as read-only (fail-closed); otherwise document the accepted risk.
-- **Decision**: PENDING
+- **Decision**: FIXED — fail-closed (Phase 2 #1 Contract now sets `isReadOnly = true` on a Supabase query `error`, distinct from a successful empty result)

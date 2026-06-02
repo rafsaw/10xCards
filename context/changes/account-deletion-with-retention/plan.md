@@ -38,7 +38,7 @@ A logged-in user can open `/settings`, click "Delete account", confirm, and land
 
 - **No data export before deletion** — parked in roadmap §Parked; separate FR + slice.
 - **No pre-delete email notification** — parked; depends on custom SMTP (Open Roadmap Question #1).
-- **No magic-link cancellation** — cancellation is an authenticated in-app action (FR-018 re-login intent satisfied by the logged-in session).
+- **No magic-link cancellation** — cancellation is an authenticated in-app action (FR-018 re-login intent satisfied by the logged-in session). **Confirmed interpretation (PRD owner, 2026-06-02):** FR-018's "cancel by logging back in" is satisfied by an *explicit Cancel button* shown to the (still or re-) authenticated user, not by re-authentication auto-cancelling. Re-login alone keeps the account read-only (FR-017); cancellation is always a deliberate click. This resolves the FR-017/FR-018 tension in favor of a deliberate action.
 - **No new modal/toast system** — reuse `window.confirm()` and inline `<p>` errors, matching the codebase.
 - **No CSRF/Origin hardening** — the codebase doesn't do it on existing write routes; not introduced here.
 - **No changes to RLS policies on `cards`** — read-only is enforced in the app layer, not by rewriting card policies.
@@ -55,6 +55,7 @@ Three phases, sequenced destructive-first → enforcement → UI:
 ## Critical Implementation Details
 
 - **Privilege & schema ownership (Phase 1).** The sweep must delete from `auth.users`, which the `authenticated` role and the user-scoped client cannot touch. The function is `SECURITY DEFINER` owned by a role with delete rights on `auth.users`. Direct `DELETE FROM auth.users WHERE id = ...` cascades through both `public` (cards, request row) and the `auth` schema's own child tables (sessions, identities, refresh tokens all reference `auth.users` with cascade). Verify the cascade empties `public.cards` for the deleted user during the Phase 1 test — do not assume.
+  - **Privilege is unverified — gate it first.** On managed Supabase `auth.users` is owned by `supabase_auth_admin`, and the migration role `postgres` is *not* a superuser; you also cannot own the function as `supabase_auth_admin` (can't grant that role membership). Whether a `postgres`-owned definer function may delete from `auth.users` is therefore unproven — it works in the SQL Editor (which also runs as `postgres`), so it likely does, but confirm before building on it. The Phase 1 cascade test (success criterion below) doubles as this gate: if the `auth.users` row does **not** disappear, `postgres` lacks the privilege — stop and switch to the fallback in **Migration Notes** (Edge Function + `auth.admin.deleteUser`) rather than fighting the privilege.
 - **Guard must be live the instant the request lands (Phase 2).** Because the user stays logged in read-only immediately after requesting (chosen flow), the request endpoint itself must not depend on read-only being off, and the very next navigation must already compute `isReadOnly = true`. Compute it in middleware from the same per-request Supabase read so there's no stale window.
 - **Read-only covers all 7 write routes (Phase 2).** A single missed route silently leaks write access — the same discipline F-01 applied to RLS. The guard is one shared helper called at the top of each mutating handler, right after the existing `user` null-check.
 - **`App.Locals` type extension (Phase 2).** `locals.isReadOnly` (and `locals.retentionUntil` for the banner) must be added to the `App.Locals` interface (in `src/env.d.ts` or equivalent) or TypeScript/ESLint will reject the access.
@@ -75,7 +76,7 @@ Add a `SECURITY DEFINER` sweep function and a daily pg_cron schedule that hard-d
 
 **Contract**:
 - `create extension if not exists pg_cron;` (Supabase: extension lives in the `cron` schema; enable if not already present).
-- `public.sweep_expired_account_deletions()` — `returns integer` (count deleted), `language sql` or `plpgsql`, **`security definer`**, owned by a role permitted to delete from `auth.users`. Body deletes `from auth.users where id in (select user_id from public.account_deletion_requests where retention_until < now())`. `revoke execute ... from public, anon, authenticated;` — only cron/service_role may call it.
+- `public.sweep_expired_account_deletions()` — `returns integer` (count deleted), `language sql` or `plpgsql`, **`security definer`**, **`set search_path = ''`** (pin against search-path hijacking — Supabase DB linter flags an unpinned definer; with an empty path every object must be schema-qualified), owned by a role permitted to delete from `auth.users`. Body deletes `from auth.users where id in (select user_id from public.account_deletion_requests where retention_until < now())` (note both names are fully qualified). `revoke execute ... from public, anon, authenticated;` — only cron/service_role may call it.
 - `select cron.schedule('account-deletion-sweep', '0 3 * * *', $$ select public.sweep_expired_account_deletions(); $$);` (daily 03:00 UTC).
 
 ### Success Criteria:
@@ -84,7 +85,7 @@ Add a `SECURITY DEFINER` sweep function and a daily pg_cron schedule that hard-d
 
 - Migration applies cleanly against remote: `npx supabase db push` (or the project's migration command) succeeds.
 - `pg_cron` job is registered: `select jobname from cron.job;` includes `account-deletion-sweep`.
-- Backdated-user cascade test passes: create a throwaway `sweep-test@example.invalid` user (service_role), insert `account_deletion_requests` with `retention_until = now() - interval '1 day'` + a card; run `select public.sweep_expired_account_deletions();`; assert the user, their card, and the request row are gone and a control user (different id, future `retention_until`) is untouched.
+- Backdated-user cascade test passes (**privilege gate** — run this first): create a throwaway `sweep-test@example.invalid` user (service_role), insert `account_deletion_requests` with `retention_until = now() - interval '1 day'` + a card; run `select public.sweep_expired_account_deletions();`; assert the `auth.users` row itself is gone (proves `postgres` has delete rights — if it survives, switch to the Migration Notes fallback), and that their card and the request row are gone and a control user (different id, future `retention_until`) is untouched.
 - `npm run lint` and `npm run build` pass (no app changes, but confirm repo stays green).
 
 #### Manual Verification:
@@ -110,7 +111,7 @@ Make the app aware of retention state and enforce it. Middleware computes `local
 
 **Intent**: After resolving `context.locals.user`, look up the user's `account_deletion_requests` row and expose retention state to all routes and pages.
 
-**Contract**: When `user` is non-null and `supabase` exists, `select retention_until from account_deletion_requests where user_id = <user.id>` (PK lookup). Set `context.locals.isReadOnly = !!row` and `context.locals.retentionUntil = row?.retention_until ?? null`. Default both to `false`/`null` when no user/row. Per the invariant, presence of the row alone sets read-only (do not also require `retention_until > now()`).
+**Contract**: When `user` is non-null and `supabase` exists, `select retention_until from account_deletion_requests where user_id = <user.id>` (PK lookup). On a successful read, set `context.locals.isReadOnly = !!row` and `context.locals.retentionUntil = row?.retention_until ?? null`. Default both to `false`/`null` when there is no user. Per the invariant, presence of the row alone sets read-only (do not also require `retention_until > now()`). **Fail-closed on query error:** distinguish a Supabase `error` from a successful empty result — if the lookup returns an `error` (not just zero rows), set `isReadOnly = true` (and leave `retentionUntil = null`) rather than defaulting to writable. A transient DB blip must not hand a pending-deletion user a write window; the cost is that an authenticated user is briefly read-only during a DB outage, which is acceptable.
 
 #### 2. `App.Locals` type extension
 
@@ -134,7 +135,7 @@ Make the app aware of retention state and enforce it. Middleware computes `local
 
 **Intent**: Block every write while pending deletion. FR-017: the user "cannot create, edit, delete, generate, or review".
 
-**Contract**: Immediately after the existing `if (!user) return 401` check in each handler, call the guard helper and return its response if non-null. Eight handlers total (two in `cards/[id].ts`). No other logic changes.
+**Contract**: Immediately after the existing `if (!user) return 401` check in each handler, call the guard helper and return its response if non-null. Seven handlers total across 6 files (POST + PATCH + DELETE + POST×4; two handlers in `cards/[id].ts`). No other logic changes.
 
 #### 5. Request-deletion endpoint
 
@@ -284,6 +285,7 @@ The middleware retention lookup is a single indexed PK (`account_deletion_reques
 ## Migration Notes
 
 - One new migration (Phase 1). pg_cron must be enabled on the Supabase project; if the extension isn't available, fall back to a service_role-invoked scheduled call (revisit — not expected for Supabase).
+- **Fallback if `postgres` cannot delete `auth.users`** (Phase 1 privilege gate fails): replace the in-DB `DELETE FROM auth.users` with Supabase's supported deletion path — keep the daily pg_cron schedule but have it call an Edge Function via `pg_net` (`net.http_post`), and have the Edge Function delete each expired user with `auth.admin.deleteUser(id)` using the `service_role` key. The expired-user query (`select user_id from account_deletion_requests where retention_until < now()`) and the existing cascade are unchanged; only the delete call moves out of SQL. Tradeoff: reintroduces a `service_role` secret (stored in Edge Function env / Supabase secrets, never in the Worker app), accepted only if the in-DB delete is rejected.
 - `wrangler rollback` reverts Worker code only; the migration (function + cron job) is not auto-reverted. Down-path: `cron.unschedule('account-deletion-sweep')` + `drop function public.sweep_expired_account_deletions()`.
 
 ## References
