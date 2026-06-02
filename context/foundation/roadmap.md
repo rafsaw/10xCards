@@ -212,3 +212,4 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 
 - **S-04: rozpocząć sesję powtórek SRS, oceniać due karty jako dobrze/źle, daty kolejnej powtórki utrwalają się między sesjami** — Archived 2026-05-31 → `context/archive/2026-05-30-srs-review-session/`. Lesson: —.
 - **S-03: utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę** — Archived 2026-06-01 → `context/archive/2026-06-01-deck-edit-delete/`. Lesson: —.
+- **S-06: zalogowany użytkownik korzysta z dopracowanej powierzchni produktu — bulk actions w review, reset sesji powtórek, lepsze loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece** — Archived 2026-06-02 → `context/archive/2026-06-02-ux-improvements/`. Lesson: —.

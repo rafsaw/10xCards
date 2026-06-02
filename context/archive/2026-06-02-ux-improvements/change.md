@@ -1,10 +1,10 @@
 ---
 change_id: ux-improvements
 title: UX polish across S-01…S-04 surfaces
-status: impl_reviewed
+status: archived
 created: 2026-06-02
 updated: 2026-06-02
-archived_at: null
+archived_at: 2026-06-02T22:48:14Z
 ---
 
 ## Notes
