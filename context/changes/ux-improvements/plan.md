@@ -313,14 +313,14 @@ No schema or data migration. All changes are page/component-level; the `cards` t
 
 #### Automated
 
-- [ ] 1.1 Linting passes: `npm run lint`
-- [ ] 1.2 Build succeeds: `npm run build`
+- [x] 1.1 Linting passes: `npm run lint`
+- [x] 1.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 1.3 Signing in lands on `/dashboard`
-- [ ] 1.4 Visiting `/` while logged in redirects to `/dashboard`
-- [ ] 1.5 Visiting `/` while logged out still shows Welcome (no loop)
+- [x] 1.3 Signing in lands on `/dashboard`
+- [x] 1.4 Visiting `/` while logged in redirects to `/dashboard`
+- [x] 1.5 Visiting `/` while logged out still shows Welcome (no loop)
 
 ### Phase 2: Navigation banner
 

@@ -1,7 +1,7 @@
 ---
 change_id: ux-improvements
 title: UX polish across S-01…S-04 surfaces
-status: planned
+status: implementing
 created: 2026-06-02
 updated: 2026-06-02
 archived_at: null
