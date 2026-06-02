@@ -6,28 +6,69 @@ import CardList from "@/components/library/CardList";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
+const PAGE_SIZE = 20;
+
 interface SavedCard {
   id: string;
   front: string;
   back: string;
 }
 
+const rawPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10);
+const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
+const q = (Astro.url.searchParams.get("q") ?? "").trim();
+// Strip characters that would break the PostgREST `.or()` filter string.
+const safeQ = q.replace(/[,()"]/g, " ").trim();
+
+const buildHref = (p: number) => {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (p > 1) params.set("page", String(p));
+  const qs = params.toString();
+  return qs ? `/library?${qs}` : "/library";
+};
+
+const orFilter = safeQ ? `front.ilike.%${safeQ}%,back.ilike.%${safeQ}%` : null;
+
 let cards: SavedCard[] = [];
 let loadError = false;
+let totalCount = 0;
 
 if (supabase) {
-  const { data, error } = await supabase
-    .from("cards")
-    .select("id, front, back")
-    .eq("status", "saved")
-    .order("created_at", { ascending: false })
-    .overrideTypes<SavedCard[], { merge: false }>();
-  if (error) {
+  // Count first so we can clamp out-of-range page requests to the last page.
+  let countQuery = supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "saved");
+  if (orFilter) {
+    countQuery = countQuery.or(orFilter);
+  }
+  const { count, error: countError } = await countQuery;
+  if (countError) {
     loadError = true;
   } else {
-    cards = data;
+    totalCount = count ?? 0;
+    const lastPage = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+    if (page > lastPage) {
+      return Astro.redirect(buildHref(lastPage));
+    }
+    const offset = (page - 1) * PAGE_SIZE;
+    let query = supabase.from("cards").select("id, front, back").eq("status", "saved");
+    if (orFilter) {
+      query = query.or(orFilter);
+    }
+    const { data, error } = await query
+      .order("created_at", { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1)
+      .overrideTypes<SavedCard[], { merge: false }>();
+    if (error) {
+      loadError = true;
+    } else {
+      cards = data;
+    }
   }
 }
+
+const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+const hasPrev = page > 1;
+const hasNext = page < totalPages;
 ---
 
 <Layout title="Card library">
@@ -62,12 +103,71 @@ if (supabase) {
       </section>
 
       <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-        <h2 class="text-xl font-semibold">Saved cards ({cards.length})</h2>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">Saved cards ({totalCount})</h2>
+          <form method="get" action="/library" class="flex items-center gap-2">
+            <input
+              type="text"
+              name="q"
+              value={q}
+              placeholder="Search front or back…"
+              class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white placeholder:text-blue-100/50 focus:border-blue-300/50 focus:outline-none"
+            />
+            <button
+              type="submit"
+              class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm transition-colors hover:bg-white/20"
+            >
+              Search
+            </button>
+            {
+              q && (
+                <a href="/library" class="text-sm text-blue-100/70 transition-colors hover:text-white">
+                  Clear
+                </a>
+              )
+            }
+          </form>
+        </div>
         {
           cards.length === 0 ? (
-            <p class="text-sm text-blue-100/70">You have no saved cards yet. Create your first card above.</p>
+            <p class="text-sm text-blue-100/70">
+              {q ? `No saved cards match “${q}”.` : "You have no saved cards yet. Create your first card above."}
+            </p>
           ) : (
-            <CardList client:load cards={cards} />
+            <>
+              <CardList client:load cards={cards} />
+              {totalPages > 1 && (
+                <nav class="flex items-center justify-between pt-2 text-sm" aria-label="Library pagination">
+                  {hasPrev ? (
+                    <a
+                      href={buildHref(page - 1)}
+                      class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 transition-colors hover:bg-white/20"
+                    >
+                      ← Previous
+                    </a>
+                  ) : (
+                    <span class="cursor-not-allowed rounded-lg border border-white/10 px-3 py-1.5 text-blue-100/40">
+                      ← Previous
+                    </span>
+                  )}
+                  <span class="text-blue-100/70">
+                    Page {page} of {totalPages}
+                  </span>
+                  {hasNext ? (
+                    <a
+                      href={buildHref(page + 1)}
+                      class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 transition-colors hover:bg-white/20"
+                    >
+                      Next →
+                    </a>
+                  ) : (
+                    <span class="cursor-not-allowed rounded-lg border border-white/10 px-3 py-1.5 text-blue-100/40">
+                      Next →
+                    </span>
+                  )}
+                </nav>
+              )}
+            </>
           )
         }
       </section>

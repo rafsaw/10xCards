@@ -367,27 +367,27 @@ No schema or data migration. All changes are page/component-level; the `cards` t
 
 #### Automated
 
-- [x] 5.1 Linting passes: `npm run lint`
-- [x] 5.2 Build succeeds: `npm run build`
+- [x] 5.1 Linting passes: `npm run lint` — d5f2cc9
+- [x] 5.2 Build succeeds: `npm run build` — d5f2cc9
 
 #### Manual
 
-- [x] 5.3 Accept-all / Reject-all set every decision; counts update
-- [x] 5.4 Per-card toggles still work after a bulk action
-- [x] 5.5 Saving after bulk persists (no `incomplete_selection`)
-- [x] 5.6 Save confirm reflects bulk counts; cancel leaves state unchanged
+- [x] 5.3 Accept-all / Reject-all set every decision; counts update — d5f2cc9
+- [x] 5.4 Per-card toggles still work after a bulk action — d5f2cc9
+- [x] 5.5 Saving after bulk persists (no `incomplete_selection`) — d5f2cc9
+- [x] 5.6 Save confirm reflects bulk counts; cancel leaves state unchanged — d5f2cc9
 
 ### Phase 6: Library pagination + keyword search
 
 #### Automated
 
-- [ ] 6.1 Linting passes: `npm run lint`
-- [ ] 6.2 Build succeeds: `npm run build`
+- [x] 6.1 Linting passes: `npm run lint`
+- [x] 6.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 6.3 Prev/next navigate pages and disable at bounds
-- [ ] 6.4 Search returns matches across the whole library, paginated
-- [ ] 6.5 `q` + `page` compose; clearing search restores full list
-- [ ] 6.6 Empty library and no-results messages render; count reflects total
-- [ ] 6.7 Edit/delete/create reload returns to a valid library view
+- [x] 6.3 Prev/next navigate pages and disable at bounds
+- [x] 6.4 Search returns matches across the whole library, paginated
+- [x] 6.5 `q` + `page` compose; clearing search restores full list
+- [x] 6.6 Empty library and no-results messages render; count reflects total
+- [x] 6.7 Edit/delete/create reload returns to a valid library view
