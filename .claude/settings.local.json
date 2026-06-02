@@ -113,7 +113,8 @@
       "Bash(echo \"BUILD_EXIT=$?\")",
       "Bash(echo \"exit=$?\")",
       "Bash(powershell.exe -Command \"Set-Clipboard '/10x-implement ux-improvements phase 6'\")",
-      "Bash(clip.exe)"
+      "Bash(clip.exe)",
+      "Bash(echo \"clean=$?\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
