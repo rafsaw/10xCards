@@ -306,15 +306,15 @@ The middleware retention lookup is a single indexed PK (`account_deletion_reques
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly against remote
-- [ ] 1.2 pg_cron job `account-deletion-sweep` is registered
-- [ ] 1.3 Backdated-user cascade test passes (user + cards + request row gone; control untouched)
-- [ ] 1.4 `npm run lint` and `npm run build` pass
+- [x] 1.1 Migration applies cleanly against remote
+- [x] 1.2 pg_cron job `account-deletion-sweep` is registered
+- [x] 1.3 Backdated-user cascade test passes (user + cards + request row gone; control untouched)
+- [x] 1.4 `npm run lint` and `npm run build` pass
 
 #### Manual
 
-- [ ] 1.5 Sweep function not callable by `authenticated`
-- [ ] 1.6 Reviewer confirms cascade emptied `public.cards` for test user; only expired user deleted
+- [x] 1.5 Sweep function not callable by `authenticated`
+- [x] 1.6 Reviewer confirms cascade emptied `public.cards` for test user; only expired user deleted
 
 ### Phase 2: Backend — Request/Cancel Endpoints + Read-Only Guard
 
