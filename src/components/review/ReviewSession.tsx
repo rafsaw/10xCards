@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { CircleAlert, Eye, Check, X, PartyPopper } from "lucide-react";
+import { CircleAlert, Eye, Check, X, PartyPopper, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ReviewRating } from "@/lib/leitner";
 
@@ -44,6 +44,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingRating, setPendingRating] = useState<ReviewRating | null>(null);
   const [error, setError] = useState<RateError | null>(null);
   // Synchronous re-entrancy guard: `submitting` is async state, so the
   // disabled button doesn't block a same-frame double-click. This ref does,
@@ -86,6 +87,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
     if (lockRef.current) return; // drop a same-frame second click before it fires a duplicate POST
     lockRef.current = true;
     setSubmitting(true);
+    setPendingRating(rating);
     setError(null);
 
     try {
@@ -120,6 +122,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
       setError({ code: "network_error", message: FALLBACK_MESSAGES.network_error });
     } finally {
       setSubmitting(false);
+      setPendingRating(null);
       lockRef.current = false;
     }
   }
@@ -174,7 +177,11 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               "border-red-500/30 bg-red-900/20 text-red-200 hover:bg-red-900/40",
             )}
           >
-            <X className="size-4" />
+            {submitting && pendingRating === "wrong" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <X className="size-4" />
+            )}
             Wrong
           </button>
           <button
@@ -188,7 +195,11 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               "border-green-500/30 bg-green-900/20 text-green-200 hover:bg-green-900/40",
             )}
           >
-            <Check className="size-4" />
+            {submitting && pendingRating === "right" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Check className="size-4" />
+            )}
             Right
           </button>
         </div>

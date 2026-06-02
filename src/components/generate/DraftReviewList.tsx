@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CircleAlert, Check, Trash2, Save } from "lucide-react";
+import { CircleAlert, Check, Trash2, Save, Loader2 } from "lucide-react";
 
 interface Draft {
   id: string;
@@ -169,7 +169,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
         disabled={submitting}
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-400/30 bg-blue-600/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600/50 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Save className="size-4" />
+        {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
         {submitting ? "Saving…" : "Save to deck"}
       </button>
     </section>

@@ -326,29 +326,29 @@ No schema or data migration. All changes are page/component-level; the `cards` t
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Build succeeds: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint` — 1c3a3e2
+- [x] 2.2 Build succeeds: `npm run build` — 1c3a3e2
 
 #### Manual
 
-- [x] 2.3 Banner appears on dashboard/generate/review/library
-- [x] 2.4 Banner links navigate directly without the dashboard
-- [x] 2.5 Banner absent/signed-out on auth pages and logged-out home
-- [x] 2.6 No duplicated nav on the Welcome page
-- [x] 2.7 Mobile width: banner links remain usable
+- [x] 2.3 Banner appears on dashboard/generate/review/library — 1c3a3e2
+- [x] 2.4 Banner links navigate directly without the dashboard — 1c3a3e2
+- [x] 2.5 Banner absent/signed-out on auth pages and logged-out home — 1c3a3e2
+- [x] 2.6 No duplicated nav on the Welcome page — 1c3a3e2
+- [x] 2.7 Mobile width: banner links remain usable — 1c3a3e2
 
 ### Phase 3: Loading-state gaps
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
-- [ ] 3.2 Build succeeds: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint`
+- [x] 3.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.3 "Save to deck" shows a spinner until navigation
-- [ ] 3.4 Right/Wrong show a spinner on the pressed button
-- [ ] 3.5 No double-submit regression
+- [x] 3.3 "Save to deck" shows a spinner until navigation
+- [x] 3.4 Right/Wrong show a spinner on the pressed button
+- [x] 3.5 No double-submit regression
 
 ### Phase 4: Reset review session
 
