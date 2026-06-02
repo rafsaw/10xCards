@@ -337,14 +337,14 @@ The middleware retention lookup is a single indexed PK (`account_deletion_reques
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes
-- [x] 3.2 `npm run build` passes
-- [x] 3.3 `/settings` redirects to `/auth/signin` when unauthenticated
+- [x] 3.1 `npm run lint` passes — cbcccca
+- [x] 3.2 `npm run build` passes — cbcccca
+- [x] 3.3 `/settings` redirects to `/auth/signin` when unauthenticated — cbcccca
 
 #### Manual
 
-- [x] 3.4 Request deletion from `/settings` → redirect to dashboard read-only with correct date banner
-- [x] 3.5 Banner + Cancel appear on dashboard, generate, review, library, settings
-- [x] 3.6 Cancel (from banner and settings) restores read-write; banner clears; writes work
-- [x] 3.7 Write affordances hidden/disabled across generate/library/review while pending
-- [x] 3.8 No regressions to existing flows when not pending
+- [x] 3.4 Request deletion from `/settings` → redirect to dashboard read-only with correct date banner — cbcccca
+- [x] 3.5 Banner + Cancel appear on dashboard, generate, review, library, settings — cbcccca
+- [x] 3.6 Cancel (from banner and settings) restores read-write; banner clears; writes work — cbcccca
+- [x] 3.7 Write affordances hidden/disabled across generate/library/review while pending — cbcccca
+- [x] 3.8 No regressions to existing flows when not pending — cbcccca
