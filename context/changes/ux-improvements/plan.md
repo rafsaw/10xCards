@@ -381,13 +381,13 @@ No schema or data migration. All changes are page/component-level; the `cards` t
 
 #### Automated
 
-- [x] 6.1 Linting passes: `npm run lint`
-- [x] 6.2 Build succeeds: `npm run build`
+- [x] 6.1 Linting passes: `npm run lint` — 3c5e501
+- [x] 6.2 Build succeeds: `npm run build` — 3c5e501
 
 #### Manual
 
-- [x] 6.3 Prev/next navigate pages and disable at bounds
-- [x] 6.4 Search returns matches across the whole library, paginated
-- [x] 6.5 `q` + `page` compose; clearing search restores full list
-- [x] 6.6 Empty library and no-results messages render; count reflects total
-- [x] 6.7 Edit/delete/create reload returns to a valid library view
+- [x] 6.3 Prev/next navigate pages and disable at bounds — 3c5e501
+- [x] 6.4 Search returns matches across the whole library, paginated — 3c5e501
+- [x] 6.5 `q` + `page` compose; clearing search restores full list — 3c5e501
+- [x] 6.6 Empty library and no-results messages render; count reflects total — 3c5e501
+- [x] 6.7 Edit/delete/create reload returns to a valid library view — 3c5e501
