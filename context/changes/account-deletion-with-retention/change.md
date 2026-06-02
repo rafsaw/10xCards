@@ -1,7 +1,7 @@
 ---
 change_id: account-deletion-with-retention
 title: Account deletion with retention
-status: implemented
+status: impl_reviewed
 created: 2026-06-01
 updated: 2026-06-02
 archived_at: null
