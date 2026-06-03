@@ -347,24 +347,24 @@ First introduction of test tooling. No data migration. `npm install` updates the
 
 #### Automated
 
-- [x] 3.1 Integration tests pass: `npm test`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Build passes: `npm run build`
+- [x] 3.1 Integration tests pass: `npm test` — 6ad92ed
+- [x] 3.2 Linting passes: `npm run lint` — 6ad92ed
+- [x] 3.3 Build passes: `npm run build` — 6ad92ed
 
 #### Manual
 
-- [x] 3.4 Insert-payload assertion fails if endpoint reads `user_id`/`status` from body (tweak-and-revert)
-- [x] 3.5 Trim-authority boundary cases behave as asserted
-- [x] 3.6 `@/lib/supabase` is the only internal module mocked; OpenRouter via global `fetch`
+- [x] 3.4 Insert-payload assertion fails if endpoint reads `user_id`/`status` from body (tweak-and-revert) — 6ad92ed
+- [x] 3.5 Trim-authority boundary cases behave as asserted — 6ad92ed
+- [x] 3.6 `@/lib/supabase` is the only internal module mocked; OpenRouter via global `fetch` — 6ad92ed
 
 ### Phase 4: Cookbook + Stack Wiring
 
 #### Automated
 
-- [ ] 4.1 No remaining "TBD — see §3 Phase 1" in §4/§6.1/§6.2
-- [ ] 4.2 Full suite still green: `npm test`
+- [x] 4.1 No remaining "TBD — see §3 Phase 1" in §4/§6.1/§6.2
+- [x] 4.2 Full suite still green: `npm test`
 
 #### Manual
 
-- [ ] 4.3 §4/§6.1/§6.2 read as actionable recipes
-- [ ] 4.4 §6.2 mocking exception is explicit and scoped (DB factory only)
+- [x] 4.3 §4/§6.1/§6.2 read as actionable recipes
+- [x] 4.4 §6.2 mocking exception is explicit and scoped (DB factory only)

@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-06-03 (§3 Phase 1 → change opened)
+> Last updated: 2026-06-03 (§3 Phase 1 → implementing; §4 stack + §6.1/§6.2 cookbook filled)
 
 ## 1. Strategy
 
@@ -101,8 +101,8 @@ The classic test base for this project. AI-native tools (if any) carry a
 
 | Layer | Tool | Version | Notes |
 |-------|------|---------|-------|
-| unit + integration | Vitest | TBD — confirm via Context7 at §3 Phase 1 | none yet — see §3 Phase 1. Astro-native, agent-friendly; bootstrapped by Phase 1 |
-| API / provider mocking | TBD (e.g. MSW or a fetch stub) | TBD | Mock only the external HTTP edge (LLM provider, Supabase REST). Decided at Phase 1 |
+| unit + integration | Vitest | `^3.2.4` | Astro-native via `getViteConfig()` (Node env). `getViteConfig()` requires Vitest ≥3.2 on Astro 6 — do not jump to 4.x (helper not on the stable 4.x peer story). Config: `vitest.config.ts`; env setup: `test/setup.ts` |
+| API / provider mocking | global `fetch` stub; `vi.mock('@/lib/supabase')` | (Vitest built-in) | Mock only the external HTTP edge — `vi.stubGlobal('fetch', …)` for OpenRouter. The DB write is the **one sanctioned internal exception**: `vi.mock('@/lib/supabase')` for the client factory, scoped to asserting the insert payload (see §6.2) |
 | e2e | none yet | — | Deferred — no critical flow needs full-browser signal that integration won't give cheaply. Revisit if §3 changes |
 | accessibility | none | — | Out of scope — UI look-and-feel is negative space (§7) |
 | (optional) AI-native | deferred — see §5 | n/a | When NOT to use: never put a model on R1's deterministic schema/JSON checks |
@@ -145,11 +145,28 @@ relevant rollout phase ships; before that, it reads "TBD — see §3 Phase N."
 
 ### 6.1 Adding a unit test
 
-- TBD — see §3 Phase 1 (R1 generation-response validation; R4 sweep predicate). Will capture location, naming, reference test, and run command once the runner is bootstrapped.
+- **Location & naming**: colocate `*.test.ts` next to the source it covers (e.g. `src/lib/openrouter.test.ts` sits beside `src/lib/openrouter.ts`). Globals are on (`globals: true`), so `describe`/`it`/`expect`/`vi` need no import; import the unit under test via the `@/*` alias.
+- **Reference test**: `src/lib/openrouter.test.ts` — the R1 parse/validate boundary.
+- **Run**: `npm test` (single run, `vitest run`) or `npm run test:watch` (watch mode).
+- **Mock only the external edge**: stub global `fetch` with `vi.stubGlobal('fetch', vi.fn().mockResolvedValue(…))` (or `.mockRejectedValue(…)`). Pure functions that take their dependencies as args (like `generateCandidateCards(source, { apiKey, model })`) need no module mocking. `test/setup.ts` already registers an `afterEach` that runs `vi.unstubAllGlobals()` + `vi.restoreAllMocks()`.
+- **Edge-shape gotcha**: to hit a branch that keys on a specific error type, reject with that exact type — e.g. the timeout path keys on `DOMException(…, "AbortError")`, so a plain `Error` falls through. Match the real discriminant.
+- **Oracle discipline (R1)**: every fixture is hand-authored with a known-good/known-bad shape. Never assert a value lifted from the function under test itself.
+- **Characterisation + gap markers**: to pin current behavior while flagging a known weakness, write an `it.fails(…)` test asserting the *desired stricter* behavior with a `TODO(R1):` label. It stays expected-fail (suite green, gap visible) and flips to a real failure the day the code is tightened — signalling "remove the marker." See the `extractCards gap markers` block in the reference test.
 
 ### 6.2 Adding an integration test
 
-- TBD — see §3 Phase 1 (generation endpoint with a stubbed provider) and §3 Phase 2 (two-user isolation fixtures). Mocking policy to be fixed at Phase 1: mock only the external HTTP edge (LLM provider, Supabase REST), never internal modules.
+**Mocking policy (fixed at Phase 1 — durable):**
+
+- **Default**: mock only the external HTTP edge. Stub global `fetch` (`vi.stubGlobal('fetch', …)`) for outbound provider calls (OpenRouter); prefer mocking Supabase REST at the `fetch` edge where feasible.
+- **One sanctioned internal exception**: `vi.mock('@/lib/supabase')` for the DB-client *factory*, and only to assert the exact write payload. Emulating PostgREST responses through `fetch` would be brittle and low-signal; a fake client whose `.from().insert().select()` records its argument lets us pin the server-authoritative insert (the R5 claim) directly. Do not extend this exception to other internal modules.
+
+**Recipe (reference test: `src/pages/api/generations.test.ts`):**
+
+- **Drive the route directly**: import the exported `POST` and call it with a hand-built Astro context — `{ request: new Request('http://test/api/generations', { method:'POST', headers, body }), locals: { user: { id: 'u1' }, isReadOnly: false }, cookies: {} }` cast `as unknown as APIContext`. `locals.isReadOnly` must be present — `readOnlyGuard` reads it; `locals.user` null exercises the 401.
+- **`astro:env/server` gotcha**: `getViteConfig()` inlines the real `.env` into `astro:env/server` at config-load time, so `vi.stubEnv` / `process.env` do **not** control values an endpoint reads from `astro:env/server`. Mock the virtual module instead — `vi.mock('astro:env/server', () => ({ get OPENROUTER_API_KEY() { return state.X } , … }))` with getters over a mutable `state` object — then flip a field per-test (e.g. empty `OPENROUTER_API_KEY` for the 503 unconfigured path). Reset the state in `beforeEach`.
+- **Fresh module per test**: call `vi.resetModules()` then re-`import` the route and the mocked factory inside a `loadRoute()` helper, so the endpoint's top-level `astro:env/server` bindings reflect the current state and each test gets a clean `createClient` mock. `vi.mock(...)` registrations survive `resetModules`.
+- **Assert request → response AND side-effect**: check the HTTP status + error code, and assert the recorded insert payload (forged `user_id`/`status`/`id` must never reach the write; `user_id` is `locals.user.id`, `status` is hardcoded `'draft'`). This side-effect assertion is the dominant high-value shape here.
+- Two-user isolation fixtures (R2) land in §3 Phase 2 and will extend this recipe; the per-user resource-denial pattern is captured in §6.4 when that phase ships.
 
 ### 6.3 Adding a test for a new API endpoint
 
@@ -182,7 +199,7 @@ contributors should respect these unless the underlying assumption changes.
 ## 8. Freshness Ledger
 
 - Strategy (§1–§5) last reviewed: 2026-06-03
-- Stack versions last verified: 2026-06-03
+- Stack versions last verified: 2026-06-03 (Vitest `^3.2.4` pinned; Astro-native `getViteConfig()` path confirmed)
 - AI-native tool references last verified: 2026-06-03
 
 Refresh (`/10x-test-plan --refresh`) when:
