@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-06-03 (§3 Phase 1 → implementing; §4 stack + §6.1/§6.2 cookbook filled)
+> Last updated: 2026-06-03 (§3 Phase 1 → complete; §4 stack + §6.1/§6.2 cookbook filled)
 
 ## 1. Strategy
 
@@ -78,7 +78,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|------------|-----------------|---------------|------------|--------|---------------|
-| 1 | Runner bootstrap + generation resilience | Stand up the test runner (test base is `none`) and prove bad LLM output never breaks the flow or persists garbage | #1, #5 (generation) | unit + integration | change opened | context/changes/testing-generation-resilience/ |
+| 1 | Runner bootstrap + generation resilience | Stand up the test runner (test base is `none`) and prove bad LLM output never breaks the flow or persists garbage | #1, #5 (generation) | unit + integration | complete | context/changes/testing-generation-resilience/ |
 | 2 | Cross-user isolation + write authorization | Prove the ship-blocker: every data endpoint scopes to the session user, and the retention lock blocks all writes | #2, #4 (lock), #5 | integration | not started | — |
 | 3 | Deck & review integrity | Prove atomic save is all-or-nothing and review progress persists with the fallback firing | #3, #6 | integration | not started | — |
 | 4 | Account-sweep predicate | Prove the hard-delete predicate selects exactly the right accounts — predicate only, not cron plumbing | #4 (sweep) | unit / integration | not started | — |
