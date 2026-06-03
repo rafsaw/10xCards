@@ -48,4 +48,4 @@ pnpm-debug.log*
 .claude/settings.local.json
 
 # my notes
-notes/
+# notes/
