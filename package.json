@@ -11,6 +11,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "sync:issues": "node .claude/hooks/github-issue-sync.mjs"
   },
   "dependencies": {
@@ -54,6 +56,7 @@
     "supabase": "^2.23.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.2",
+    "vitest": "^3.2.4",
     "wrangler": "^4.90.0"
   },
   "overrides": {

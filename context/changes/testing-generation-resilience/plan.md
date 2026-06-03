@@ -320,15 +320,15 @@ First introduction of test tooling. No data migration. `npm install` updates the
 
 #### Automated
 
-- [ ] 1.1 Dependencies install cleanly: `npm install`
-- [ ] 1.2 Test runner executes and smoke test passes: `npm test`
-- [ ] 1.3 Linting passes on new files: `npm run lint`
-- [ ] 1.4 Build still passes: `npm run build`
+- [x] 1.1 Dependencies install cleanly: `npm install`
+- [x] 1.2 Test runner executes and smoke test passes: `npm test`
+- [x] 1.3 Linting passes on new files: `npm run lint`
+- [x] 1.4 Build still passes: `npm run build`
 
 #### Manual
 
-- [ ] 1.5 `npm run test:watch` starts watch mode and re-runs on change
-- [ ] 1.6 `vitest.config.ts` resolves `@/*` and uses the `node` environment
+- [x] 1.5 `npm run test:watch` starts watch mode and re-runs on change
+- [x] 1.6 `vitest.config.ts` resolves `@/*` and uses the `node` environment
 
 ### Phase 2: R1 Unit — Parse/Validate Boundary
 
