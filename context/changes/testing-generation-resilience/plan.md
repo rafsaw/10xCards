@@ -334,28 +334,28 @@ First introduction of test tooling. No data migration. `npm install` updates the
 
 #### Automated
 
-- [x] 2.1 Unit tests pass (RED markers skipped/expected-fail): `npm test`
-- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.1 Unit tests pass (RED markers skipped/expected-fail): `npm test` — be59443
+- [x] 2.2 Linting passes: `npm run lint` — be59443
 
 #### Manual
 
-- [x] 2.3 Each typed-error case maps to the documented code
-- [x] 2.4 Gap markers labelled `TODO(R1)`, visible as skipped/expected-fail
-- [x] 2.5 No assertion uses a value produced by `extractCards` (oracle discipline)
+- [x] 2.3 Each typed-error case maps to the documented code — be59443
+- [x] 2.4 Gap markers labelled `TODO(R1)`, visible as skipped/expected-fail — be59443
+- [x] 2.5 No assertion uses a value produced by `extractCards` (oracle discipline) — be59443
 
 ### Phase 3: R1 + R5 Integration — POST /api/generations
 
 #### Automated
 
-- [ ] 3.1 Integration tests pass: `npm test`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Build passes: `npm run build`
+- [x] 3.1 Integration tests pass: `npm test`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Insert-payload assertion fails if endpoint reads `user_id`/`status` from body (tweak-and-revert)
-- [ ] 3.5 Trim-authority boundary cases behave as asserted
-- [ ] 3.6 `@/lib/supabase` is the only internal module mocked; OpenRouter via global `fetch`
+- [x] 3.4 Insert-payload assertion fails if endpoint reads `user_id`/`status` from body (tweak-and-revert)
+- [x] 3.5 Trim-authority boundary cases behave as asserted
+- [x] 3.6 `@/lib/supabase` is the only internal module mocked; OpenRouter via global `fetch`
 
 ### Phase 4: Cookbook + Stack Wiring
 
