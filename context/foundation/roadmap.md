@@ -83,7 +83,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Unknowns:**
   - Czy soft-delete konta projektować jako flagę na profilu Supabase usera (admin API), kolumnę w osobnej tabeli `account_deletion_requests`, czy całkiem inny model. — Owner: TBD. Block: no (rozstrzygnięte w `/10x-plan`, gdy S-05 odblokowane przez PRD update).
 - **Risk:** Źle skonfigurowana polityka RLS przy choćby jednej tabeli/operacji w cichy sposób przecieka dane między userami — a PRD §Guardrails nazywa to wprost ship-blocking. Sekwencjonowane jako pierwsze, bo każdy inny slice zapisuje lub czyta karty; zrobienie RLS dobrze raz na poziomie DB jest tańsze niż weryfikacja izolacji per slice. Wbudowanie `status` i mechanizmu soft-delete od początku jest tańsze niż dwie migracje rozszerzające schemat w środku roadmapy.
-- **Status:** done (issue #6 zamknięty 2026-05-28; change `impl_reviewed`, czeka na `/10x-archive`)
+- **Status:** done (issue #6 zamknięty 2026-05-28; change zarchiwizowany 2026-06-03)
 
 ## Slices
 
@@ -215,3 +215,4 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **S-05: zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie dozwolone, dostęp read-only, kancelacja przez re-login), po retencji dane twardo usuwane** — Archived 2026-06-02 → `context/archive/2026-06-01-account-deletion-with-retention/`. Lesson: —.
 - **S-06: zalogowany użytkownik korzysta z dopracowanej powierzchni produktu — bulk actions w review, reset sesji powtórek, lepsze loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece** — Archived 2026-06-02 → `context/archive/2026-06-02-ux-improvements/`. Lesson: —.
 - **S-02: atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)** — Archived 2026-06-03 → `context/archive/2026-05-29-atomic-save-to-deck/`. Lesson: —.
+- **F-01: (foundation) schema kart (z polem `status` rozróżniającym draft / saved) + soft-delete na koncie + RLS izolujące dane każdego użytkownika** — Archived 2026-06-03 → `context/archive/2026-05-27-cards-schema-and-rls/`. Lesson: —.
