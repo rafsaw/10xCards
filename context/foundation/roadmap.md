@@ -100,7 +100,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
   - Wybór modelu LLM + sufit kosztowy per request. — Owner: TBD. Block: no (rozstrzygnięte w `/10x-plan`).
   - Polityka czyszczenia "wiszących" draftów (user wygenerował i porzucił bez wejścia w S-02). Czy są one widoczne przy kolejnym wejściu na dashboard, czy są TTL-owane. — Owner: TBD. Block: no.
 - **Risk:** Trwałe drafty w bazie podnoszą koszt RLS-błędu — wyciek listy draftów innego usera jest takim samym ship-blockerem jak wyciek saved. Drugie ryzyko: jeśli S-02 nie wyląduje w krótkim okienku po S-01, user widzi szmugiel "wisz, się nie zapisuje" i pętla wygląda na zepsutą — to wzmacnia argument, że S-02 idzie zaraz po S-01 w tym samym Stream A.
-- **Status:** done (issue #7 zamknięty 2026-05-28; change `impl_reviewed`, czeka na `/10x-archive`)
+- **Status:** done (issue #7 zamknięty 2026-05-28; change zarchiwizowany 2026-06-03)
 
 ### S-02: Atomowy zapis do decka (north star)
 
@@ -216,3 +216,4 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **S-06: zalogowany użytkownik korzysta z dopracowanej powierzchni produktu — bulk actions w review, reset sesji powtórek, lepsze loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece** — Archived 2026-06-02 → `context/archive/2026-06-02-ux-improvements/`. Lesson: —.
 - **S-02: atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)** — Archived 2026-06-03 → `context/archive/2026-05-29-atomic-save-to-deck/`. Lesson: —.
 - **F-01: (foundation) schema kart (z polem `status` rozróżniającym draft / saved) + soft-delete na koncie + RLS izolujące dane każdego użytkownika** — Archived 2026-06-03 → `context/archive/2026-05-27-cards-schema-and-rls/`. Lesson: —.
+- **S-01: wkleić fragment tekstu i zobaczyć karty-kandydatów z AI zapisane jako draft w bazie (gated UI accept/reject, ale finalizacja w S-02)** — Archived 2026-06-03 → `context/archive/2026-05-27-first-gated-generation/`. Lesson: —.
