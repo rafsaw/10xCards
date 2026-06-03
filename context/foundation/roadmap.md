@@ -3,7 +3,7 @@ project: 10xCards
 version: 5
 status: active
 created: 2026-05-26
-updated: 2026-06-02
+updated: 2026-06-03
 prd_version: 2
 main_goal: speed
 top_blocker: time
@@ -113,7 +113,7 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **Unknowns:**
   - Czy "atomic" wymaga DB-side transakcji, czy server-side guard + idempotency key wystarczy. — Owner: TBD. Block: no.
 - **Risk:** Brak atomowości w accept/reject (np. accept zapisuje per-card w pętli, awaria w środku) zostawia połowiczny stan — niektóre karty saved, niektóre wciąż draft — i user nie wie, na co patrzy. Drugie ryzyko: granularność operacji na grupie 5–20 draftów może wymagać DB transaction albo batch UPSERT; obie ścieżki są realne, ale dobranie złej daje subtelne race condition gdy user otwiera dwie karty przeglądarki. PRD FR-006/007 obligują "saves to library" i "discards no save" jako wynik *każdej* operacji — atomic finalize jest kontraktem dla obu.
-- **Status:** done (issue #8 zamknięty 2026-05-30; change `impl_reviewed`, czeka na `/10x-archive`)
+- **Status:** done (issue #8 zamknięty 2026-05-30; change zarchiwizowany 2026-06-03)
 
 ### S-03: Biblioteka kart — ręczne tworzenie, przegląd, edycja, kasowanie
 
@@ -214,3 +214,4 @@ Foundations poniżej zakładają obecność poniższych warstw i NIE budują ich
 - **S-03: utworzyć ręcznie kartę (front+back), przeglądać bibliotekę zapisanych kart, edytować front/back, na twardo skasować kartę** — Archived 2026-06-01 → `context/archive/2026-06-01-deck-edit-delete/`. Lesson: —.
 - **S-05: zażądać usunięcia konta; konto wchodzi w 30-dniową retencję (logowanie dozwolone, dostęp read-only, kancelacja przez re-login), po retencji dane twardo usuwane** — Archived 2026-06-02 → `context/archive/2026-06-01-account-deletion-with-retention/`. Lesson: —.
 - **S-06: zalogowany użytkownik korzysta z dopracowanej powierzchni produktu — bulk actions w review, reset sesji powtórek, lepsze loading states, post-login redirect na dashboard, banner nawigacyjny, paginacja + keyword search w bibliotece** — Archived 2026-06-02 → `context/archive/2026-06-02-ux-improvements/`. Lesson: —.
+- **S-02: atomowo zaakceptować wybranych draftów (status → saved) i odrzucić resztę (hard-delete draftów), kończąc cykl AI capture (north star)** — Archived 2026-06-03 → `context/archive/2026-05-29-atomic-save-to-deck/`. Lesson: —.
