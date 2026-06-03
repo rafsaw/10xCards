@@ -320,28 +320,28 @@ First introduction of test tooling. No data migration. `npm install` updates the
 
 #### Automated
 
-- [x] 1.1 Dependencies install cleanly: `npm install`
-- [x] 1.2 Test runner executes and smoke test passes: `npm test`
-- [x] 1.3 Linting passes on new files: `npm run lint`
-- [x] 1.4 Build still passes: `npm run build`
+- [x] 1.1 Dependencies install cleanly: `npm install` — 3618234
+- [x] 1.2 Test runner executes and smoke test passes: `npm test` — 3618234
+- [x] 1.3 Linting passes on new files: `npm run lint` — 3618234
+- [x] 1.4 Build still passes: `npm run build` — 3618234
 
 #### Manual
 
-- [x] 1.5 `npm run test:watch` starts watch mode and re-runs on change
-- [x] 1.6 `vitest.config.ts` resolves `@/*` and uses the `node` environment
+- [x] 1.5 `npm run test:watch` starts watch mode and re-runs on change — 3618234
+- [x] 1.6 `vitest.config.ts` resolves `@/*` and uses the `node` environment — 3618234
 
 ### Phase 2: R1 Unit — Parse/Validate Boundary
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass (RED markers skipped/expected-fail): `npm test`
-- [ ] 2.2 Linting passes: `npm run lint`
+- [x] 2.1 Unit tests pass (RED markers skipped/expected-fail): `npm test`
+- [x] 2.2 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 2.3 Each typed-error case maps to the documented code
-- [ ] 2.4 Gap markers labelled `TODO(R1)`, visible as skipped/expected-fail
-- [ ] 2.5 No assertion uses a value produced by `extractCards` (oracle discipline)
+- [x] 2.3 Each typed-error case maps to the documented code
+- [x] 2.4 Gap markers labelled `TODO(R1)`, visible as skipped/expected-fail
+- [x] 2.5 No assertion uses a value produced by `extractCards` (oracle discipline)
 
 ### Phase 3: R1 + R5 Integration — POST /api/generations
 
