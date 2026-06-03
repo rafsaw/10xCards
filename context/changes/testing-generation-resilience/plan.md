@@ -361,10 +361,10 @@ First introduction of test tooling. No data migration. `npm install` updates the
 
 #### Automated
 
-- [x] 4.1 No remaining "TBD — see §3 Phase 1" in §4/§6.1/§6.2
-- [x] 4.2 Full suite still green: `npm test`
+- [x] 4.1 No remaining "TBD — see §3 Phase 1" in §4/§6.1/§6.2 — 77b5ff7
+- [x] 4.2 Full suite still green: `npm test` — 77b5ff7
 
 #### Manual
 
-- [x] 4.3 §4/§6.1/§6.2 read as actionable recipes
-- [x] 4.4 §6.2 mocking exception is explicit and scoped (DB factory only)
+- [x] 4.3 §4/§6.1/§6.2 read as actionable recipes — 77b5ff7
+- [x] 4.4 §6.2 mocking exception is explicit and scoped (DB factory only) — 77b5ff7
