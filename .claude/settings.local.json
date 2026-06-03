@@ -132,7 +132,8 @@
       "PowerShell(npx astro sync)",
       "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:4321/api/account/delete\" -Method POST -UseBasicParsing } catch { $r = $_.Exception.Response }; $sc = if \\($r.StatusCode\\) { [int]$r.StatusCode } else { \"n/a\" }; \"status=$sc\"; if \\($r.Content\\) { $r.Content })",
       "Bash(echo \"empty_diff_exit=$?\")",
-      "Bash(git *)"
+      "Bash(git *)",
+      "PowerShell([DateTime]::UtcNow.ToString\\(\"o\"\\))"
     ],
     "deny": [
       "Bash(rm -rf *)"

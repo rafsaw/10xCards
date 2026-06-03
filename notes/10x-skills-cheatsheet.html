@@ -357,7 +357,7 @@ body {
 <!-- HEADER -->
 <div class="header">
   <h1>10xDevs <span>Skills</span> Workflow<br>Cheat Sheet</h1>
-  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)</div>
+  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → rollout testów)</div>
 </div>
 
 <!-- LEGEND -->
@@ -797,6 +797,7 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
       <tr><td>Agent łamie konwencje</td><td>/init + /10x-rule-review</td><td>Reguły w pliku > poprawki per prompt</td></tr>
       <tr><td>Nie wiem gdzie deployować</td><td>/10x-infra-research</td><td>Scoring + devil's advocate + pre-mortem</td></tr>
       <tr><td>Mam PRD + repo, co dalej?</td><td>/10x-roadmap</td><td>Vertical slices, nie "zbuduj mi MVP"</td></tr>
+      <tr><td>Czas pisać pierwsze testy / testy lądują na helperach</td><td>/10x-test-plan</td><td>Kontrakt jakości risk-first przed kodem testów</td></tr>
       <tr><td>Prosty slice (CRUD, fundament)</td><td>/10x-new → /10x-plan → /10x-implement</td><td>Szybka ścieżka bez researchu</td></tr>
       <tr><td>Bug + proponowany fix / pytanie o zakres</td><td>/10x-frame → /10x-plan</td><td>Kwestionuj WHAT zanim zaplanujesz HOW</td></tr>
       <tr><td>Trudny slice (logika, biblioteki)</td><td>Exa + Context7 + /10x-research → plan</td><td>Research przed planem, nie po</td></tr>
@@ -853,6 +854,82 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   </table>
   <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:16px">
     <strong style="color:var(--accent-coral)">Limit:</strong> przepustowość ogranicza <strong>pojemność review</strong>, nie liczba agentów. Więcej agentów bez review = więcej niezweryfikowanego kodu, nie wyższy throughput.
+  </div>
+</div>
+
+<!-- ===== MODULE 3 LESSON 1 — TEST PLAN ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-blue)">⛉</span> Moduł 3, Lekcja 1 — kontrakt jakości (<span style="color:var(--accent-blue)">/10x-test-plan</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-blue-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-blue)">Co to jest:</strong> trwały, <strong>risk-first</strong> kontrakt jakości pisany <em>zanim</em> powstanie pierwszy test. <span style="font-family:var(--mono);color:var(--accent-blue)">/10x-test-plan</span> to <strong>stateful orchestrator</strong>, nie generator one-shot. Pierwsze uruchomienie pisze <span style="font-family:var(--mono)">context/foundation/test-plan.md</span> (discovery PRD + roadmap + archive + skan hot-spotów → wywiad 5 pytań → synteza z obowiązkowym challenger-checkiem). Każde kolejne uruchomienie <strong>re-derywuje stan z artefaktów na dysku</strong> i prezentuje następny handoff. Lekcja = <strong>strategia i sekwencja rolloutu, nie konfiguracja</strong> (hooki, MCP, CI YAML → dalsze lekcje M3).
+  </div>
+
+  <!-- ROLLOUT CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">PRD + roadmap + archive</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">/10x-test-plan</div><span class="chain-arrow">→</span>
+    <div class="chain-node">test-plan.md <span style="color:var(--text3)">(§1–§5 frozen · §6 rośnie)</span></div><span class="chain-arrow">↻ per faza</span>
+    <div class="chain-node">/10x-new</div><span class="chain-arrow">→</span>
+    <div class="chain-node">/10x-research</div><span class="chain-arrow">→</span>
+    <div class="chain-node">/10x-plan</div><span class="chain-arrow">→</span>
+    <div class="chain-node">/10x-implement</div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px">Każdy handoff to <strong>STOP point</strong>: orchestrator kopiuje następną komendę do schowka, prosi o <span style="font-family:var(--mono)">/clear</span> + odpalenie, i kończy. Re-invoke <span style="font-family:var(--mono)">/10x-test-plan</span> (bez argumentów), żeby ruszyć dalej.</p>
+
+  <!-- INVOCATION MODES -->
+  <table class="dtable">
+    <thead>
+      <tr><th>Tryb</th><th>Kiedy</th><th>Co robi</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/10x-test-plan</td><td>Masz PRD (+ roadmap, +kilka archived slice'ów) i piszesz pierwsze testy — lub AI-testy lądują na helperach, a krytyczne flow bez pokrycia</td><td>1. uruchomienie: discovery + wywiad + synteza → pisze test-plan.md. Kolejne: posuwa rollout o jeden handoff</td></tr>
+      <tr><td>/10x-test-plan --status</td><td>test-plan.md istnieje, chcesz snapshot stanu rolloutu</td><td>Pokazuje status faz (not started / change opened / researched / planned / implementing / complete) + next action. Nic nie robi — bezpieczne zawsze</td></tr>
+      <tr><td>/10x-test-plan --refresh</td><td>Nowe top-3 ryzyko z roadmap/archive · tool <span style="font-family:var(--mono)">checked:</span> &gt; 3 mies. · zmiana stacku · §7 nieaktualne</td><td>Otwiera nowy folder zmiany <span style="font-family:var(--mono)">test-plan-refresh-&lt;data&gt;</span> zamiast edytować guide in-place</td></tr>
+    </tbody>
+  </table>
+
+  <!-- STATE MACHINE -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">↻</span> Maszyna stanów rolloutu — §3 <em>Phased Rollout</em> to stan orchestratora</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Dla każdego ni-<span style="font-family:var(--mono)">complete</span> wiersza §3 wybiera handoff wg tego, które artefakty istnieją w <span style="font-family:var(--mono)">context/changes/&lt;change-id&gt;/</span>:</p>
+  <table class="dtable">
+    <thead>
+      <tr><th>Stan na dysku</th><th>Następny handoff</th><th>Status →</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>brak folderu zmiany</td><td>/10x-new &lt;change-id&gt;</td><td>change opened</td></tr>
+      <tr><td>tylko change.md</td><td>/10x-research (z brief: ryzyka do weryfikacji)</td><td>researched</td></tr>
+      <tr><td>+ research.md</td><td>/10x-plan (cost × signal + update cookbooka)</td><td>planned</td></tr>
+      <tr><td>+ plan.md z pending ## Progress</td><td>/10x-implement &lt;change-id&gt; phase N</td><td>implementing / complete</td></tr>
+      <tr><td>+ plan.md w pełni [x]</td><td>oznacz wiersz §3 complete → następny pending</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <!-- DOCUMENT ANATOMY -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">§</span> Anatomia test-plan.md</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Sekcja</th><th>Zawartość</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-blue)">§2 Risk map</td><td>5–7 scenariuszy <strong>awarii w kategoriach user/biznes</strong> (nie nazwy testów). Każde ryzyko ma źródło (PRD / archive / roadmap / wywiad / hot-spot dir + churn). <strong>Signal, nie knowledge</strong> — file:line / nazwy funkcji zakazane</td></tr>
+      <tr><td style="color:var(--accent-blue)">§3 Phased rollout</td><td>Tabela faz = stan orchestratora (maszyna stanów wyżej)</td></tr>
+      <tr><td style="color:var(--accent-blue)">§4 Stack</td><td>Tabela narzędzi; każda nazwa z <span style="font-family:var(--mono)">checked: &lt;data&gt;</span> (przykład kategorii, nie endorsement)</td></tr>
+      <tr><td style="color:var(--accent-blue)">§5 Quality gates</td><td>Lint · typecheck · unit+integration · e2e na krytycznych flow → mapują na realne kroki CI (lub <span style="font-family:var(--mono)">required after §3 Phase N</span>)</td></tr>
+      <tr><td style="color:var(--accent-blue)">§6 Cookbook</td><td>Startuje jako placeholdery <span style="font-family:var(--mono)">TBD — see §3 Phase N</span>, <strong>rośnie</strong> per faza (location · naming · reference test · run command). To czyta <span style="font-family:var(--mono)">/10x-tdd</span> w L2</td></tr>
+      <tr><td style="color:var(--accent-blue)">§7 Negative space</td><td>Czego <strong>świadomie nie testujemy</strong></td></tr>
+    </tbody>
+  </table>
+
+  <!-- RULES NOTES -->
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-top:16px">
+    <strong style="color:var(--accent-amber)">Risk-first prioritization:</strong> ryzyka to scenariusze awarii ("Wylogowany user dociera do płatnej treści przez stary token"), nie "przetestuj formularz logowania". Impact × likelihood = oceny user/biznes, nie złożoność techniczna. <strong>Risk coverage</strong> to metryka — nie coverage linii.
+  </div>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Dual-layer mapping:</strong> <strong>classic najpierw</strong> — najtańszy test dający realny sygnał wygrywa; promocja do e2e tylko gdy nic tańszego nie pokrywa ryzyka. <strong>AI-native drugi</strong> — tylko gdzie dodaje sygnał, którego classic nie daje tanio; każdy wiersz AI-native ma linię <em>"When NOT to use"</em> (nie umiesz napisać → wytnij wiersz). Classic-only = plan z 2020; AI-native-only = hype.
+  </div>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE pisz kodu testów (L2 <span style="font-family:var(--mono)">/10x-tdd</span>) · NIE konfiguruj hooków (L3) · NIE konfiguruj MCP / Playwright / e2e / multimodal (L4) · NIE odpalaj bug→fix→regression (L5) · NIE pisz CI YAML od zera · <strong>NIE czytaj kodu po wiedzę</strong> (call graphs, schematy, "który plik ma tę awarię") — to robota <span style="font-family:var(--mono)">/10x-research</span> per faza rolloutu.
   </div>
 </div>
 
