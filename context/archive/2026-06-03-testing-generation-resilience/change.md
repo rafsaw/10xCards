@@ -1,10 +1,10 @@
 ---
 change_id: testing-generation-resilience
 title: Runner bootstrap + generation resilience (test-plan Phase 1, R1+R5)
-status: impl_reviewed
+status: archived
 created: 2026-06-03
-updated: 2026-06-03
-archived_at: null
+updated: 2026-06-04
+archived_at: 2026-06-04T16:38:16Z
 ---
 
 ## Notes
