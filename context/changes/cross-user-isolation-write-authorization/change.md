@@ -1,7 +1,7 @@
 ---
 change_id: cross-user-isolation-write-authorization
 title: Cross user isolation write authorization
-status: planned
+status: implementing
 created: 2026-06-03
 updated: 2026-06-03
 archived_at: null
