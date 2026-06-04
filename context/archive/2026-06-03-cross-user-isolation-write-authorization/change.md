@@ -1,10 +1,10 @@
 ---
 change_id: cross-user-isolation-write-authorization
 title: Cross user isolation write authorization
-status: impl_reviewed
+status: archived
 created: 2026-06-03
 updated: 2026-06-04
-archived_at: null
+archived_at: 2026-06-04T16:36:47Z
 ---
 
 ## Notes
