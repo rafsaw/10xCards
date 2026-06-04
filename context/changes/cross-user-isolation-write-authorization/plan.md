@@ -492,9 +492,9 @@ requires `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env`.
 
 #### Automated
 
-- [x] 6.1 Lint of touched markdown passes: `npm run lint`
+- [x] 6.1 Lint of touched markdown passes: `npm run lint` — 6a7c3dd
 
 #### Manual
 
-- [x] 6.2 §6.3/§6.4 read as actionable recipes
-- [x] 6.3 §3 Phase 2 status `complete` and change-folder link correct
+- [x] 6.2 §6.3/§6.4 read as actionable recipes — 6a7c3dd
+- [x] 6.3 §3 Phase 2 status `complete` and change-folder link correct — 6a7c3dd
