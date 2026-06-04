@@ -49,3 +49,6 @@ pnpm-debug.log*
 
 # my notes
 # notes/
+
+# stryker temp files
+.stryker-tmp
