@@ -363,7 +363,7 @@ body {
 <!-- HEADER -->
 <div class="header">
   <h1>10xDevs <span>Skills</span> Workflow<br>Cheat Sheet</h1>
-  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → rollout testów)</div>
+  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → testy, które chronią kod)</div>
 </div>
 
 <!-- LEGEND -->
@@ -527,11 +527,18 @@ body {
         <div class="out">→ foundation/test-plan.md</div>
       </div>
     </div>
-    <div class="step" style="margin-bottom:0">
+    <div class="step">
       <span class="snum sn-bl" style="opacity:.55">↻</span>
       <div class="sbody">
         <span style="color:var(--accent-blue);font-size:12px;font-weight:500">per faza §3 — re-invoke, ten sam łańcuch zmiany</span>
-        <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> (kroki 10–13) produkuje testy dla ryzyka. Pełne detale ↓ sekcja „Moduł 3, Lekcja 1".</div>
+        <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> lub <span class="cmd">/10x-tdd</span> (kroki 10–13) produkuje testy dla ryzyka. <strong style="color:var(--accent-blue)">L1</strong> ↓ kontrakt · <strong style="color:var(--accent-blue)">L2</strong> ↓ testy, które chronią kod.</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl">16</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">/10x-implement</span> lub <span class="cmd cmd-bl">/10x-tdd</span> <span style="color:var(--text3);font-size:12px">(L2)</span>
+        <div class="desc">Testy z <strong>oracle ze źródeł</strong> (PRD/docs), nie z implementacji. <span class="cmd" style="font-size:11px">/10x-tdd</span> gdy nazwiesz pierwszy red test jednym zdaniem; inaczej <span class="cmd" style="font-size:11px">/10x-implement</span>. Unikaj mirror / happy-path / redundant. Pełne detale ↓ „Moduł 3, Lekcja 2".</div>
       </div>
     </div>
 
@@ -690,11 +697,18 @@ body {
         <div class="out">→ foundation/test-plan.md</div>
       </div>
     </div>
-    <div class="step" style="margin-bottom:0">
+    <div class="step">
       <span class="snum sn-bl" style="opacity:.55">↻</span>
       <div class="sbody">
         <span style="color:var(--accent-blue);font-size:12px;font-weight:500">per faza §3 — re-invoke, ten sam łańcuch zmiany</span>
-        <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> (kroki 10–13) produkuje testy dla ryzyka. Pełne detale ↓ sekcja „Moduł 3, Lekcja 1".</div>
+        <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> lub <span class="cmd">/10x-tdd</span> (kroki 10–13) produkuje testy dla ryzyka. <strong style="color:var(--accent-blue)">L1</strong> ↓ kontrakt · <strong style="color:var(--accent-blue)">L2</strong> ↓ testy, które chronią kod.</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl">16</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">/10x-implement</span> lub <span class="cmd cmd-bl">/10x-tdd</span> <span style="color:var(--text3);font-size:12px">(L2)</span>
+        <div class="desc">Identyczne z greenfield: testy z <strong>oracle ze źródeł</strong>, nie z implementacji. <span class="cmd" style="font-size:11px">/10x-tdd</span> gdy nazwiesz pierwszy red test jednym zdaniem; inaczej <span class="cmd" style="font-size:11px">/10x-implement</span>. Pełne detale ↓ „Moduł 3, Lekcja 2".</div>
       </div>
     </div>
 
@@ -972,6 +986,86 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   </div>
   <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
     <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE pisz kodu testów (L2 <span style="font-family:var(--mono)">/10x-tdd</span>) · NIE konfiguruj hooków (L3) · NIE konfiguruj MCP / Playwright / e2e / multimodal (L4) · NIE odpalaj bug→fix→regression (L5) · NIE pisz CI YAML od zera · <strong>NIE czytaj kodu po wiedzę</strong> (call graphs, schematy, "który plik ma tę awarię") — to robota <span style="font-family:var(--mono)">/10x-research</span> per faza rolloutu.
+  </div>
+</div>
+
+<!-- ===== MODULE 3 LESSON 2 — TESTS THAT PROTECT ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-blue)">⛉</span> Moduł 3, Lekcja 2 — testy, które chronią kod (<span style="color:var(--accent-blue)">/10x-implement · /10x-tdd</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-blue-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-blue)">Co to jest:</strong> pisanie testów, które <strong>naprawdę chronią kod</strong> — nie maksymalizują coverage. <strong>Problem oracle</strong> i <strong>vibe-testing anti-patterns</strong> tłumaczą, czemu testy generowane przez LLM padają na realnym kodzie; lekiem jest risk-first kontrakt z L1. L1 = <em>strategia i sekwencja</em> (test-plan.md); <strong>L2 = kod testów</strong> dla jednej fazy rolloutu §3 naraz.
+  </div>
+
+  <!-- CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">test-plan.md §3 <span style="color:var(--text3)">(1 faza)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">/10x-research <span style="color:var(--text3)">oracle: co kod MA robić</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">/10x-plan <span style="color:var(--text3)">cost × signal</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">/10x-implement | /10x-tdd</div><span class="chain-arrow">→</span>
+    <div class="chain-node">testy + §6 cookbook</div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px">Oracle (co kod <em>powinien</em> robić) pochodzi ze <strong>źródeł</strong> — PRD, docs, tech-stack, domena — <strong>nie z czytania implementacji</strong>. Ten sam <span style="font-family:var(--mono)">plan.md</span> + <span style="font-family:var(--mono)">## Progress</span> co w M2; ten sam commit-per-faza.</p>
+
+  <!-- TASK ROUTER -->
+  <table class="dtable">
+    <thead>
+      <tr><th>Skill / prompt</th><th>Kiedy go odpalić</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/10x-research</td><td>Przed każdym testem dla ryzyka — produkuje <strong>oracle</strong> ze źródeł; ujawnia, czy ryzyko jest już pokryte lub ma dwie twarze (bezpieczną i realną)</td></tr>
+      <tr><td>/10x-plan</td><td>Research gotowy — rozkłada ryzyko na uporządkowane fazy: środowisko → reguły → hermetyczne stuby na awarie, których realna infra nie wywoła → update cookbooka</td></tr>
+      <tr><td>/10x-implement</td><td><strong>Domyślny executor.</strong> Setup środowiska, istniejący kod, scaffolding, każda faza gdzie NIE da się napisać red testu przed kodem</td></tr>
+      <tr><td>/10x-tdd</td><td>Opcjonalny. Gdy <strong>nazwiesz pierwszy red test jednym zdaniem</strong> — red → green → refactor; stop przy asercji, zanim ruszysz implementację (ta pauza to sedno)</td></tr>
+      <tr><td>m3l2-ad-hoc-testing</td><td>Jeden plik, testy od ręki, bez pełnego cyklu research→plan→implement. Wymusza oracle-ze-źródeł, ale świadomie wymienia głębię na szybkość</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TDD vs IMPLEMENT -->
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:16px">
+    <strong style="color:var(--accent-green)">/10x-tdd czy /10x-implement?</strong> Pytanie rozstrzygające: <em>czy nazwiesz pierwszy red test jednym zdaniem?</em> TAK → <span class="cmd" style="font-size:11px">/10x-tdd</span> (np. „zwraca 401, gdy user nie ma dostępu do kursu", „resetuje interwał powtórki do 1 dnia, gdy ocena = 0"). NIE → zostań na <span class="cmd" style="font-size:11px">/10x-implement</span>. <strong>Nie dla tdd:</strong> setup środowiska, CI/CD, dokumentacja, cienkie wiring (test tylko przepisałby implementację), spike gdzie wciąż odkrywasz kontrakt. Tryby <strong>można mieszać w jednym planie</strong> (faza 1 implement, faza 2–3 tdd…).
+  </div>
+
+  <!-- TWO-LAYER STRATEGY -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">⚖</span> Strategia dwuwarstwowa — cost × signal</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Dla każdego ryzyka: <strong>najtańszy test dający realny sygnał</strong>. Nie domyślnie e2e „bo bezpieczniej", nie pogoń za procentem coverage.</p>
+  <table class="dtable">
+    <thead>
+      <tr><th>Warstwa</th><th>Kiedy używać</th><th>Kiedy NIE</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Integration <span style="color:var(--text3)">(real DB / infra)</span></td><td>Reguła zależy od constraintów DB, kaskad, realnego SQL, unique constraints — mock by skłamał</td><td>Flow gated przez RLS (osobna faza); gdy koszt setupu &gt; wartość sygnału</td></tr>
+      <tr><td>Hermetic <span style="color:var(--text3)">(stub client)</span></td><td>Awarie częściowe, których realna infra nie wywoła łatwo (np. druga operacja w sekwencji pada)</td><td>Reguły zależne od realnego stanu DB — stub skłamie o constraintach i kaskadach</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Sekwencja zapisu bez transakcji</strong> (kilka niezależnych operacji bez transakcji) → pisz <strong>hermetyczne</strong> testy dla gałęzi częściowej awarii, NIE integration, który na siłę wymusza błąd w środku sekwencji.
+  </div>
+
+  <!-- ORACLE + ANTI-PATTERNS -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-coral)">◎</span> Oracle &amp; vibe-testing anti-patterns</h2>
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-bottom:12px">
+    <strong style="color:var(--accent-amber)">Reguła oracle:</strong> to, co kod <em>powinien</em> robić, pochodzi ze źródeł (PRD, docs, tech-stack, domena) — <strong>nie z czytania implementacji</strong>. Jeśli implementacja ma bug, skopiowanie jej outputu jako wartości oczekiwanej daje <strong>mirror test</strong>, który przechodzi… przeciw bugowi. Gdy źródła nie rozstrzygają jednoznacznie — <strong>STOP i pytaj</strong>, nie zgaduj.
+  </div>
+  <table class="dtable">
+    <thead>
+      <tr><th>Anti-pattern</th><th>Jak wygląda</th><th>Co zamiast</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Mirror implementation</td><td>Asercja liczy wartość oczekiwaną tą samą logiką co testowany kod</td><td>Asertuj wartość z oracle (PRD / reguła domeny), nie z implementacji</td></tr>
+      <tr><td>Happy paths only</td><td>Tylko poprawne wejścia; brak edge-case'ów</td><td>≥1 edge per ryzyko: <span style="font-family:var(--mono)">null</span>, empty, błąd zależności, invalid input</td></tr>
+      <tr><td>Redundant copies</td><td>Sześć prawie identycznych testów sprawdzających ten sam brak sentinela</td><td>Jeden sparametryzowany <span style="font-family:var(--mono)">it.each</span> per property; każdy łapie inną regresję</td></tr>
+    </tbody>
+  </table>
+
+  <!-- MUTATION TESTING -->
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:16px">
+    <strong style="color:var(--accent-green)">Mutation testing (Stryker) — selektywna bramka:</strong> coverage mówi „ta linia się wykonała"; mutation score mówi „czy test by padł, gdybym zepsuł tę linię?". Używaj <strong>po fazie ryzyka</strong>, nie jako gate na każdy commit. Flow: testy green → <span style="font-family:var(--mono)">npx stryker run --mutate "ścieżka/plik.ts"</span> (wąski zakres) → otwórz raport HTML → dla każdego <em>survived mutant</em> pytaj „czy to zaszkodzi userowi/biznesowi?": TAK → dodaj asercję, która go zabije; NIE (mutant równoważny / kosmetyka) → zignoruj świadomie. <strong>Nie goń 100%</strong> — test pinujący detale implementacji to też vibe test.
+  </div>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE konfiguruj hooków (L3) · NIE konfiguruj MCP / Playwright / e2e / multimodal (L4) · NIE odpalaj bug→fix→regression (L5) · NIE pisz CI/CD od zera · NIE zmieniaj strategii ryzyka przez <span style="font-family:var(--mono)">/10x-test-plan</span> (L1 — użyj <span style="font-family:var(--mono)">--status</span> do odczytu) · <strong>NIE pisz testów bez kroku research</strong>, chyba że ad-hoc prompt ze świadomością trade-offu.
   </div>
 </div>
 
