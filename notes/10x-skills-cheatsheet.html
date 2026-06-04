@@ -141,6 +141,7 @@ body {
 .mod:first-child { margin-top: 0; }
 .mod-m1 { color: var(--accent-purple); }
 .mod-m2 { color: var(--accent-green); }
+.mod-m3 { color: var(--accent-blue); }
 
 /* ---- STEP ---- */
 .step {
@@ -177,6 +178,7 @@ body {
 .sn-g { background: var(--accent-green-dim); color: var(--accent-green); }
 .sn-b { background: var(--accent-amber-dim); color: var(--accent-amber); }
 .sn-p { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.sn-bl { background: var(--accent-blue-dim); color: var(--accent-blue); }
 .sbody { padding-top: 3px; }
 .sbody .cmd {
   font-family: var(--mono);
@@ -191,6 +193,10 @@ body {
 .sbody .cmd-b {
   color: var(--accent-amber);
   background: rgba(245, 176, 68, 0.08);
+}
+.sbody .cmd-bl {
+  color: var(--accent-blue);
+  background: rgba(96, 165, 250, 0.08);
 }
 .sbody .desc {
   font-size: 13px;
@@ -511,6 +517,24 @@ body {
       </div>
     </div>
 
+    <div class="mod mod-m3">Moduł 3 — kontrakt jakości &amp; testy</div>
+
+    <div class="step">
+      <span class="snum sn-bl">15</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">/10x-test-plan</span>
+        <div class="desc">Po roadmap + kilku archived slice'ach, zanim powstanie pierwszy test. Stateful orchestrator: pisze risk-first kontrakt, potem napędza rollout faza po fazie.</div>
+        <div class="out">→ foundation/test-plan.md</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl" style="opacity:.55">↻</span>
+      <div class="sbody">
+        <span style="color:var(--accent-blue);font-size:12px;font-weight:500">per faza §3 — re-invoke, ten sam łańcuch zmiany</span>
+        <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> (kroki 10–13) produkuje testy dla ryzyka. Pełne detale ↓ sekcja „Moduł 3, Lekcja 1".</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -654,6 +678,24 @@ body {
 
     <div class="note" style="border-left-color:var(--accent-amber-dim)">
       Brownfield: moduł 2 jest identyczny. Różni się tylko sprint zero — diagnoza stacku zamiast wyboru, health-check zamiast bootstrapu.
+    </div>
+
+    <div class="mod mod-m3">Moduł 3 — kontrakt jakości &amp; testy</div>
+
+    <div class="step">
+      <span class="snum sn-bl">15</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">/10x-test-plan</span>
+        <div class="desc">Brownfield-first: masz produkt z kodem do pokrycia. Po roadmap, gdy AI-testy lądują na helperach a krytyczne flow są bez pokrycia. Stateful orchestrator, nie generator.</div>
+        <div class="out">→ foundation/test-plan.md</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl" style="opacity:.55">↻</span>
+      <div class="sbody">
+        <span style="color:var(--accent-blue);font-size:12px;font-weight:500">per faza §3 — re-invoke, ten sam łańcuch zmiany</span>
+        <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> (kroki 10–13) produkuje testy dla ryzyka. Pełne detale ↓ sekcja „Moduł 3, Lekcja 1".</div>
+      </div>
     </div>
 
   </div>
