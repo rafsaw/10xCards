@@ -431,16 +431,16 @@ requires `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env`.
 
 #### Automated
 
-- [x] 1.1 `npm test` still passes and does not execute any `*.integration.test.ts`
-- [x] 1.2 Type checking passes: `npm run build`
-- [x] 1.3 Linting passes: `npm run lint`
-- [x] 1.4 With real `.env`, the harness smoke test passes: `npm run test:integration`
-- [x] 1.5 With a required secret unset, the integration suite fails fast with the descriptive message
+- [x] 1.1 `npm test` still passes and does not execute any `*.integration.test.ts` — bd2d449
+- [x] 1.2 Type checking passes: `npm run build` — bd2d449
+- [x] 1.3 Linting passes: `npm run lint` — bd2d449
+- [x] 1.4 With real `.env`, the harness smoke test passes: `npm run test:integration` — bd2d449
+- [x] 1.5 With a required secret unset, the integration suite fails fast with the descriptive message — bd2d449
 
 #### Manual
 
-- [x] 1.6 Test users created then removed from the remote project (no orphan users/cards)
-- [x] 1.7 `npm test` runs offline with no secrets
+- [x] 1.6 Test users created then removed from the remote project (no orphan users/cards) — bd2d449
+- [x] 1.7 `npm test` runs offline with no secrets — bd2d449
 
 ### Phase 2: R2 cross-user isolation tests
 
