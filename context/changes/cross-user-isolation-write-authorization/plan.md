@@ -481,20 +481,20 @@ requires `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env`.
 
 #### Automated
 
-- [x] 5.1 Scan passes (no service_role references in `src/`): `npm test`
-- [x] 5.2 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 5.1 Scan passes (no service_role references in `src/`): `npm test` — 66d9ab8
+- [x] 5.2 Type/lint pass: `npm run build` / `npm run lint` — 66d9ab8
 
 #### Manual
 
-- [x] 5.3 Adding a `service_role` reference under `src/` makes the test fail (signal check)
+- [x] 5.3 Adding a `service_role` reference under `src/` makes the test fail (signal check) — 66d9ab8
 
 ### Phase 6: Cookbook + plan sync
 
 #### Automated
 
-- [ ] 6.1 Lint of touched markdown passes: `npm run lint`
+- [x] 6.1 Lint of touched markdown passes: `npm run lint`
 
 #### Manual
 
-- [ ] 6.2 §6.3/§6.4 read as actionable recipes
-- [ ] 6.3 §3 Phase 2 status `complete` and change-folder link correct
+- [x] 6.2 §6.3/§6.4 read as actionable recipes
+- [x] 6.3 §3 Phase 2 status `complete` and change-folder link correct
