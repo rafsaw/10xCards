@@ -459,23 +459,23 @@ requires `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env`.
 
 #### Automated
 
-- [x] 3.1 All 9 cases (7 locked + 2 exempt) pass: `npm test`
-- [x] 3.2 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 3.1 All 9 cases (7 locked + 2 exempt) pass: `npm test` — 47e3cbc
+- [x] 3.2 Type/lint pass: `npm run build` / `npm run lint` — 47e3cbc
 
 #### Manual
 
-- [x] 3.3 Table imports each real route handler (a future un-guarded write route would surface here)
+- [x] 3.3 Table imports each real route handler (a future un-guarded write route would surface here) — 47e3cbc
 
 ### Phase 4: R5 validation parity (hermetic)
 
 #### Automated
 
-- [ ] 4.1 Forged-field + validation cases pass: `npm test`
-- [ ] 4.2 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 4.1 Forged-field + validation cases pass: `npm test`
+- [x] 4.2 Type/lint pass: `npm run build` / `npm run lint`
 
 #### Manual
 
-- [ ] 4.3 Each test asserts against an oracle value, not a value lifted from the endpoint (no mirror tests)
+- [x] 4.3 Each test asserts against an oracle value, not a value lifted from the endpoint (no mirror tests)
 
 ### Phase 5: Service-role static guardrail (hermetic)
 
