@@ -470,23 +470,23 @@ requires `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env`.
 
 #### Automated
 
-- [x] 4.1 Forged-field + validation cases pass: `npm test`
-- [x] 4.2 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 4.1 Forged-field + validation cases pass: `npm test` — c67ab29
+- [x] 4.2 Type/lint pass: `npm run build` / `npm run lint` — c67ab29
 
 #### Manual
 
-- [x] 4.3 Each test asserts against an oracle value, not a value lifted from the endpoint (no mirror tests)
+- [x] 4.3 Each test asserts against an oracle value, not a value lifted from the endpoint (no mirror tests) — c67ab29
 
 ### Phase 5: Service-role static guardrail (hermetic)
 
 #### Automated
 
-- [ ] 5.1 Scan passes (no service_role references in `src/`): `npm test`
-- [ ] 5.2 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 5.1 Scan passes (no service_role references in `src/`): `npm test`
+- [x] 5.2 Type/lint pass: `npm run build` / `npm run lint`
 
 #### Manual
 
-- [ ] 5.3 Adding a `service_role` reference under `src/` makes the test fail (signal check)
+- [x] 5.3 Adding a `service_role` reference under `src/` makes the test fail (signal check)
 
 ### Phase 6: Cookbook + plan sync
 
