@@ -140,7 +140,8 @@
       "PowerShell($ErrorActionPreference='SilentlyContinue'; cmd /c \"npm run lint 2>nul\"; \"EXIT=$LASTEXITCODE\")",
       "PowerShell($ErrorActionPreference='SilentlyContinue'; cmd /c \"npm run build 2>&1\"; \"EXIT=$LASTEXITCODE\")",
       "Skill(10x-plan)",
-      "PowerShell(if \\(Test-Path .env\\) { $names = \\(Get-Content .env | ForEach-Object { \\($_ -split '='\\)[0].Trim\\(\\) }\\) | Where-Object { $_ -and -not $_.StartsWith\\('#'\\) }; \"Keys present in .env: $\\($names -join ', '\\)\" } else { \".env not present\" })"
+      "PowerShell(if \\(Test-Path .env\\) { $names = \\(Get-Content .env | ForEach-Object { \\($_ -split '='\\)[0].Trim\\(\\) }\\) | Where-Object { $_ -and -not $_.StartsWith\\('#'\\) }; \"Keys present in .env: $\\($names -join ', '\\)\" } else { \".env not present\" })",
+      "Bash(echo \"cached-empty-exit=$?\")"
     ],
     "deny": [
       "Bash(rm -rf *)"

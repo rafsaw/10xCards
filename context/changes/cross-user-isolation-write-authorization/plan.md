@@ -446,25 +446,25 @@ requires `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env`.
 
 #### Automated
 
-- [x] 2.1 Isolation suite passes against real RLS: `npm run test:integration`
-- [x] 2.2 Default suite unaffected: `npm test`
-- [x] 2.3 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 2.1 Isolation suite passes against real RLS: `npm run test:integration` — 2480d45
+- [x] 2.2 Default suite unaffected: `npm test` — 2480d45
+- [x] 2.3 Type/lint pass: `npm run build` / `npm run lint` — 2480d45
 
 #### Manual
 
-- [x] 2.4 Dropping/weakening a `cards_*_own` policy makes the matching assertion fail (signal check)
-- [x] 2.5 Positive controls pass (path works for the legitimate owner)
+- [x] 2.4 Dropping/weakening a `cards_*_own` policy makes the matching assertion fail (signal check) — 2480d45
+- [x] 2.5 Positive controls pass (path works for the legitimate owner) — 2480d45
 
 ### Phase 3: R4 retention write-lock (hermetic)
 
 #### Automated
 
-- [ ] 3.1 All 9 cases (7 locked + 2 exempt) pass: `npm test`
-- [ ] 3.2 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 3.1 All 9 cases (7 locked + 2 exempt) pass: `npm test`
+- [x] 3.2 Type/lint pass: `npm run build` / `npm run lint`
 
 #### Manual
 
-- [ ] 3.3 Table imports each real route handler (a future un-guarded write route would surface here)
+- [x] 3.3 Table imports each real route handler (a future un-guarded write route would surface here)
 
 ### Phase 4: R5 validation parity (hermetic)
 
