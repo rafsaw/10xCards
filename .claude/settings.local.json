@@ -138,7 +138,8 @@
       "Bash(echo \"diff-empty-exit=$?\")",
       "PowerShell(if \\(Test-Path .env\\) { \"has .env\" } else { \"no .env\" }; if \\(Test-Path .dev.vars\\) { \"has .dev.vars\" } else { \"no .dev.vars\" }; Get-Content .env -ErrorAction SilentlyContinue | ForEach-Object { \\($_ -split '='\\)[0] })",
       "PowerShell($ErrorActionPreference='SilentlyContinue'; cmd /c \"npm run lint 2>nul\"; \"EXIT=$LASTEXITCODE\")",
-      "PowerShell($ErrorActionPreference='SilentlyContinue'; cmd /c \"npm run build 2>&1\"; \"EXIT=$LASTEXITCODE\")"
+      "PowerShell($ErrorActionPreference='SilentlyContinue'; cmd /c \"npm run build 2>&1\"; \"EXIT=$LASTEXITCODE\")",
+      "Skill(10x-plan)"
     ],
     "deny": [
       "Bash(rm -rf *)"
