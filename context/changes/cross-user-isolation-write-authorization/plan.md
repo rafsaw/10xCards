@@ -446,14 +446,14 @@ requires `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env`.
 
 #### Automated
 
-- [ ] 2.1 Isolation suite passes against real RLS: `npm run test:integration`
-- [ ] 2.2 Default suite unaffected: `npm test`
-- [ ] 2.3 Type/lint pass: `npm run build` / `npm run lint`
+- [x] 2.1 Isolation suite passes against real RLS: `npm run test:integration`
+- [x] 2.2 Default suite unaffected: `npm test`
+- [x] 2.3 Type/lint pass: `npm run build` / `npm run lint`
 
 #### Manual
 
-- [ ] 2.4 Dropping/weakening a `cards_*_own` policy makes the matching assertion fail (signal check)
-- [ ] 2.5 Positive controls pass (path works for the legitimate owner)
+- [x] 2.4 Dropping/weakening a `cards_*_own` policy makes the matching assertion fail (signal check)
+- [x] 2.5 Positive controls pass (path works for the legitimate owner)
 
 ### Phase 3: R4 retention write-lock (hermetic)
 
