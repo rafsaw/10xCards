@@ -32,6 +32,7 @@ async function readContent(client: FixtureClient, cardId: string): Promise<CardC
     .overrideTypes<CardContent[], { merge: false }>();
   expect(error).toBeNull();
   expect(data).toHaveLength(1);
+  if (!data) throw new Error("expected one card row");
   return data[0];
 }
 
@@ -42,6 +43,7 @@ async function cardCount(client: FixtureClient, cardId: string): Promise<number>
     .eq("id", cardId)
     .overrideTypes<{ id: string }[], { merge: false }>();
   expect(error).toBeNull();
+  if (!data) throw new Error("expected card rows");
   return data.length;
 }
 

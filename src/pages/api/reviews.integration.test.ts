@@ -39,6 +39,7 @@ async function readScheduleColumns(client: FixtureClient, cardId: string): Promi
     .overrideTypes<SrColumns[], { merge: false }>();
   expect(error).toBeNull();
   expect(data).toHaveLength(1);
+  if (!data) throw new Error("expected one card row");
   return data[0];
 }
 
