@@ -46,33 +46,43 @@ if (supabase) {
     loadError = true;
   } else {
     totalCount = count ?? 0;
-    const lastPage = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-    if (page > lastPage) {
-      return Astro.redirect(buildHref(lastPage));
-    }
-    const offset = (page - 1) * PAGE_SIZE;
-    let query = supabase.from("cards").select("id, front, back").eq("status", "saved");
-    if (orFilter) {
-      query = query.or(orFilter);
-    }
-    const { data, error } = await query
-      .order("created_at", { ascending: false })
-      .range(offset, offset + PAGE_SIZE - 1)
-      .overrideTypes<SavedCard[], { merge: false }>();
-    if (error) {
-      loadError = true;
-    } else {
-      cards = data;
-    }
   }
 }
 
 const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-const hasPrev = page > 1;
-const hasNext = page < totalPages;
+const lastPage = totalPages;
+const effectivePage = page > lastPage ? lastPage : page;
+const shouldFixPageUrl = !loadError && supabase && page > lastPage;
+
+if (supabase && !loadError) {
+  const offset = (effectivePage - 1) * PAGE_SIZE;
+  let query = supabase.from("cards").select("id, front, back").eq("status", "saved");
+  if (orFilter) {
+    query = query.or(orFilter);
+  }
+  const { data, error } = await query
+    .order("created_at", { ascending: false })
+    .range(offset, offset + PAGE_SIZE - 1)
+    .overrideTypes<SavedCard[], { merge: false }>();
+  if (error) {
+    loadError = true;
+  } else {
+    cards = data;
+  }
+}
+
+const hasPrev = effectivePage > 1;
+const hasNext = effectivePage < totalPages;
 ---
 
 <Layout title="Card library">
+  {
+    shouldFixPageUrl && (
+      <script is:inline define:vars={{ href: buildHref(lastPage) }}>
+        window.history.replaceState(null, "", href);
+      </script>
+    )
+  }
   <div class="bg-cosmic min-h-screen p-4">
     <div class="mx-auto max-w-3xl space-y-6 py-8">
       <header class="flex items-center justify-between">
@@ -149,7 +159,7 @@ const hasNext = page < totalPages;
                 <nav class="flex items-center justify-between pt-2 text-sm" aria-label="Library pagination">
                   {hasPrev ? (
                     <a
-                      href={buildHref(page - 1)}
+                      href={buildHref(effectivePage - 1)}
                       class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 transition-colors hover:bg-white/20"
                     >
                       ← Previous
@@ -160,11 +170,11 @@ const hasNext = page < totalPages;
                     </span>
                   )}
                   <span class="text-blue-100/70">
-                    Page {page} of {totalPages}
+                    Page {effectivePage} of {totalPages}
                   </span>
                   {hasNext ? (
                     <a
-                      href={buildHref(page + 1)}
+                      href={buildHref(effectivePage + 1)}
                       class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 transition-colors hover:bg-white/20"
                     >
                       Next →
