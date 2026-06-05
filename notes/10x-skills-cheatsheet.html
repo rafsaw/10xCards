@@ -363,7 +363,7 @@ body {
 <!-- HEADER -->
 <div class="header">
   <h1>10xDevs <span>Skills</span> Workflow<br>Cheat Sheet</h1>
-  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → testy, które chronią kod)</div>
+  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → testy → hooki → E2E)</div>
 </div>
 
 <!-- LEGEND -->
@@ -534,11 +534,27 @@ body {
         <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> lub <span class="cmd">/10x-tdd</span> (kroki 10–13) produkuje testy dla ryzyka. <strong style="color:var(--accent-blue)">L1</strong> ↓ kontrakt · <strong style="color:var(--accent-blue)">L2</strong> ↓ testy, które chronią kod.</div>
       </div>
     </div>
-    <div class="step" style="margin-bottom:0">
+    <div class="step">
       <span class="snum sn-bl">16</span>
       <div class="sbody">
         <span class="cmd cmd-bl">/10x-implement</span> lub <span class="cmd cmd-bl">/10x-tdd</span> <span style="color:var(--text3);font-size:12px">(L2)</span>
         <div class="desc">Testy z <strong>oracle ze źródeł</strong> (PRD/docs), nie z implementacji. <span class="cmd" style="font-size:11px">/10x-tdd</span> gdy nazwiesz pierwszy red test jednym zdaniem; inaczej <span class="cmd" style="font-size:11px">/10x-implement</span>. Unikaj mirror / happy-path / redundant. Pełne detale ↓ „Moduł 3, Lekcja 2".</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="snum sn-bl">17</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">PostToolUse hook</span> <span style="color:var(--text3);font-size:12px">(L3)</span>
+        <div class="desc">Bramki §4 z L1 + testy z L2 → <strong>automatyczne, deterministyczne</strong> checki podczas pracy agenta. Per-edit (lint/format/scoped) → pre-commit → pre-push → CI. Exit 2 + stdout → agent self-corrects. Detale ↓ „Moduł 3, Lekcja 3".</div>
+        <div class="out">→ .claude/settings.json · lefthook.yml</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl">18</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">/10x-e2e</span> <span style="color:var(--text3);font-size:12px">(L4)</span>
+        <div class="desc">Ryzyka <strong>browser-level</strong> (cross-boundary / tylko-UI) — plan → generate → review → verify, 1 test/ryzyko. Sibling <span class="cmd" style="font-size:11px">/10x-implement</span> i <span class="cmd" style="font-size:11px">/10x-tdd</span>, ten sam plan + <span class="cmd" style="font-size:11px">## Progress</span>. Detale ↓ „Moduł 3, Lekcja 4".</div>
+        <div class="out">→ tests/e2e/*.spec.ts</div>
       </div>
     </div>
 
@@ -704,11 +720,27 @@ body {
         <div class="desc"><span class="cmd">/10x-new</span> → <span class="cmd">/10x-research</span> → <span class="cmd">/10x-plan</span> → <span class="cmd">/10x-implement</span> lub <span class="cmd">/10x-tdd</span> (kroki 10–13) produkuje testy dla ryzyka. <strong style="color:var(--accent-blue)">L1</strong> ↓ kontrakt · <strong style="color:var(--accent-blue)">L2</strong> ↓ testy, które chronią kod.</div>
       </div>
     </div>
-    <div class="step" style="margin-bottom:0">
+    <div class="step">
       <span class="snum sn-bl">16</span>
       <div class="sbody">
         <span class="cmd cmd-bl">/10x-implement</span> lub <span class="cmd cmd-bl">/10x-tdd</span> <span style="color:var(--text3);font-size:12px">(L2)</span>
         <div class="desc">Identyczne z greenfield: testy z <strong>oracle ze źródeł</strong>, nie z implementacji. <span class="cmd" style="font-size:11px">/10x-tdd</span> gdy nazwiesz pierwszy red test jednym zdaniem; inaczej <span class="cmd" style="font-size:11px">/10x-implement</span>. Pełne detale ↓ „Moduł 3, Lekcja 2".</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="snum sn-bl">17</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">PostToolUse hook</span> <span style="color:var(--text3);font-size:12px">(L3)</span>
+        <div class="desc">Identyczne z greenfield. Brownfield bonus: pre-commit łapie też <strong>edycje spoza agenta</strong> (manualne, commit kolegi). Bramki §4 z L1 → per-edit → pre-commit → pre-push → CI. Detale ↓ „Moduł 3, Lekcja 3".</div>
+        <div class="out">→ .claude/settings.json · lefthook.yml</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl">18</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">/10x-e2e</span> <span style="color:var(--text3);font-size:12px">(L4)</span>
+        <div class="desc">Identyczne z greenfield: ryzyka <strong>browser-level</strong> — plan → generate → review → verify, 1 test/ryzyko. Feature MUSI już istnieć (inaczej redirect do <span class="cmd" style="font-size:11px">/10x-implement</span>). Detale ↓ „Moduł 3, Lekcja 4".</div>
+        <div class="out">→ tests/e2e/*.spec.ts</div>
       </div>
     </div>
 
@@ -1066,6 +1098,175 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   <!-- LESSON BOUNDARIES -->
   <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
     <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE konfiguruj hooków (L3) · NIE konfiguruj MCP / Playwright / e2e / multimodal (L4) · NIE odpalaj bug→fix→regression (L5) · NIE pisz CI/CD od zera · NIE zmieniaj strategii ryzyka przez <span style="font-family:var(--mono)">/10x-test-plan</span> (L1 — użyj <span style="font-family:var(--mono)">--status</span> do odczytu) · <strong>NIE pisz testów bez kroku research</strong>, chyba że ad-hoc prompt ze świadomością trade-offu.
+  </div>
+</div>
+
+<!-- ===== MODULE 3 LESSON 3 — HOOKS ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-blue)">⛉</span> Moduł 3, Lekcja 3 — hooki &amp; lokalne warstwy jakości (<span style="color:var(--accent-blue)">PostToolUse · pre-commit</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-blue-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-blue)">Co to jest:</strong> zamiana bramek jakości z L1 (<span style="font-family:var(--mono)">test-plan.md §4</span>) i testów z L2 w <strong>automatyczne, deterministyczne</strong> checki, które odpalają się <em>w trakcie</em> pracy agenta. Hook działa <strong>poza modelem</strong> — przeżywa kompresję kontekstu, zmiany instrukcji i „zapominanie". Bonus agentowy: <span style="font-family:var(--mono)">PostToolUse</span> wstrzykuje swój wynik z powrotem do kontekstu, więc agent <strong>sam naprawia</strong> trywialne błędy (format, brakujący import, zły typ) w następnej iteracji — zanim Ty je zobaczysz.
+  </div>
+
+  <!-- LAYER CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">test-plan.md §4 gates</div><span class="chain-arrow">→</span>
+    <div class="chain-node">per-edit <span style="color:var(--text3)">(agent hooks)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">pre-commit <span style="color:var(--text3)">(git)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">pre-push</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-green-dim);color:var(--accent-green)">CI</div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px">Każdą bramkę przypisz do <strong>najtańszej warstwy, która wciąż daje sygnał</strong>. Lokalne warstwy NIE zastępują CI — każda złapana lokalnie = o jeden round-trip CI mniej. Start: jeden hook lint per-edit + jedna bramka commit; dokładaj, gdy widzisz co ucieka.</p>
+
+  <!-- LIFECYCLE -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">↻</span> Cykl życia hooka — uniwersalny wzorzec (każde narzędzie)</h2>
+  <div class="chain">
+    <div class="chain-node">1 · Trigger <span style="color:var(--text3)">(np. PostToolUse)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">2 · Matcher <span style="color:var(--text3)">(Write|Edit, typ pliku)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">3 · Handler <span style="color:var(--text3)">(komenda shell)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">4 · Signal <span style="color:var(--text3)">(exit code + stdout)</span></div>
+  </div>
+
+  <!-- EXIT CODES -->
+  <table class="dtable" style="margin-top:16px">
+    <thead>
+      <tr><th>Exit code</th><th>Znaczenie</th><th>Efekt</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-green)">0</td><td>Sukces — hook przeszedł</td><td>Kontynuuj</td></tr>
+      <tr><td style="color:var(--accent-amber)">2</td><td>Blokujący błąd</td><td>stdout → kontekst agenta (<span style="font-family:var(--mono)">additionalContext</span>, max 10 000 znaków) → agent reaguje w następnej turze</td></tr>
+      <tr><td style="color:var(--text2)">inne</td><td>Nieblokujący błąd</td><td>Zalogowane, nie przerywa pracy</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Granica self-correct:</strong> agent niezawodnie naprawia <strong>trywialne</strong> błędy. Gdy test pada przez <strong>złą logikę biznesową</strong>, hook to ujawni, ale agent może nie zdiagnozować przyczyny — powie „coś jest nie tak" i spróbuje trywialnego fixa. Jak nie zejdzie w 1–2 próbach, sygnał wraca do Ciebie → możliwe, że to osobny change-id z pełnym <span style="font-family:var(--mono)">/10x-new → research → plan → implement</span>.
+  </div>
+
+  <!-- THREE LOCAL LAYERS -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">▤</span> Trzy lokalne warstwy (+ CI)</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Warstwa</th><th>Co łapie</th><th>Czas</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Per-edit <span style="color:var(--text3)">(agent hooks)</span></td><td>Format, proste błędy typów, scoped unit testy na plikach ryzyka. <strong>Jedyna</strong> warstwa karmiąca agenta mid-work</td><td>ms–s</td></tr>
+      <tr><td>Pre-commit <span style="color:var(--text3)">(git hooks)</span></td><td>Co przeszło per-edit: edycje manualne, pliki zmienione poza hookiem, checki za wolne na per-edit. Działa na <strong>staged</strong></td><td>s</td></tr>
+      <tr><td>Pre-push</td><td>Cięższe checki przed remote (pełny typecheck, szerszy zestaw testów)</td><td>s–min</td></tr>
+      <tr><td>CI</td><td>Integracja, zależności cross-module, checki wymagające infry niedostępnej lokalnie</td><td>min</td></tr>
+    </tbody>
+  </table>
+
+  <!-- KEY RULES -->
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-top:16px">
+    <strong style="color:var(--accent-amber)">Kluczowe reguły:</strong> Per-edit hook MUSI być <strong>szybki</strong> (&lt; kilka s) — wolny check blokuje pętlę agenta na każdej edycji → przenieś do commit/push/CI. Odpalaj <strong>scoped testy</strong>, nie cały suite: tylko related do edytowanego pliku i tylko gdy to plik ryzyka w <span style="font-family:var(--mono)">test-plan.md</span>. <span style="font-family:var(--mono)">related</span> to subkomenda, nie flaga (<span style="font-family:var(--mono)">vitest related &lt;file&gt; --run</span>, <span style="font-family:var(--mono)">jest --findRelatedTests $FILE</span>); <span style="font-family:var(--mono)">--run</span> żeby nie wejść w watch. Ścieżkę z stdin: <span style="font-family:var(--mono)">jq -r .tool_input.file_path</span>. <span style="font-family:var(--mono)">PostToolUse</span> odpala się <strong>raz na tool-use</strong> — trzy edycje w turze = trzy odpalenia, brak agregacji.
+  </div>
+
+  <!-- CROSS-TOOL TABLE -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">⌘</span> Ten sam wzorzec w każdym narzędziu</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px"><strong style="color:var(--accent-coral)">Context injection NIE jest uniwersalny</strong> — Windsurf potrafi blokować (exit 2), ale nie powie agentowi <em>co</em> poszło źle.</p>
+  <table class="dtable">
+    <thead>
+      <tr><th>Narzędzie</th><th>Eventy</th><th>Handlery</th><th>Context injection</th><th>Config</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Claude Code</td><td>~30</td><td>command, http, mcp_tool, prompt, agent</td><td style="color:var(--accent-green)">tak</td><td>.claude/settings.json</td></tr>
+      <tr><td>Cursor</td><td>~18</td><td>command, prompt</td><td style="color:var(--accent-green)">tak</td><td>.cursor/hooks.json</td></tr>
+      <tr><td>Codex</td><td>10</td><td>command</td><td style="color:var(--accent-green)">tak</td><td>.codex/hooks.json</td></tr>
+      <tr><td>Windsurf</td><td>12</td><td>command</td><td style="color:var(--accent-coral)">NIE</td><td>.windsurf/hooks.json</td></tr>
+      <tr><td>Copilot</td><td>~13</td><td>command, http, prompt</td><td style="color:var(--accent-green)">tak (VS Code)</td><td>.github/hooks/*.json</td></tr>
+    </tbody>
+  </table>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:16px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> tylko konfiguracja hooków i lokalnych warstw (hook JSON, <span style="font-family:var(--mono)">lefthook.yml</span>, layering per-edit/commit/push) · NIE pisz E2E / Playwright / MCP (L4) · NIE odpalaj bug→fix→regression (L5) · NIE zmieniaj strategii ryzyka ani definicji bramek (L1 — <span style="font-family:var(--mono)">--status</span> do odczytu) · NIE pisz kodu testów od zera (L2 — hooki tylko <em>odpalają</em> istniejące testy) · NIE pisz CI/CD (M1L5 / M2L5 — hooki to warstwy <em>przed</em> CI). Lefthook vs Husky+lint-staged to detal — jak Husky działa, nie migruj.
+  </div>
+</div>
+
+<!-- ===== MODULE 3 LESSON 4 — E2E ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-blue)">⛉</span> Moduł 3, Lekcja 4 — testy E2E browser-level (<span style="color:var(--accent-blue)">/10x-e2e</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-blue-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-blue)">Co to jest:</strong> napędzanie fazy E2E zatwierdzonego planu, <strong>jedno ryzyko naraz</strong>, przeciw <em>działającej</em> aplikacji. Agent wygeneruje <em>przechodzący</em> test E2E w sekundy — trudne jest, żeby <strong>chronił realne ryzyko</strong> i <strong>przeżył jutrzejszy refactor</strong>. <span style="font-family:var(--mono);color:var(--accent-blue)">/10x-e2e</span> to <strong>sibling</strong> <span style="font-family:var(--mono)">/10x-implement</span> i <span style="font-family:var(--mono)">/10x-tdd</span>: ten sam <span style="font-family:var(--mono)">plan.md</span> + <span style="font-family:var(--mono)">## Progress</span>, ten sam commit-per-faza — różni się tylko wewnętrzna pętla. Działa też <strong>standalone</strong>: <span style="font-family:var(--mono)">/10x-e2e &lt;risk-id&gt;</span> czyta <span style="font-family:var(--mono)">test-plan.md</span>, robi jeden test na top ryzyko i kończy.
+  </div>
+
+  <!-- CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">test-plan.md <span style="color:var(--text3)">(ryzyko)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">seed.spec.ts + E2E rules</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">PLAN → GENERATE → REVIEW → VERIFY</div><span class="chain-arrow">→</span>
+    <div class="chain-node">1 test/ryzyko</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-green-dim);color:var(--accent-green)">CI</div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px">Agent widzi <strong>drzewo dostępności</strong> (role, nazwy, stany — YAML snapshot z refami), nie piksele → naturalnie produkuje <span style="font-family:var(--mono)">getByRole</span>, nie CSS. NIE generuj E2E od zera: start z ryzyka, dwie dźwignie jakości (seed + rules) rządzą outputem; prompt dodaje tylko ryzyko, flow i granice real-vs-mocked.</p>
+
+  <!-- ELIGIBILITY GATE -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">⛉</span> Bramka kwalifikacji — przed każdą fazą, 3 warunki naraz</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Warunek</th><th>Pytanie</th><th>Gdy NIE</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-blue)">1 · Browser-level fit</td><td>Ryzyko przekracza wiele granic (auth→routing→API→DB) lub istnieje tylko w renderowanym UI?</td><td>Redirect → <span style="font-family:var(--mono)">/10x-tdd</span> / <span style="font-family:var(--mono)">/10x-implement</span></td></tr>
+      <tr><td style="color:var(--accent-blue)">2 · Feature present</td><td>Feature już zbudowany i app się uruchamia? <strong>(odwrotność /10x-tdd)</strong></td><td>STOP → zbuduj <span style="font-family:var(--mono)">/10x-implement</span>, potem wróć</td></tr>
+      <tr><td style="color:var(--accent-blue)">3 · Test absence</td><td>Brak przechodzącego testu E2E dla tego ryzyka?</td><td>Istnieje &amp; green → skip · istnieje &amp; <strong>red → debug (L5)</strong>, nie healer</td></tr>
+    </tbody>
+  </table>
+
+  <!-- E2E WORTHY -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">⚖</span> Kiedy E2E, kiedy NIE</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>E2E-worthy — napędzaj tutaj</th><th>NIE E2E — redirect do tdd / implement</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Pełne flow usera przez auth → routing → API → DB</td><td>Czyste funkcje, parsery, walidatory, liczenie flag</td></tr>
+      <tr><td>Dane przeżywają realny SSR reload / nawigację</td><td>Kontrakt jednego endpointu (status/shape/auth/gating)</td></tr>
+      <tr><td>Stan istniejący tylko w renderowanym, interaktywnym UI</td><td>Logika biznesowa z jasnym input/output</td></tr>
+      <tr><td>Ryzyka pojawiające się dopiero przy integracji realnych granic</td><td>Config, scaffolding, wiring infry, dokumentacja</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:var(--text3);margin:8px 0 0"><strong>Budżet:</strong> E2E jest najdroższe i najbardziej flaky — typowo <strong>1 test/ryzyko</strong>, rzadko &gt;1–3/faza. Chronisz nazwane ryzyko, nie powierzchnię. Żadnego testu-per-strona / per-przycisk.</p>
+
+  <!-- FIVE ANTI-PATTERNS -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-coral)">◎</span> Pięć anti-patternów E2E agenta — re-prompt po nazwie</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Wspólny rdzeń: agent optymalizuje „test przechodzi teraz", nie „test jest stabilny jutro". Nigdy „fix this test" — nazwij anti-pattern, wyjaśnij <em>czemu nie chroni ryzyka</em>, podaj target pattern.</p>
+  <table class="dtable">
+    <thead>
+      <tr><th>Anti-pattern</th><th>Jak wygląda</th><th>Co zamiast</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hallucinated assertion</td><td>Składnia OK, sens pusty — reload, potem asercja „title zawiera Dashboard" zamiast czy karta przeżyła</td><td>Asertuj realny outcome biznesowy (heading + treść karty visible po reload)</td></tr>
+      <tr><td>Brittle selector</td><td><span style="font-family:var(--mono)">div.card &gt; div:nth-child(3) &gt; button</span> — pada na każdy refactor layoutu</td><td><span style="font-family:var(--mono)">getByRole</span> / <span style="font-family:var(--mono)">getByLabel</span> / <span style="font-family:var(--mono)">getByText</span> — jak seed</td></tr>
+      <tr><td>Shared state</td><td>Test „edit" zakłada, że „add" już poszedł → flaky przy random-order parallel</td><td>Każdy test: własny setup / action / assertion / cleanup w jednym bloku</td></tr>
+      <tr><td>Wait-for-time</td><td><span style="font-family:var(--mono)">waitForTimeout(3000)</span> — green lokalnie, flake w wolniejszym CI</td><td><span style="font-family:var(--mono)">waitForResponse</span> / <span style="font-family:var(--mono)">toBeVisible()</span> — web-first auto-retry</td></tr>
+      <tr><td>No cleanup</td><td>Tworzy deck/karty, nie sprząta → 2. run = unique constraint violation</td><td>Unikalne id (suffix timestamp) + cleanup per test / <span style="font-family:var(--mono)">afterEach</span> (lub teardown-before-setup)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- VERIFY: DELIBERATE BREAK -->
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:16px">
+    <strong style="color:var(--accent-green)">VERIFY = green + deliberate break:</strong> uruchom sam ten spec → green. Potem <strong>pytanie kontrolne</strong>: czy test padłby, gdyby ryzyko z <span style="font-family:var(--mono)">test-plan.md</span> się ziściło? Aby to potwierdzić — <strong>celowo zepsuj</strong> chronioną logikę (odwróć/osłab), re-run, potwierdź <strong>red</strong>; jeśli zostaje green, asercja nic nie chroni. <strong>Natychmiast cofnij break</strong> — nigdy go nie commituj. Commit <strong>tylko na green</strong>. Nigdy <span style="font-family:var(--mono)">test.skip()</span> / <span style="font-family:var(--mono)">test.fixme()</span> dla „zaliczenia" fazy.
+  </div>
+
+  <!-- TWO LEVERS + TRANSPORT -->
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Dwie dźwignie jakości (one-time setup per projekt):</strong> <strong>seed</strong> (<span style="font-family:var(--mono)">seed.spec.ts</span>) — egzemplarz, na którym wzoruje się każdy test (<em>what you show is what you get</em>: <span style="font-family:var(--mono)">getByRole</span> w seedzie → w testach też; <span style="font-family:var(--mono)">waitForTimeout</span> w seedzie → dziedziczą wszystkie). <strong>E2E rules</strong> — plik reguł, który agent czyta sam przed generacją. Prompt dodaje tylko to, czego dźwignie nie kodują: ryzyko, flow, real-vs-mocked. <strong>Transport:</strong> Playwright <strong>CLI</strong> (preferuj — ~27K tok vs ~114K MCP, tool surface poza kontekstem) → <strong>MCP</strong> (30+ tooli w kontekście, turnkey) → <strong>prompt-template</strong> (brak live browser).
+  </div>
+
+  <!-- REAL VS MOCKED + DOM/VISION/HEALER -->
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-top:12px">
+    <strong style="color:var(--accent-amber)">Real vs mocked = rdzeń wartości:</strong> E2E ≠ zero mockowania. Granice <strong>wewnętrzne</strong> (auth, routing, DB) zostają <strong>realne</strong> — tam siedzi ryzyko integracyjne; mockuj tylko drogie / niedeterministyczne <strong>zewnętrzne</strong> API (LLM, płatności) na warstwie sieci. Uwaga: API wołane <em>server-side</em> nie złapie <span style="font-family:var(--mono)">page.route()</span> — mockuj tam, gdzie serwer faktycznie woła.
+  </div>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Dwie granice do zapamiętania:</strong> <strong>DOM (snapshot) = default</strong>, vision (<span style="font-family:var(--mono)">--caps=vision</span>) tylko jako suplement na ryzyka czysto wizualne (layout, z-index, animacja); regresja pikselowa → narzędzia deterministyczne (<span style="font-family:var(--mono)">toMatchSnapshot</span>, Argos, Lost Pixel). <strong>Healer pomaga na selektory, szkodzi na logikę:</strong> zmieniony selektor → healer go re-finduje (przez PR review, nigdy auto-commit); zmienione <em>zachowanie biznesowe</em> → healer maskuje bug → to robota debugowania (L5), nie healingu.
+  </div>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE instaluj Playwrighta / nie scaffolduj configów / nie wiruj CI (skill <em>zakłada</em>, że są — tworzy tylko seed + rules) · NIE napędzaj ryzyk nie-browser-level (redirect tdd/implement) · NIE napędzaj feature'a, którego nie ma (STOP → implement) · failing E2E to <strong>debug (L5)</strong>, nie generacja ani healing · selekcja modelu VLM / koszt → temat debugowania (L5), nie testowania.
   </div>
 </div>
 
