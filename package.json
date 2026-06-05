@@ -9,6 +9,7 @@
     "astro": "astro",
     "deploy": "astro build && wrangler deploy",
     "lint": "eslint .",
+    "typecheck": "astro sync && astro check",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "test": "vitest run",
