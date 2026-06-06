@@ -1,3 +1,5 @@
+import { reportError } from "@/lib/observability";
+
 /**
  * Shared parser for an error-response body returned by our API routes.
  *
@@ -6,9 +8,10 @@
  * Returns the raw `{ code, message }` — each call site applies its own
  * `FALLBACK_MESSAGES[code]` lookup, since the fallback map differs per surface.
  *
- * NOTE: the `} catch { … }` below still swallows a non-JSON body. That is
- * intentional at this step (Phase A is a behavior-preserving extraction); the
- * swallow is fixed in Phase B, where a RED test births the `reportError` seam.
+ * A non-JSON error body (or any throw while parsing) used to be swallowed
+ * silently here. It is now reported through the `reportError` seam — the
+ * user-facing fallback `{ code, message }` is unchanged, but the exception is
+ * observable instead of vanishing.
  */
 export async function parseErrorBody(response: Response): Promise<{ code: string; message: string }> {
   let code = "unknown";
@@ -21,8 +24,9 @@ export async function parseErrorBody(response: Response): Promise<{ code: string
       if (typeof rawCode === "string") code = rawCode;
       if (typeof rawMessage === "string" && rawMessage) message = rawMessage;
     }
-  } catch {
-    /* non-JSON error body — keep the generic message */
+  } catch (err) {
+    // Non-JSON error body — keep the generic message, but surface the throw.
+    reportError(err, { where: "parseErrorBody" });
   }
   return { code, message };
 }

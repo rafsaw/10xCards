@@ -1,5 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { parseErrorBody } from "@/lib/parse-error";
+import { reportError } from "@/lib/observability";
+
+// The seam is mocked so we assert the *contract* (it gets called with the
+// swallowed exception), not its dev/no-op transport. The factory also lets this
+// suite reference `@/lib/observability` before the module exists (Phase B GREEN
+// creates it).
+vi.mock("@/lib/observability", () => ({ reportError: vi.fn() }));
 
 // Characterization coverage for the shared error-body parser (Phase A). We stub
 // ONLY the parts of `Response` the parser touches (`json`), via a `Partial<Response>`
@@ -46,5 +53,26 @@ describe("parseErrorBody — pins the already-correct paths", () => {
   it("uses both fallbacks when the body is not an object", async () => {
     const result = await parseErrorBody(jsonBody("just a string"));
     expect(result).toEqual({ code: "unknown", message: GENERIC });
+  });
+});
+
+describe("parseErrorBody — reports the swallowed exception (Phase B regression guard)", () => {
+  // A response whose `.json()` rejects = the non-JSON error body that the old bare
+  // `catch {}` discarded silently. The fix must surface that throw through the seam
+  // while keeping the user-facing fallback intact.
+  function rejectingBody(err: Error): Response {
+    return { json: () => Promise.reject(err) } as unknown as Response;
+  }
+
+  it("calls reportError with the thrown error and context, but still returns the generic fallback", async () => {
+    const parseFailure = new SyntaxError("Unexpected token < in JSON");
+    const result = await parseErrorBody(rejectingBody(parseFailure));
+
+    // User-facing behavior is unchanged: the generic fallback is still returned.
+    expect(result).toEqual({ code: "unknown", message: GENERIC });
+
+    // But the previously-swallowed exception is now observable through the seam.
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError).toHaveBeenCalledWith(parseFailure, { where: "parseErrorBody" });
   });
 });

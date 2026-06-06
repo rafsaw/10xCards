@@ -439,24 +439,24 @@ intended one: previously-swallowed exceptions now reach `reportError`.
 
 #### Automated
 
-- [x] 1.1 Characterization tests pass: `npm test`
-- [x] 1.2 Type checking passes: `npm run typecheck`
-- [x] 1.3 Linting passes: `npm run lint`
-- [x] 1.4 Build passes: `npm run build`
+- [x] 1.1 Characterization tests pass: `npm test` — 8833953
+- [x] 1.2 Type checking passes: `npm run typecheck` — 8833953
+- [x] 1.3 Linting passes: `npm run lint` — 8833953
+- [x] 1.4 Build passes: `npm run build` — 8833953
 
 #### Manual
 
-- [x] 1.5 `/library` edit + delete still show correct error message (behavior unchanged)
-- [x] 1.6 No new console output appears (seam not introduced yet)
+- [x] 1.5 `/library` edit + delete still show correct error message (behavior unchanged) — 8833953
+- [x] 1.6 No new console output appears (seam not introduced yet) — 8833953
 
 ### Phase 2: Phase B — Test-driven bugfix the swallow (specimen)
 
 #### Automated
 
-- [ ] 2.1 RED test fails for the right reason, then full suite passes: `npm test`
-- [ ] 2.2 Type checking passes: `npm run typecheck`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Build passes: `npm run build`
+- [x] 2.1 RED test fails for the right reason, then full suite passes: `npm test`
+- [x] 2.2 Type checking passes: `npm run typecheck`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 Build passes: `npm run build`
 
 #### Manual
 
