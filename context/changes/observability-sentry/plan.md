@@ -467,11 +467,11 @@ intended one: previously-swallowed exceptions now reach `reportError`.
 
 #### Automated
 
-- [x] 3.1 Full suite passes: `npm test`
-- [x] 3.2 Type checking passes: `npm run typecheck`
-- [x] 3.3 Linting passes: `npm run lint`
-- [x] 3.4 Build passes: `npm run build`
-- [x] 3.5 No `/* non-JSON error body — keep the generic message */` comment remains in `src/components/**`
+- [x] 3.1 Full suite passes: `npm test` — 5bd0917
+- [x] 3.2 Type checking passes: `npm run typecheck` — 5bd0917
+- [x] 3.3 Linting passes: `npm run lint` — 5bd0917
+- [x] 3.4 Build passes: `npm run build` — 5bd0917
+- [x] 3.5 No `/* non-JSON error body — keep the generic message */` comment remains in `src/components/**` — 5bd0917
 
 #### Manual
 
