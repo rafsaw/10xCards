@@ -144,7 +144,9 @@
       "Bash(echo \"cached-empty-exit=$?\")",
       "PowerShell(npx vitest run test/no-service-role-in-src.test.ts)",
       "Bash(echo \"diff-exit=$?\")",
-      "Bash(echo \"exit: $? \\(1 = none found, good\\)\")"
+      "Bash(echo \"exit: $? \\(1 = none found, good\\)\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(echo \"=== commit exit: $? ===\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
