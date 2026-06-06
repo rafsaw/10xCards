@@ -439,15 +439,15 @@ intended one: previously-swallowed exceptions now reach `reportError`.
 
 #### Automated
 
-- [ ] 1.1 Characterization tests pass: `npm test`
-- [ ] 1.2 Type checking passes: `npm run typecheck`
-- [ ] 1.3 Linting passes: `npm run lint`
-- [ ] 1.4 Build passes: `npm run build`
+- [x] 1.1 Characterization tests pass: `npm test`
+- [x] 1.2 Type checking passes: `npm run typecheck`
+- [x] 1.3 Linting passes: `npm run lint`
+- [x] 1.4 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 1.5 `/library` edit + delete still show correct error message (behavior unchanged)
-- [ ] 1.6 No new console output appears (seam not introduced yet)
+- [x] 1.5 `/library` edit + delete still show correct error message (behavior unchanged)
+- [x] 1.6 No new console output appears (seam not introduced yet)
 
 ### Phase 2: Phase B — Test-driven bugfix the swallow (specimen)
 

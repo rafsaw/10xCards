@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CircleAlert, Loader2, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { parseErrorBody } from "@/lib/parse-error";
 
 interface SavedCard {
   id: string;
@@ -23,19 +24,7 @@ const FALLBACK_MESSAGES: Record<string, string> = {
 };
 
 async function parseError(response: Response): Promise<RowError> {
-  let code = "unknown";
-  let message = "Something went wrong. Please try again.";
-  try {
-    const body: unknown = await response.json();
-    if (body && typeof body === "object") {
-      const rawCode = (body as { error?: unknown }).error;
-      const rawMessage = (body as { message?: unknown }).message;
-      if (typeof rawCode === "string") code = rawCode;
-      if (typeof rawMessage === "string" && rawMessage) message = rawMessage;
-    }
-  } catch {
-    /* non-JSON error body — keep the generic message */
-  }
+  const { code, message } = await parseErrorBody(response);
   return { code, message: message || FALLBACK_MESSAGES[code] };
 }
 
