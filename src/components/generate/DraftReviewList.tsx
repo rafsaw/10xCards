@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CircleAlert, Check, Trash2, Save, Loader2 } from "lucide-react";
+import { parseErrorBody } from "@/lib/parse-error";
 
 interface Draft {
   id: string;
@@ -81,19 +82,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
         return;
       }
 
-      let code = "unknown";
-      let message = "Save failed. Please try again.";
-      try {
-        const body: unknown = await response.json();
-        if (body && typeof body === "object") {
-          const rawCode = (body as { error?: unknown }).error;
-          const rawMessage = (body as { message?: unknown }).message;
-          if (typeof rawCode === "string") code = rawCode;
-          if (typeof rawMessage === "string" && rawMessage) message = rawMessage;
-        }
-      } catch {
-        /* non-JSON error body — keep the generic message */
-      }
+      const { code, message } = await parseErrorBody(response);
       setError({ code, message: message || FALLBACK_MESSAGES[code] });
       setSubmitting(false);
     } catch {

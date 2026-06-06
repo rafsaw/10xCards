@@ -148,7 +148,8 @@
       "Bash(echo \"EXIT: $?\")",
       "Bash(echo \"=== commit exit: $? ===\")",
       "Skill(10x-new)",
-      "Skill(10x-implement)"
+      "Skill(10x-implement)",
+      "Bash(echo \"empty-diff exit code: $?\")"
     ],
     "deny": [
       "Bash(rm -rf *)"

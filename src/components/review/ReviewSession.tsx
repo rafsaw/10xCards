@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { CircleAlert, Eye, Check, X, PartyPopper, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseErrorBody } from "@/lib/parse-error";
 import type { ReviewRating } from "@/lib/leitner";
 
 export interface DueCard {
@@ -127,19 +128,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         return;
       }
 
-      let code = "unknown";
-      let message = "Rating failed. Please try again.";
-      try {
-        const body: unknown = await response.json();
-        if (body && typeof body === "object") {
-          const rawCode = (body as { error?: unknown }).error;
-          const rawMessage = (body as { message?: unknown }).message;
-          if (typeof rawCode === "string") code = rawCode;
-          if (typeof rawMessage === "string" && rawMessage) message = rawMessage;
-        }
-      } catch {
-        /* non-JSON error body — keep the generic message */
-      }
+      const { code, message } = await parseErrorBody(response);
       setError({ code, message: message || FALLBACK_MESSAGES[code] });
     } catch {
       setError({ code: "network_error", message: FALLBACK_MESSAGES.network_error });

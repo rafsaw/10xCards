@@ -453,25 +453,25 @@ intended one: previously-swallowed exceptions now reach `reportError`.
 
 #### Automated
 
-- [x] 2.1 RED test fails for the right reason, then full suite passes: `npm test`
-- [x] 2.2 Type checking passes: `npm run typecheck`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Build passes: `npm run build`
+- [x] 2.1 RED test fails for the right reason, then full suite passes: `npm test` — f6c8e6b
+- [x] 2.2 Type checking passes: `npm run typecheck` — f6c8e6b
+- [x] 2.3 Linting passes: `npm run lint` — f6c8e6b
+- [x] 2.4 Build passes: `npm run build` — f6c8e6b
 
 #### Manual
 
-- [ ] 2.5 Dev: forced non-JSON error on `/library` edit/delete prints `console.error` via the seam
-- [ ] 2.6 User still sees the same generic error message (no UX regression)
+- [x] 2.5 Dev: forced non-JSON error on `/library` edit/delete prints `console.error` via the seam — f6c8e6b
+- [x] 2.6 User still sees the same generic error message (no UX regression) — f6c8e6b
 
 ### Phase 3: Phase C — Kill the convention (migrate the other 5 sites)
 
 #### Automated
 
-- [ ] 3.1 Full suite passes: `npm test`
-- [ ] 3.2 Type checking passes: `npm run typecheck`
-- [ ] 3.3 Linting passes: `npm run lint`
-- [ ] 3.4 Build passes: `npm run build`
-- [ ] 3.5 No `/* non-JSON error body — keep the generic message */` comment remains in `src/components/**`
+- [x] 3.1 Full suite passes: `npm test`
+- [x] 3.2 Type checking passes: `npm run typecheck`
+- [x] 3.3 Linting passes: `npm run lint`
+- [x] 3.4 Build passes: `npm run build`
+- [x] 3.5 No `/* non-JSON error body — keep the generic message */` comment remains in `src/components/**`
 
 #### Manual
 
