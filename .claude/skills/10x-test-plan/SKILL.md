@@ -1,19 +1,12 @@
 ---
 name: 10x-test-plan
 description: >
-  Stateful, phased test-rollout orchestrator for existing products. Writes a
-  durable phased rollout document at `context/foundation/test-plan.md`
-  BEFORE handing off, then drives each rollout phase into
-  /10x-new → /10x-research → /10x-plan → /10x-implement. Re-running the
-  skill re-derives state from which artifacts exist and resumes from the
-  next pending rollout phase. Once a rollout change is opened, follow the
-  established research → plan → implement process: after each major phase,
-  suggest the next natural command unless there is a clear blocker.
-  Use when the user says "create test plan", "plan tests", "test
-  strategy", "phased test rollout", "continue test rollout", "risk map
-  for testing", "QA spec", "AI-native testing strategy", "stwórz plan
-  testów", "strategia jakości". Use AFTER /10x-prd and /10x-roadmap.
-  Brownfield only; greenfield needs a PRD first.
+  Stateful, phased test-rollout orchestrator for existing products. Writes
+  context/foundation/test-plan.md, then drives each rollout phase through
+  /10x-new → /10x-research → /10x-plan → /10x-implement; re-running resumes
+  from the next pending phase. Trigger phrases: "create test plan", "test
+  strategy", "phased test rollout", "QA spec", "stwórz plan testów",
+  "strategia jakości". Use AFTER /10x-prd and /10x-roadmap. Brownfield only.
 argument-hint: "[path ...] | --status | --refresh"
 ---
 
