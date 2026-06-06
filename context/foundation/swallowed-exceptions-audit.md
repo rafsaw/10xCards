@@ -189,12 +189,15 @@ Two bug classes drive two test styles:
 
 **Phase C — Generalize: fix the convention, not one instance**
 
-6. **Repeat red→green across the other swallow sites** — origin
-   `PasteAndGenerateForm.tsx`, then `ReviewSession.tsx`,
-   `DeleteAccountButton.tsx`, `CreateCardForm.tsx` — *or* extract a shared
-   error-body parser so there is a single `reportError` call to test once. Each
-   site ends with a regression test. (Open choice: do ~2 by hand for TDB reps,
-   then refactor to the shared helper as 6b.)
+6. **Extract the shared parser, then migrate the other swallow sites to it**
+   (`DEC-1` locked → extract early). Lift the Phase-B specimen into a shared
+   `parseErrorBody` (in `src/lib`), unit-tested once for the swallow (non-JSON
+   body ⇒ `reportError` called). Then point the remaining sites — origin
+   `PasteAndGenerateForm.tsx`, `ReviewSession.tsx`, `DeleteAccountButton.tsx`,
+   `CreateCardForm.tsx` — at it. Those migrations are behavior-preserving
+   refactors covered by the helper's test (the swallow is fixed at each by
+   construction), so they need no per-component RED harness; verify via
+   lint/build + manual checks.
 
 **Phase D — Bind the seam to Sentry (production wiring, last)**
 
@@ -211,11 +214,24 @@ the *enabler* of testability, not the goal.
 
 ### Open decisions to lock before execution
 
-- **Step 6 scope:** fix all 5 sites individually (more TDB practice) vs. extract a
-  shared helper and test once (better engineering). Leaning: 2 by hand, then
-  refactor.
-- **Step 1 specimen:** `CardRow.parseError` (cleanest walkthrough) vs. the origin
-  `PasteAndGenerateForm.tsx` (fix it where it was born).
+- **Step 6 scope — LOCKED (`DEC-1`): extract early.** Phase B's specimen rep is
+  the single by-hand red→green→refactor; Phase C then extracts a shared
+  `parseErrorBody` helper and migrates all 5 sites to it (a test-covered
+  refactor), tested once. *Rationale (re-argued past the old "2 by hand" lean):*
+  Phase B already lands one complete TDB rep, so a second hand-rep would re-type a
+  byte-identical diff on the hardest (inlined-in-component) site for ~zero new
+  gain; "rule of three" is already satisfied by the audit, so the abstraction
+  needs no manual de-risking; and 5 manual fixes would *preserve* the duplicated
+  parsers — re-enacting the copy-paste convention this audit indicts. Extraction
+  is the cure and makes the other four fixes a behavior-preserving refactor
+  covered by the helper's unit test.
+- **Step 1 specimen — LOCKED (`DEC-2`): `CardRow.parseError`.** Already an
+  extracted, module-scope pure async fn `(Response) => Promise<RowError>` —
+  testable with zero React, the cleanest TDB walkthrough. The origin
+  `PasteAndGenerateForm.tsx` inlines the same logic in a component handler (needs
+  render + fetch mock + event sim) and is still fixed in Phase C. **Synergy:** the
+  specimen *graduates into* the shared `parseErrorBody` — same artifact, one test,
+  whole convention killed.
 
 ### Execution vehicle — `/10x-tdd` (Module 3, Lesson 2)
 
@@ -293,8 +309,8 @@ IDs are phase-prefixed so you can call a step directly (e.g. "let's do **B-1**")
 | `INV-5` | Choose execution vehicle (`/10x-tdd` vs alternatives) | skill review | ✅ done |
 | `INV-6` | Confirm flow: single-change chain, not `/10x-test-plan` | skill review | ✅ done |
 | **Pre-execution decisions** | | | |
-| `DEC-1` | Lock Step 6 scope (5 sites by hand vs shared helper) | decision | ⬜ to do |
-| `DEC-2` | Lock specimen (`CardRow.parseError` vs origin) | decision | ⬜ to do |
+| `DEC-1` | Lock Step 6 scope → **extract early**: Phase B specimen is the one hand rep, then extract a shared `parseErrorBody` and migrate all 5 sites (test once). *(Shifted past the old "2 by hand" lean — see rationale below.)* | decision | ✅ done |
+| `DEC-2` | Lock specimen → **`CardRow.parseError`** (already an extracted pure fn; origin still fixed in Phase C). | decision | ✅ done |
 | **Scaffold the change** | | | |
 | `SET-1` | Open change folder `observability-sentry` | `/10x-new` | ⬜ to do |
 | `SET-2` | (optional) Ground the seam + 5 sites in code | `/10x-research` | ⬜ to do |
@@ -306,13 +322,13 @@ IDs are phase-prefixed so you can call a step directly (e.g. "let's do **B-1**")
 | `B-2` | GREEN: `catch (err)` + minimal `reportError` seam | `/10x-tdd` | ⬜ to do |
 | `B-3` | REFACTOR: tidy context payload, stay green | `/10x-tdd` | ⬜ to do |
 | **Phase C — generalize (kill the convention)** | | | |
-| `C-1` | Red→green the other swallow sites / extract shared helper | `/10x-tdd` | ⬜ to do |
+| `C-1` | Extract shared `parseErrorBody` (test once) + migrate the other 4 sites to it (behavior-preserving refactor) | `/10x-tdd` + `/10x-implement` | ⬜ to do |
 | **Phase D — bind the seam to Sentry** | | | |
 | `D-1` | Wire `reportError` → Sentry at the edge (env-gated) | `/10x-implement` + Context7 docs | ⬜ to do |
 | `D-2` | Verify: `npm run lint` + `npm run build` + manual Sentry hit | manual | ⬜ to do |
 
-**Next action:** lock **`DEC-1`** & **`DEC-2`** (two small decisions), then run
-`/10x-new observability-sentry` (**`SET-1`**).
+**Next action:** `DEC-1` & `DEC-2` are locked ✅ — run
+`/10x-new observability-sentry` (**`SET-1`**) to scaffold the change folder.
 
 > Note: once the change folder exists, `plan.md`'s own `## Progress` section
 > becomes the authoritative execution tracker for items 12–18 (that's what
