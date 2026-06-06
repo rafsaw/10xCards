@@ -52,3 +52,10 @@ pnpm-debug.log*
 
 # stryker temp files
 .stryker-tmp
+
+# playwright e2e
+/test-results/
+/playwright-report/
+/blob-report/
+/tests/e2e/.auth/
+.playwright-cli/

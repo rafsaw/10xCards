@@ -13,6 +13,8 @@ export default getViteConfig({
     // project and needs the service_role key. Keep the default `npm test`
     // hermetic, fast, and secret-free — those tests run only via
     // `npm run test:integration` (see vitest.integration.config.ts).
-    exclude: [...configDefaults.exclude, "**/*.integration.test.ts"],
+    // Playwright E2E specs (tests/e2e/**) use their own runner — keep Vitest out
+    // of them so `npm test` doesn't try to execute *.spec.ts via the Node runner.
+    exclude: [...configDefaults.exclude, "**/*.integration.test.ts", "tests/e2e/**"],
   },
 });
