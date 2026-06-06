@@ -312,9 +312,9 @@ IDs are phase-prefixed so you can call a step directly (e.g. "let's do **B-1**")
 | `DEC-1` | Lock Step 6 scope → **extract early**: Phase B specimen is the one hand rep, then extract a shared `parseErrorBody` and migrate all 5 sites (test once). *(Shifted past the old "2 by hand" lean — see rationale below.)* | decision | ✅ done |
 | `DEC-2` | Lock specimen → **`CardRow.parseError`** (already an extracted pure fn; origin still fixed in Phase C). | decision | ✅ done |
 | **Scaffold the change** | | | |
-| `SET-1` | Open change folder `observability-sentry` | `/10x-new` | ⬜ to do |
-| `SET-2` | (optional) Ground the seam + 5 sites in code | `/10x-research` | ⬜ to do |
-| `SET-3` | Write the phased `plan.md` (Progress section) | `/10x-plan` | ⬜ to do |
+| `SET-1` | Open change folder `observability-sentry` | `/10x-new` | ✅ done |
+| `SET-2` | (optional) Ground the seam + 5 sites in code | `/10x-research` | ⏭️ skipped (audit already grounded; plan did targeted reads) |
+| `SET-3` | Write the phased `plan.md` (Progress section) | `/10x-plan` | ✅ done |
 | **Phase A — make the invisible testable** | | | |
 | `A-1` | Characterization test of existing `parseError` (GREEN) | `/10x-implement` (TDD refuses existing code) | ⬜ to do |
 | **Phase B — test-driven bugfix the specimen** | | | |
