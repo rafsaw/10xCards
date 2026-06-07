@@ -13,6 +13,8 @@ Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
 });
 
+console.log("SENTRY CLIENT LOADED");
+
 Sentry.captureException(
   new Error("deploy-verification-test"),
 );
