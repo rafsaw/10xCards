@@ -1,10 +1,10 @@
 ---
 change_id: observability-sentry
 title: Observability seam + Sentry — fix swallowed-exception convention
-status: impl_reviewed
+status: archived
 created: 2026-06-06
-updated: 2026-06-06
-archived_at: null
+updated: 2026-06-07
+archived_at: 2026-06-07T01:41:59Z
 ---
 
 ## Notes
