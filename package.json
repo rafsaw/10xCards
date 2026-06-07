@@ -25,6 +25,8 @@
     "@astrojs/sitemap": "^3.7.2",
     "@eslint/config-helpers": "^0.6.0",
     "@radix-ui/react-slot": "^1.1.2",
+    "@sentry/astro": "^10.56.0",
+    "@sentry/cloudflare": "^10.56.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.99.1",
     "@tailwindcss/vite": "^4.2.4",

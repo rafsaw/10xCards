@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "10x-cards",
-  "main": "@astrojs/cloudflare/entrypoints/server",
+  "main": "./sentry.server.config.ts",
   "compatibility_date": "2026-05-08",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {

@@ -149,7 +149,8 @@
       "Bash(echo \"=== commit exit: $? ===\")",
       "Skill(10x-new)",
       "Skill(10x-implement)",
-      "Bash(echo \"empty-diff exit code: $?\")"
+      "Bash(echo \"empty-diff exit code: $?\")",
+      "PowerShell(Write-Output \"=== versions ===\"; \\(Get-Content node_modules/@sentry/astro/package.json | ConvertFrom-Json\\).version; \\(Get-Content node_modules/@sentry/cloudflare/package.json | ConvertFrom-Json\\).version; Write-Output \"=== entrypoints/server default export? ===\"; \\(Get-Content node_modules/@astrojs/cloudflare/package.json | ConvertFrom-Json\\).version)"
     ],
     "deny": [
       "Bash(rm -rf *)"

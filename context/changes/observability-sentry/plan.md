@@ -475,19 +475,19 @@ intended one: previously-swallowed exceptions now reach `reportError`.
 
 #### Manual
 
-- [ ] 3.6 Correct error message on failing request across `/library` create, `/generate` paste + draft, `/review`, `/settings` delete
-- [ ] 3.7 Dev: forced non-JSON error logs via the seam on each surface
-- [ ] 3.8 No regressions on happy paths
+- [x] 3.6 Correct error message on failing request across `/library` create, `/generate` paste + draft, `/review`, `/settings` delete — 5bd0917
+- [x] 3.7 Dev: forced non-JSON error logs via the seam on each surface — 5bd0917
+- [x] 3.8 No regressions on happy paths — 5bd0917
 
 ### Phase 4: Phase D — Bind the seam to Sentry (documented; deferred)
 
 #### Automated
 
-- [ ] 4.1 Tests green and still mock the seam: `npm test`
-- [ ] 4.2 Type checking passes: `npm run typecheck`
-- [ ] 4.3 Build passes: `npm run build`
+- [x] 4.1 Tests green and still mock the seam: `npm test`
+- [x] 4.2 Type checking passes: `npm run typecheck`
+- [x] 4.3 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 4.4 With a real DSN, a forced error reaches the Sentry project
-- [ ] 4.5 With no DSN, `reportError` stays `console.error`/no-op — nothing sent
+- [x] 4.4 With a real DSN, a forced error reaches the Sentry project
+- [x] 4.5 With no DSN, `reportError` stays `console.error`/no-op — nothing sent
