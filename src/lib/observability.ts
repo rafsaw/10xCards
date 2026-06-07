@@ -5,7 +5,7 @@ import * as Sentry from "@sentry/astro";
  * replaces the copy-pasted inline error swallows across the components.
  *
  * Dev logs to the console; production routes to Sentry. The transport is
- * initialized once per runtime — the browser SDK in `sentry.client.config.js`
+ * initialized once per runtime — the browser SDK in `sentry.client.config.ts`
  * and the Worker via `withSentry` in `sentry.server.config.ts` — so this call
  * site never changes; the signature is the contract.
  */
@@ -24,5 +24,10 @@ export function reportError(err: unknown, context?: ErrorContext): void {
   // Production: report through Sentry. `@sentry/astro` resolves to the browser SDK
   // on the client and the Cloudflare SDK on the Worker, sharing the global scope set
   // up at init. With no DSN configured, captureException is a safe no-op.
-  Sentry.captureException(err, { extra: context });
+  try {
+    Sentry.captureException(err, { extra: context });
+  } catch {
+    // Never let the reporter throw into the path it reports from — a throw here
+    // would re-swallow the very exception this seam exists to surface.
+  }
 }

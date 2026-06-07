@@ -70,8 +70,9 @@ truth for the findings, the Phase A–D sequence, and the two locked decisions.
   green; manual check of `/library`, `/generate`, `/review`, `/settings` shows
   unchanged user-facing behavior, and a forced non-JSON error logs via the seam
   in dev.
-- Phase D (Sentry wiring) is fully written below but intentionally **not executed**
-  in this change.
+- Phase D (Sentry wiring) — originally specified as deferred — was **executed in
+  this change** (commit `403ce62`): `reportError` now binds to Sentry, gated on an
+  env/secret DSN, and stays a no-op when unconfigured.
 
 ## What We're NOT Doing
 
@@ -83,8 +84,10 @@ truth for the findings, the Phase A–D sequence, and the two locked decisions.
   covered by `parseErrorBody`). `CancelDeletionButton` therefore drops out
   entirely (it has no inner parse body).
 - **Not** touching server-side API routes (already clean).
-- **Not** executing Phase D — no Sentry account, DSN, deploy config, or SDK
-  install in this change. Phase D is specified for a later `/10x-implement`.
+- ~~**Not** executing Phase D~~ — **superseded:** Phase D *was* executed in this
+  change (commit `403ce62`; see Phase 4 below and Progress 4.x). Retained here to
+  record the original scope boundary that was deliberately crossed once a DSN
+  became available.
 - **Not** building a logging framework — the seam is a single function.
 - **Not** retroactively TDD-ing existing-correct behavior (Phase A is
   characterization + refactor, run via `/10x-implement`; `/10x-tdd` refuses it).
@@ -334,16 +337,17 @@ verification passes, pause for manual confirmation before proceeding.
 
 ---
 
-## Phase 4: Phase D — Bind the seam to Sentry (documented; deferred)
+## Phase 4: Phase D — Bind the seam to Sentry (executed in this change — commit 403ce62)
 
 ### Overview
 
-**Specified now, executed in a later `/10x-implement`** once a Sentry project/DSN
-exists. Wires `reportError` to Sentry at the Astro / Cloudflare Workers edge,
-env-gated and off in tests. Pull current SDK setup via Context7 at execution time
-(Sentry-for-Astro / Workers setup changes often). No code lands in this change.
+**Executed in this change** (commit `403ce62`), ahead of the originally-planned
+deferral, once a Sentry project/DSN was available. Wires `reportError` to Sentry at
+the Astro / Cloudflare Workers edge, env-gated and off in tests. SDK setup was
+pulled via Context7 at execution time (Sentry-for-Astro / Workers setup changes
+often).
 
-### Changes Required (for the future implementer)
+### Changes Required
 
 #### 1. Inject the Sentry transport into the seam
 
@@ -358,8 +362,9 @@ site changes. Env var read via `astro:env` / Workers binding, never hardcoded.
 
 #### 2. Initialize Sentry at the edge
 
-**File**: Astro/Workers init (e.g. `src/middleware.ts` or a Workers entry as the
-current SDK docs dictate)
+**File**: `sentry.client.config.ts`, `sentry.server.config.ts`, `astro.config.mjs`
+(the `@sentry/astro` integration pattern the current SDK docs dictate — not
+`src/middleware.ts`).
 
 **Intent**: One-time Sentry init gated on the DSN secret; disabled in dev/test.
 
@@ -382,9 +387,8 @@ runtime may rule out the Node-oriented integration.
 - With a real DSN configured, a forced error reaches the Sentry project.
 - With no DSN (dev/test), `reportError` stays `console.error`/no-op — nothing sent.
 
-**Implementation Note**: This phase is deferred. Do not execute until a Sentry DSN
-is provisioned; track it as a follow-up `/10x-implement observability-sentry phase
-4`.
+**Implementation Note**: Originally deferred; executed in this change once a DSN was
+provisioned. All Phase 4 Progress boxes are checked (commit `403ce62`).
 
 ---
 
@@ -479,7 +483,7 @@ intended one: previously-swallowed exceptions now reach `reportError`.
 - [x] 3.7 Dev: forced non-JSON error logs via the seam on each surface — 5bd0917
 - [x] 3.8 No regressions on happy paths — 5bd0917
 
-### Phase 4: Phase D — Bind the seam to Sentry (documented; deferred)
+### Phase 4: Phase D — Bind the seam to Sentry (executed in this change — commit 403ce62)
 
 #### Automated
 

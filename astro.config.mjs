@@ -10,7 +10,7 @@ import sentry from "@sentry/astro";
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  // Sentry: errors only. Client init lives in sentry.client.config.js (browser SDK)
+  // Sentry: errors only. Client init lives in sentry.client.config.ts (browser SDK)
   // and the Worker is wrapped via withSentry in sentry.server.config.ts. No authToken
   // is set, so no source maps are uploaded at build time; telemetry is off so the
   // build plugin sends nothing to Sentry.
