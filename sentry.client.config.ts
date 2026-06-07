@@ -1,3 +1,8 @@
+// IMPORTANT:
+// `PUBLIC_SENTRY_DSN` must be configured as a Cloudflare Build Variable.
+// Worker Secrets are not exposed through `astro:env/client`.
+// If `PUBLIC_SENTRY_DSN` is missing at build time, browser-side Sentry becomes a no-op and no client-side events will be sent.
+
 import * as Sentry from "@sentry/astro";
 import { PUBLIC_SENTRY_DSN } from "astro:env/client";
 
@@ -12,9 +17,3 @@ import { PUBLIC_SENTRY_DSN } from "astro:env/client";
 Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
 });
-
-console.log("SENTRY CLIENT LOADED");
-
-Sentry.captureException(
-  new Error("deploy-verification-test"),
-);

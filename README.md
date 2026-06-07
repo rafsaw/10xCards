@@ -180,6 +180,30 @@ when it is read**. Both may hold the **same** DSN value (Sentry DSNs are publish
 Leave both unset to disable Sentry (init becomes a no-op). After a production build you can confirm the
 browser DSN was embedded with `grep -r "ingest" dist/client`.
 
+> **Cloudflare gotcha — `PUBLIC_SENTRY_DSN` must be a _Build Variable_, not a Worker Secret.**
+> It is consumed via `astro:env/client` and must be present during `npm run build`. Setting it only as a
+> Worker Secret is too late — the value is needed at build time, before the Worker runs — and results in:
+>
+> - `PUBLIC_SENTRY_DSN === undefined` in the browser
+> - `Sentry.init()` becoming a no-op
+> - browser errors never reaching Sentry
+>
+> Add it under the Cloudflare project's **Build Variables**, then trigger a new build (Retry Build /
+> Redeploy) for the change to take effect.
+
+### Verifying Browser Sentry
+
+If browser-side Sentry appears inactive:
+
+1. Open DevTools Console.
+2. Temporarily log `PUBLIC_SENTRY_DSN?.length` from `sentry.client.config.ts`.
+3. Verify the value is defined after deployment.
+4. If it is `undefined`, check Cloudflare Build Variables (not Worker Secrets).
+5. Trigger a rebuild after updating the variable.
+
+**Known issue (M3L5):** `PUBLIC_SENTRY_DSN` was configured as a Worker Secret instead of a Build
+Variable, causing browser-side Sentry to silently disable itself.
+
 ## CI
 
 GitHub Actions runs lint + build on every push and PR to `master`. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets in GitHub for the build step.
