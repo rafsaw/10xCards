@@ -483,11 +483,11 @@ intended one: previously-swallowed exceptions now reach `reportError`.
 
 #### Automated
 
-- [x] 4.1 Tests green and still mock the seam: `npm test`
-- [x] 4.2 Type checking passes: `npm run typecheck`
-- [x] 4.3 Build passes: `npm run build`
+- [x] 4.1 Tests green and still mock the seam: `npm test` — 403ce62
+- [x] 4.2 Type checking passes: `npm run typecheck` — 403ce62
+- [x] 4.3 Build passes: `npm run build` — 403ce62
 
 #### Manual
 
-- [x] 4.4 With a real DSN, a forced error reaches the Sentry project
-- [x] 4.5 With no DSN, `reportError` stays `console.error`/no-op — nothing sent
+- [x] 4.4 With a real DSN, a forced error reaches the Sentry project — 403ce62
+- [x] 4.5 With no DSN, `reportError` stays `console.error`/no-op — nothing sent — 403ce62
