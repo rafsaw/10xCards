@@ -166,6 +166,20 @@ npx wrangler deploy
 
 Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or via `npx wrangler secret put`.
 
+### Sentry Configuration
+
+Error reporting routes through the `reportError` seam (`src/lib/observability.ts`) to Sentry — errors
+only, no tracing/logs/metrics. Two variables drive it, and **where you configure each one differs by
+when it is read**. Both may hold the **same** DSN value (Sentry DSNs are publishable).
+
+| Variable | Read when | Where to set it |
+| --- | --- | --- |
+| `PUBLIC_SENTRY_DSN` | **Build time** — inlined into the browser bundle by `astro build` (`sentry.client.config.ts`) | The **build environment**, e.g. `.env.production` locally or a CI build variable. **Not** a Cloudflare runtime var — it is baked into the client JS before the Worker ever runs. |
+| `SENTRY_DSN` | **Runtime** — read per request by `withSentry` in the Worker (`sentry.server.config.ts`) | A **Cloudflare Worker secret**: `npx wrangler secret put SENTRY_DSN` (or the dashboard's Variables and Secrets). |
+
+Leave both unset to disable Sentry (init becomes a no-op). After a production build you can confirm the
+browser DSN was embedded with `grep -r "ingest" dist/client`.
+
 ## CI
 
 GitHub Actions runs lint + build on every push and PR to `master`. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets in GitHub for the build step.
