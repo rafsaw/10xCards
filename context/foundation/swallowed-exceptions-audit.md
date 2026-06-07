@@ -316,19 +316,26 @@ IDs are phase-prefixed so you can call a step directly (e.g. "let's do **B-1**")
 | `SET-2` | (optional) Ground the seam + 5 sites in code | `/10x-research` | ⏭️ skipped (audit already grounded; plan did targeted reads) |
 | `SET-3` | Write the phased `plan.md` (Progress section) | `/10x-plan` | ✅ done |
 | **Phase A — make the invisible testable** | | | |
-| `A-1` | Characterization test of existing `parseError` (GREEN) | `/10x-implement` (TDD refuses existing code) | ⬜ to do |
+| `A-1` | Characterization test of existing `parseError` (GREEN) | `/10x-implement` (TDD refuses existing code) | ✅ done (`8833953`) |
 | **Phase B — test-driven bugfix the specimen** | | | |
-| `B-1` | RED: non-JSON body ⇒ `reportError` called | `/10x-tdd` | ⬜ to do |
-| `B-2` | GREEN: `catch (err)` + minimal `reportError` seam | `/10x-tdd` | ⬜ to do |
-| `B-3` | REFACTOR: tidy context payload, stay green | `/10x-tdd` | ⬜ to do |
+| `B-1` | RED: non-JSON body ⇒ `reportError` called | `/10x-tdd` | ✅ done (`f6c8e6b`) |
+| `B-2` | GREEN: `catch (err)` + minimal `reportError` seam | `/10x-tdd` | ✅ done (`f6c8e6b`) |
+| `B-3` | REFACTOR: tidy context payload, stay green | `/10x-tdd` | ✅ done (`f6c8e6b`) |
 | **Phase C — generalize (kill the convention)** | | | |
-| `C-1` | Extract shared `parseErrorBody` (test once) + migrate the other 4 sites to it (behavior-preserving refactor) | `/10x-tdd` + `/10x-implement` | ⬜ to do |
+| `C-1` | Extract shared `parseErrorBody` (test once) + migrate the other 4 sites to it (behavior-preserving refactor) | `/10x-tdd` + `/10x-implement` | ✅ done (`5bd0917`) |
 | **Phase D — bind the seam to Sentry** | | | |
-| `D-1` | Wire `reportError` → Sentry at the edge (env-gated) | `/10x-implement` + Context7 docs | ⬜ to do |
-| `D-2` | Verify: `npm run lint` + `npm run build` + manual Sentry hit | manual | ⬜ to do |
+| `D-1` | Wire `reportError` → Sentry at the edge (env-gated) | `/10x-implement` + Context7 docs | ✅ done (`403ce62`) |
+| `D-2` | Verify: `npm run lint` + `npm run build` + manual Sentry hit | manual | ✅ done (`403ce62`) |
 
-**Next action:** `DEC-1` & `DEC-2` are locked ✅ — run
-`/10x-new observability-sentry` (**`SET-1`**) to scaffold the change folder.
+**Status:** ✅ **Shipped & archived.** All phases (A–D) landed; the change was
+impl-reviewed and archived to
+`context/archive/2026-06-06-observability-sentry/` (`chore(archive): close
+observability-sentry`, `c6f15ae`). The swallowed-exception convention is gone:
+all six inner sites route through `src/lib/parse-error.ts`, reporting via the
+`src/lib/observability.ts` seam (Sentry-bound, env-gated). Open follow-ups
+recorded in the change's `reviews/impl-review.md`: **F3** — the *outer*
+network-error catches (audit §"Outer catches") remain unobserved, a deliberate
+out-of-scope item for a future change.
 
 > Note: once the change folder exists, `plan.md`'s own `## Progress` section
 > becomes the authoritative execution tracker for items 12–18 (that's what
