@@ -15,6 +15,11 @@ Sentry.init({
 
 console.log("SENTRY CLIENT LOADED");
 
+console.log(
+  "PUBLIC_SENTRY_DSN length:",
+  PUBLIC_SENTRY_DSN?.length,
+);
+
 Sentry.captureException(
   new Error("deploy-verification-test"),
 );
