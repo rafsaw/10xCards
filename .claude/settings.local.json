@@ -150,7 +150,8 @@
       "Skill(10x-new)",
       "Skill(10x-implement)",
       "Bash(echo \"empty-diff exit code: $?\")",
-      "PowerShell(Write-Output \"=== versions ===\"; \\(Get-Content node_modules/@sentry/astro/package.json | ConvertFrom-Json\\).version; \\(Get-Content node_modules/@sentry/cloudflare/package.json | ConvertFrom-Json\\).version; Write-Output \"=== entrypoints/server default export? ===\"; \\(Get-Content node_modules/@astrojs/cloudflare/package.json | ConvertFrom-Json\\).version)"
+      "PowerShell(Write-Output \"=== versions ===\"; \\(Get-Content node_modules/@sentry/astro/package.json | ConvertFrom-Json\\).version; \\(Get-Content node_modules/@sentry/cloudflare/package.json | ConvertFrom-Json\\).version; Write-Output \"=== entrypoints/server default export? ===\"; \\(Get-Content node_modules/@astrojs/cloudflare/package.json | ConvertFrom-Json\\).version)",
+      "PowerShell($html = Get-Content \"notes\\\\10x-skills-cheatsheet.html\" -Raw; $open = \\([regex]::Matches\\($html, '<div\\\\b'\\)\\).Count; $close = \\([regex]::Matches\\($html, '</div>'\\)\\).Count; \"div open: $open / close: $close\"; $tables = \\([regex]::Matches\\($html, '<table\\\\b'\\)\\).Count; $tclose = \\([regex]::Matches\\($html, '</table>'\\)\\).Count; \"table open: $tables / close: $tclose\"; \\([regex]::Matches\\($html, 'Lekcja 5'\\)\\).Count.ToString\\(\\) + ' wystąpień \"Lekcja 5\"')"
     ],
     "deny": [
       "Bash(rm -rf *)"

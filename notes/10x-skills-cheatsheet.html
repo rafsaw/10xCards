@@ -363,7 +363,7 @@ body {
 <!-- HEADER -->
 <div class="header">
   <h1>10xDevs <span>Skills</span> Workflow<br>Cheat Sheet</h1>
-  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → testy → hooki → E2E)</div>
+  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → testy → hooki → E2E → debugowanie)</div>
 </div>
 
 <!-- LEGEND -->
@@ -549,12 +549,20 @@ body {
         <div class="out">→ .claude/settings.json · lefthook.yml</div>
       </div>
     </div>
-    <div class="step" style="margin-bottom:0">
+    <div class="step">
       <span class="snum sn-bl">18</span>
       <div class="sbody">
         <span class="cmd cmd-bl">/10x-e2e</span> <span style="color:var(--text3);font-size:12px">(L4)</span>
         <div class="desc">Ryzyka <strong>browser-level</strong> (cross-boundary / tylko-UI) — plan → generate → review → verify, 1 test/ryzyko. Sibling <span class="cmd" style="font-size:11px">/10x-implement</span> i <span class="cmd" style="font-size:11px">/10x-tdd</span>, ten sam plan + <span class="cmd" style="font-size:11px">## Progress</span>. Detale ↓ „Moduł 3, Lekcja 4".</div>
         <div class="out">→ tests/e2e/*.spec.ts</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl">19</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">audyt → /10x-tdd</span> <span style="color:var(--text3);font-size:12px">(L5)</span>
+        <div class="desc">Debugowanie: znany bug → najmniejszy <strong>failing test (RED)</strong> → minimalny fix (GREEN) → refactor; test zostaje jako <strong>regression armor</strong>. Bug niewidzialny (swallowed exception) najpierw dostaje <strong>seam obserwowalności</strong>; Sentry na końcu. Detale ↓ „Moduł 3, Lekcja 5".</div>
+        <div class="out">→ lib/observability.ts · Sentry</div>
       </div>
     </div>
 
@@ -735,12 +743,20 @@ body {
         <div class="out">→ .claude/settings.json · lefthook.yml</div>
       </div>
     </div>
-    <div class="step" style="margin-bottom:0">
+    <div class="step">
       <span class="snum sn-bl">18</span>
       <div class="sbody">
         <span class="cmd cmd-bl">/10x-e2e</span> <span style="color:var(--text3);font-size:12px">(L4)</span>
         <div class="desc">Identyczne z greenfield: ryzyka <strong>browser-level</strong> — plan → generate → review → verify, 1 test/ryzyko. Feature MUSI już istnieć (inaczej redirect do <span class="cmd" style="font-size:11px">/10x-implement</span>). Detale ↓ „Moduł 3, Lekcja 4".</div>
         <div class="out">→ tests/e2e/*.spec.ts</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <span class="snum sn-bl">19</span>
+      <div class="sbody">
+        <span class="cmd cmd-bl">audyt → /10x-tdd</span> <span style="color:var(--text3);font-size:12px">(L5)</span>
+        <div class="desc">Identyczne z greenfield. Brownfield bonus: <strong>git archaeology</strong> (<span class="cmd" style="font-size:11px">git log -G</span>) — sprawdź, czy anti-pattern przyszedł ze startera, czy <strong>wyrósł w projekcie</strong> i rozszedł się copy-paste → naprawiaj konwencję, nie instancję. Detale ↓ „Moduł 3, Lekcja 5".</div>
+        <div class="out">→ lib/observability.ts · Sentry</div>
       </div>
     </div>
 
@@ -888,6 +904,7 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
       <tr><td>Czas pisać pierwsze testy / testy lądują na helperach</td><td>/10x-test-plan</td><td>Kontrakt jakości risk-first przed kodem testów</td></tr>
       <tr><td>Prosty slice (CRUD, fundament)</td><td>/10x-new → /10x-plan → /10x-implement</td><td>Szybka ścieżka bez researchu</td></tr>
       <tr><td>Bug + proponowany fix / pytanie o zakres</td><td>/10x-frame → /10x-plan</td><td>Kwestionuj WHAT zanim zaplanujesz HOW</td></tr>
+      <tr><td>Znany bug / red test E2E (regresja)</td><td>audyt → /10x-new → /10x-plan → /10x-tdd</td><td>RED reprodukuje bug przed fixem; test zostaje jako regression armor</td></tr>
       <tr><td>Trudny slice (logika, biblioteki)</td><td>Exa + Context7 + /10x-research → plan</td><td>Research przed planem, nie po</td></tr>
       <tr><td>Kod gotowy, przed merge</td><td>/10x-impl-review → triage</td><td>Scorecard 6 wymiarów, nie "wygląda ok"</td></tr>
       <tr><td>Zmiana zmergowana, domknięcie</td><td>/10x-archive &lt;id&gt;</td><td>context/changes/ → context/archive/ (immutable)</td></tr>
@@ -1267,6 +1284,76 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   <!-- LESSON BOUNDARIES -->
   <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
     <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE instaluj Playwrighta / nie scaffolduj configów / nie wiruj CI (skill <em>zakłada</em>, że są — tworzy tylko seed + rules) · NIE napędzaj ryzyk nie-browser-level (redirect tdd/implement) · NIE napędzaj feature'a, którego nie ma (STOP → implement) · failing E2E to <strong>debug (L5)</strong>, nie generacja ani healing · selekcja modelu VLM / koszt → temat debugowania (L5), nie testowania.
+  </div>
+</div>
+
+<!-- ===== MODULE 3 LESSON 5 — DEBUGGING: TDB + OBSERVABILITY ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-blue)">⛉</span> Moduł 3, Lekcja 5 — debugowanie: test-driven bugfixing + obserwowalność (<span style="color:var(--accent-blue)">/10x-tdd · Sentry</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-blue-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-blue)">Co to jest:</strong> domknięcie pętli jakości M3 — co robić, gdy bug <strong>już jest</strong> (znaleziony ręcznie, przez red test E2E z L4, albo przez audyt anti-patternu). Rdzeń = <strong>test-driven bugfixing (TDB)</strong>: dla znanego defektu najpierw napisz najmniejszy test, który pada <em>z powodu buga</em> (RED), potem minimalny diff do GREEN, potem refactor pod zielonym — a test <strong>zostaje na zawsze jako regression armor</strong>. Wehikuł lekcji w tym projekcie: audyt <strong>swallowed exceptions</strong> (catch, który łyka wyjątek bez logu i bez raportu) → seam obserwowalności → Sentry. Artefakty: <span style="font-family:var(--mono)">foundation/swallowed-exceptions-audit.md</span> (raport + tracker) · change <span style="font-family:var(--mono)">observability-sentry</span> (zarchiwizowany).
+  </div>
+
+  <!-- CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">audyt anti-patternu</div><span class="chain-arrow">→</span>
+    <div class="chain-node">raport + git archaeology</div><span class="chain-arrow">→</span>
+    <div class="chain-node">/10x-new → /10x-plan</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-blue-dim);color:var(--accent-blue)">RED → GREEN → REFACTOR</div><span class="chain-arrow">→</span>
+    <div class="chain-node">generalizacja (konwencja)</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-green-dim);color:var(--accent-green)">Sentry (ostatni krok)</div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px">RED musi padać <strong>z właściwego powodu</strong> (uruchom i zobacz, że pada bo bug, nie bo literówka w teście). Spine w jednej linii: <em>pin dobrego zachowania → seam → red→green swallow → generalizuj → bind Sentry → verify</em>. Pojedyncza zmiana przez łańcuch <span style="font-family:var(--mono)">/10x-new → /10x-plan → /10x-tdd (+ /10x-implement)</span> — <strong>NIE</strong> <span style="font-family:var(--mono)">/10x-test-plan</span> (to orkiestrator product-wide; pojedynczy scope deleguje do tdd).</p>
+
+  <!-- PHASES -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">▤</span> Fazy A–D — jak audyt staje się fixem</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Faza</th><th>Co robi</th><th>Skill</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-blue)">A — charakteryzacja</td><td>Pin tego, co <strong>już działa</strong> (GREEN test istniejącego zachowania specimenu) — safety net + nauka harnessu; oddziela kontrakt behawioralny (działa) od luki obserwowalności (zepsute)</td><td>/10x-implement <span style="color:var(--text3)">(tdd odmawia testów do istniejącego kodu)</span></td></tr>
+      <tr><td style="color:var(--accent-blue)">B — TDB specimen</td><td>RED: non-JSON body ⇒ <span style="font-family:var(--mono)">reportError</span> wywołany (pada, bo bare <span style="font-family:var(--mono)">catch</span> łyka wyjątek) → GREEN: <span style="font-family:var(--mono)">catch (err) + reportError(err, ...)</span> → REFACTOR pod zielonym. <strong>Centralny moment TDB</strong>: niewidzialny bug staje się wykonywalny</td><td>/10x-tdd <span style="color:var(--text3)">(„bug fixes: write the failing repro first")</span></td></tr>
+      <tr><td style="color:var(--accent-blue)">C — generalizacja</td><td>Wynieś specimen do wspólnego helpera (<span style="font-family:var(--mono)">lib/parse-error.ts</span>, testowany <strong>raz</strong> za swallow) i zmigruj pozostałe miejsca jako behavior-preserving refactor — <strong>zabija konwencję, nie instancję</strong></td><td>/10x-tdd + /10x-implement</td></tr>
+      <tr><td style="color:var(--accent-blue)">D — bind Sentry</td><td>Podepnij <span style="font-family:var(--mono)">reportError</span> → Sentry na edge'u (env-gated, DSN z sekretów, off w testach); docs SDK przez Context7 (setup zmienia się często) → verify lint/build/manual hit</td><td>/10x-implement</td></tr>
+    </tbody>
+  </table>
+
+  <!-- KEY INSIGHT -->
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-top:16px">
+    <strong style="color:var(--accent-amber)">Kluczowa zależność — testowalność = obserwowalność:</strong> swallowed exception nie daje <strong>żadnej obserwowalnej różnicy</strong> (funkcja zwraca ten sam generyczny message z wyjątkiem i bez). Bug jest niewidzialny dla <em>testu</em> z tego samego powodu, co w <em>produkcji</em> — brak seamu. Dlatego seam (<span style="font-family:var(--mono)">reportError</span>) musi istnieć <strong>zanim</strong> red-testniesz swallow, a Sentry (implementacja seamu) wchodzi <strong>ostatnie</strong> — jest <em>enablerem</em> testowalności, nie celem. Naprawa testowalności i naprawa obserwowalności to ten sam akt.
+  </div>
+
+  <!-- STRICT TDD -->
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:12px">
+    <strong style="color:var(--accent-green)">Strict TDD ostrzy plan — RED rodzi seam:</strong> <span style="font-family:var(--mono)">/10x-tdd</span> zabrania budować production code <em>przed</em> failing testem, więc nie ma osobnej fazy „zaprojektuj seam": RED test referuje <span style="font-family:var(--mono)">reportError(...)</span>, pada bo moduł nie istnieje, a GREEN tworzy <strong>minimalny</strong> seam, który go satysfakcjonuje. Seam = jedno call site zamiast N inline'owych wywołań SDK — kasuje problem propagacji u źródła. Specimen wybieraj jak na L2: <strong>wyekstrahowana czysta funkcja</strong> (zero Reacta) zamiast logiki inline w komponencie (render + fetch mock + event sim).
+  </div>
+
+  <!-- CONVENTION -->
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Git archaeology — naprawiaj konwencję, nie instancję:</strong> intuicja mówi „to boilerplate ze startera" — <span style="font-family:var(--mono)">git log -G</span> pokazało, że <strong>nie</strong>: pattern był ręcznie napisany w jednym commicie feature'owym i rozszedł się <strong>copy-paste na 5+ komponentów</strong> w miarę wzrostu appki. Wniosek: 5 ręcznych fixów <em>zakonserwowałoby</em> zduplikowane parsery; ekstrakcja jednego helpera + jednego seamu to lek — pozostałe miejsca stają się refactorem pokrytym jednym testem. Łap konwencję wcześnie, bo jeden swallow napisany raz replikuje się sam.
+  </div>
+
+  <!-- SENTRY WIRING -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-blue)">⚙</span> Wiring Sentry — seam + dwa DSN-y (Cloudflare)</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Seam: <span style="font-family:var(--mono)">reportError(err, { where, ... })</span> w <span style="font-family:var(--mono)">src/lib/observability.ts</span> — dev → <span style="font-family:var(--mono)">console.error</span>, prod → <span style="font-family:var(--mono)">Sentry.captureException</span> (errors-only, bez tracingu). Reporter sam <strong>nigdy nie rzuca</strong> (throw w reporterze re-swallowowałby wyjątek, który ma raportować). Testy mockują seam — <strong>Sentry nie biega w CI</strong>.</p>
+  <table class="dtable">
+    <thead>
+      <tr><th>Zmienna</th><th>Czytana kiedy</th><th>Gdzie ją ustawić</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>PUBLIC_SENTRY_DSN</td><td><strong>Build time</strong> — wbita w bundle przeglądarki przez <span style="font-family:var(--mono)">astro build</span> (<span style="font-family:var(--mono)">sentry.client.config.ts</span>)</td><td>Środowisko <strong>buildu</strong>: Cloudflare <strong>Build Variable</strong> (lub <span style="font-family:var(--mono)">.env.production</span> lokalnie) — NIE runtime var</td></tr>
+      <tr><td>SENTRY_DSN</td><td><strong>Runtime</strong> — per request przez <span style="font-family:var(--mono)">withSentry</span> w Workerze (<span style="font-family:var(--mono)">sentry.server.config.ts</span>)</td><td><strong>Worker Secret</strong>: <span style="font-family:var(--mono)">npx wrangler secret put SENTRY_DSN</span></td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Pułapka Cloudflare (znana z tego projektu):</strong> <span style="font-family:var(--mono)">PUBLIC_SENTRY_DSN</span> ustawiony jako Worker Secret zamiast Build Variable = za późno (wartość potrzebna w trakcie <span style="font-family:var(--mono)">npm run build</span>, zanim Worker w ogóle ruszy) → <span style="font-family:var(--mono)">undefined</span> w przeglądarce → <span style="font-family:var(--mono)">Sentry.init()</span> cichy no-op → błędy browserowe nigdy nie docierają. Fix: Build Variables + retry build. Weryfikacja po buildzie: <span style="font-family:var(--mono)">grep -r "ingest" dist/client</span>. Oba DSN-y mogą mieć tę samą wartość (DSN jest publishable). Brak obu = Sentry wyłączony (bezpieczny no-op).
+  </div>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE zmieniaj strategii ryzyka (L1 — <span style="font-family:var(--mono)">--status</span> do odczytu) · NIE pisz testów feature'owych od zera (L2 — tu testy <em>reprodukują znany defekt</em>) · NIE konfiguruj hooków (L3) · NIE generuj nowych E2E ani nie używaj healera na zmienione <em>zachowanie biznesowe</em> (L4 — red test → debug tutaj; healer by zamaskował bug) · charakteryzacja istniejącego kodu → <span style="font-family:var(--mono)">/10x-implement</span>, nie tdd · Sentry zawsze env-gated i zmockowany w testach · selekcja modelu VLM / koszt to też temat debugowania (L5), nie testowania (L4).
   </div>
 </div>
 
