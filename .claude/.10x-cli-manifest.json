@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.8.0",
   "manifestVersion": 3,
-  "lastApplied": "2026-06-09T22:16:43.815Z",
-  "lessonId": "m4l1",
+  "lastApplied": "2026-06-15T22:47:24.812Z",
+  "lessonId": "m4l2",
   "course": "10xdevs3",
   "tool": "claude-code",
   "files": {
@@ -247,7 +247,11 @@
       "m1l5-2-constrain-approach.md",
       "m1l5-3-extend-prerequisites.md",
       "m1l5-4-store-plan.md",
-      "m3l2-ad-hoc-testing.md"
+      "m3l2-ad-hoc-testing.md",
+      "m4l2-1-territory-git-history.md",
+      "m4l2-2-structure-dependency-cruiser.md",
+      "m4l2-3-contributors-git.md",
+      "m4l2-repo-map-synthesis.md"
     ],
     "configs": [],
     "promptHashes": {
@@ -256,7 +260,11 @@
       "m1l5-2-constrain-approach.md": "1d2477cdc3c2a867a4bf79d3d1ba1151f0468875237f2322126b26e5d506c505",
       "m1l5-3-extend-prerequisites.md": "3418ae7c2ffc10f9cce9ad23b48b845033b57793fc2816df66c6deb8b6eae867",
       "m1l5-4-store-plan.md": "0f72fd90618f05bd8f6784825d217e128fa3148def28024995f1ad1026b34f48",
-      "m3l2-ad-hoc-testing.md": "6a4509b6b90d3ea9229d19dbec77aea0c6812d0d706144006f9465e195f5387f"
+      "m3l2-ad-hoc-testing.md": "6a4509b6b90d3ea9229d19dbec77aea0c6812d0d706144006f9465e195f5387f",
+      "m4l2-1-territory-git-history.md": "37a48d9095fa02fe2147190a9d4fdcf74a780f556b1e9d25945dd06f33bec5f2",
+      "m4l2-2-structure-dependency-cruiser.md": "0b0a15d46647bc28c0d41c901b2d07366edb9172bc0a529abe03488fb8de186c",
+      "m4l2-3-contributors-git.md": "fc600f19f40cfbc16bec152e1326021b3118d95f43c7bd2519986dcf3318fb50",
+      "m4l2-repo-map-synthesis.md": "8112d4b13fcb4a909308a82a696a64ef1a659e9e3b20238eeae7cccf228352b4"
     }
   },
   "lessons": {
@@ -1484,6 +1492,17 @@
       "appliedAt": "2026-06-09T22:16:43.814Z",
       "skills": {},
       "prompts": [],
+      "configs": []
+    },
+    "m4l2": {
+      "appliedAt": "2026-06-15T22:47:24.811Z",
+      "skills": {},
+      "prompts": [
+        "m4l2-1-territory-git-history.md",
+        "m4l2-2-structure-dependency-cruiser.md",
+        "m4l2-3-contributors-git.md",
+        "m4l2-repo-map-synthesis.md"
+      ],
       "configs": []
     }
   }
