@@ -16,7 +16,9 @@
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
-    "sync:issues": "node .claude/hooks/github-issue-sync.mjs"
+    "sync:issues": "node .claude/hooks/github-issue-sync.mjs",
+    "dep:check": "depcruise src",
+    "dep:graph": "depcruise src --output-type mermaid"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
@@ -48,6 +50,7 @@
     "@playwright/test": "^1.60.0",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
+    "dependency-cruiser": "^17.4.3",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.7.0",
