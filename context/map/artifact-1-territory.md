@@ -21,7 +21,7 @@
 
 ### Skala obszarów (top-level, surowo, dla kontekstu)
 
-| Obszar | Wiersze zmian | Charakter |
+| Obszar | File touches / changes | Charakter |
 |---|---:|---|
 | `context/` | 347 | dokumentacja procesu (plan/change/foundation) — **nie kod** |
 | `.claude/` | 149 | konfiguracja agenta / manifest — **szum** |
@@ -171,6 +171,23 @@ istnieją, zero usunięć**:
   najbardziej ryzykowne ścieżki (RLS, izolacja użytkowników) są pilnowane.
 - **Szum dokumentacyjny dominuje churn** (`context/`, `.claude/`). Każda przyszła
   analiza częstotliwości MUSI go filtrować, inaczej `src/` zniknie w statystykach.
+
+## 6. Self-perception vs evidence
+
+Expected owner perception:
+- The core of the project is AI flashcard generation.
+- The riskiest areas are OpenRouter and Supabase integration.
+- The project is small enough to understand mostly from memory.
+
+Evidence from git history suggests:
+- The project’s real center of gravity is broader than AI generation:
+  API routes, auth/middleware, card persistence, review workflow, and hardening all show strong activity.
+- `src/pages/api` is the hottest real product area.
+- `src/middleware.ts` is not the largest churn hotspot, but it is a cross-cutting chokepoint with broad blast radius.
+- `src/lib` should not be treated as one thing; the next structure analysis should split it into Supabase, OpenRouter, Leitner, observability, and retention responsibilities.
+
+Caveat:
+- The repository history is very short (~26 days), so this artifact shows early development concentration, not mature long-term maintenance patterns.
 
 ---
 

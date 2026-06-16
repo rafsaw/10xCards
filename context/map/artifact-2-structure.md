@@ -12,9 +12,14 @@
 - **Zakres grafu:** `src/` (TS/TSX). Wykluczone w configu: `context/`, `.claude/`,
   `public/`, `supabase/`, skompilowane `.astro/`, `dist/`.
 - **Skala grafu:** **60 modułów, 134 zależności**. **0 naruszeń reguł, 0 cykli,
-  0 sierot** wg narzędzia.
+  0 sierot** wg narzędzia. (Reporter `--output-type err` w podsumowaniu drukuje
+  **61 modules** — dolicza węzeł wejściowy `src`; liczbą odniesienia w tym dokumencie
+  jest **60** realnych modułów z raportu JSON.)
 - **Metryki:** fan-in = ile modułów importuje dany plik (jak bardzo jesteś *zależnym*);
   fan-out = ile modułów `src/` dany plik importuje (jak bardzo *zależysz*).
+  **Fan-in liczy też kolokowane testy** (`*.test.ts`), chyba że w danym wierszu
+  zaznaczono inaczej — dlatego niektóre endpointy mają fan-in ≥1 wyłącznie z własnych
+  testów, nie z produkcji.
 - **Ważny limit metody:** depcruise widzi tylko graf TS/TSX. **Importy z plików
   `.astro` nie są liczone do fan-in.** Dlatego np. `src/lib/config-status.ts` ma w
   tej metryce fan-in 0, mimo że jest używany — importuje go `src/layouts/Layout.astro`.
@@ -65,8 +70,10 @@
 
 > **Wniosek:** centrum grawitacji kodu to **infrastruktura dostępu do danych**
 > (`supabase.ts`), a nie żadna z funkcji produktowych. To typowe i zdrowe dla aplikacji
-> CRUD+auth, ale oznacza, że klient Supabase jest **najbardziej niebezpiecznym pojedynczym
-> punktem zmiany** w całym repo.
+> CRUD+auth. Wysoki fan-in nie jest tu *design smell* — to **stabilna granica
+> infrastruktury** (jeden, zamierzony punkt dostępu do bazy/sesji). Oznacza jednak,
+> że jest to **moduł o największym blast radius** w repo: zmiany jego sygnatury/zachowania
+> wymagają największej ostrożności, nawet jeśli sam moduł jest celowo stabilny i rzadko ruszany.
 
 ## 2. Cykle zależności
 
@@ -106,7 +113,7 @@ Co pęka, gdy zmienisz sygnaturę/zachowanie danego modułu:
 | `src/lib/supabase.ts` | **16 modułów** | Zmiana klienta/sesji/typów → ripuje przez middleware i **każdy** endpoint. Największa dźwignia w repo. |
 | `src/lib/parse-error.ts` | 7 | Zmiana kształtu błędu → wszystkie ścieżki obsługi błędów w UI. |
 | `src/lib/account-retention.ts` | 6 | Zmiana logiki write-locka → **wszystkie operacje zapisu** naraz (cards, generations, reviews). |
-| `src/lib/leitner.ts` | 3 (klient + serwer) | Zmiana interwałów SRS → trzeba zsynchronizować podgląd w `ReviewSession.tsx` i zapis w `reviews.ts`. Ukryte sprzężenie przez granicę. |
+| `src/lib/leitner.ts` | 3 (klient + serwer) | Niski fan-in, ale **wysoki blast radius semantyczny**: pojedynczy moduł SRS zasila zarówno podgląd w `ReviewSession.tsx`, jak i zapis w `reviews.ts`. Zmiana interwałów propaguje się przez granicę klient↔serwer naraz — to jeden kontrakt na dwóch końcach, nie zduplikowana logika. |
 | `src/lib/openrouter.ts` | 2 | Wąsko — dotyka tylko `generations.ts`. Bezpieczny do zmiany. |
 | `src/middleware.ts` | brama wszystkich chronionych tras | Fan-in 0 w grafie, ale runtime-owy blast radius = każda trasa `PROTECTED_ROUTES` (zgodne z Artifact 1 §5). |
 
@@ -133,9 +140,10 @@ co potwierdza, że ryzyko zostało rozpoznane.
 - **`retention-write-lock.test.ts` ma fan-out 9** — to najcięższy test w repo. Pilnuje
   inwariantu „brak zapisu w trakcie retencji" naraz na wielu endpointach. Wysoka wartość,
   ale **kruchy**: zmiana w którymkolwiek z 9 modułów może go ruszyć.
-- **Bramę `middleware.ts` da się sprawdzić tylko integracyjnie/e2e** — istnieje
-  `tests/e2e/auth.setup.ts` + `review-persistence.spec.ts`. Logiki `PROTECTED_ROUTES`
-  nie zweryfikujesz unit-testem.
+- **Bramę `middleware.ts` najlepiej dziś weryfikować integracyjnie/e2e** — istnieje
+  `tests/e2e/auth.setup.ts` + `review-persistence.spec.ts`. Przy obecnym kształcie
+  `PROTECTED_ROUTES` to wystarcza; gdyby logika ochrony tras urosła (role, wyjątki,
+  warunki), warto wydzielić czystą funkcję dopasowania trasy do unit-testów.
 - **Komponenty React zależą głównie od `parse-error.ts`** (czysty) — łatwe do unit/render-testu;
   ale ścieżki robiące `fetch` do API domykają się dopiero **e2e**.
 
@@ -170,7 +178,7 @@ cztery rozjazdy między tym obrazem a realną strukturą kodu:
 | # | Domena mówi | Struktura pokazuje | Dlaczego to ważne |
 |--:|---|---|---|
 | 1 | **„AI" to sedno produktu** | `openrouter.ts` ma fan-in **2** — jedna wąska szprycha do jednego endpointu | Headline-feature jest strukturalnie peryferyjny. Plus: świetna izolacja (łatwo wymienić providera). Minus: „AI-first" to w kodzie cienki moduł, nie centrum. |
-| 2 | **SRS/Leitner to sygnatura aplikacji** | `leitner.ts` to mały util (fan-in 3), **współdzielony przez granicę** klient↔serwer | Najważniejsza logika domenowa nie jest centralna, a w dodatku zduplikowana koncepcyjnie po dwóch stronach. Zmiana interwałów wymaga ręcznej synchronizacji `ReviewSession.tsx` ↔ `reviews.ts`. Ukryte sprzężenie. |
+| 2 | **SRS/Leitner to sygnatura aplikacji** | `leitner.ts` to mały util (fan-in 3), **współdzielony przez granicę** klient↔serwer | Najważniejsza logika domenowa nie jest strukturalnie centralna, ale ma **wysoki blast radius semantyczny**: ten sam kontrakt interwałów obowiązuje po obu stronach granicy. To jeden moduł czytany w dwóch miejscach (`ReviewSession.tsx` ↔ `reviews.ts`), nie zduplikowana logika — zmiana propaguje się na oba końce równocześnie. |
 | 3 | **Backend „per feature"** (jak komponenty) | Komponenty SĄ per-feature (`generate/`, `library/`, `review/`…), ale API jest **płaskie** pod `pages/api/`, a sprzężenie idzie przez **warstwę lib**, nie przez funkcję | Frontend tnie pionowo (po domenie), backend poziomo (po warstwie). Szukając „całej funkcji review" znajdziesz ją w komponencie, ale na serwerze jest rozsmarowana: `reviews.ts` + `supabase` + `retention` + `leitner`. |
 | 4 | **„Usuwanie konta" to jedna mała funkcja** | `account-retention.ts` to **aspekt przecinający wszystkie zapisy** (fan-in 6) | W mapie domeny to drobny feature; w kodzie to globalny inwariant wpięty w każdy endpoint mutujący. Każda nowa ścieżka zapisu MUSI uwzględnić retention — to nieoczywiste z nazw folderów. |
 
@@ -194,6 +202,25 @@ npx depcruise src --config .dependency-cruiser.cjs \
 Drugi kandydat: `--focus "src/lib/account-retention.ts"` (mapa write-locka po wszystkich
 zapisach). Render dopiero po selekcji — pełny graf `src/` (60 modułów) jest zbyt gęsty,
 by coś z niego wyczytać.
+
+
+## 7. Self-perception vs evidence
+
+Expected owner perception:
+- The core architectural risk is AI/OpenRouter.
+- The app is organized around product features: generate, library, review, auth.
+- SRS/Leitner is one of the central domain mechanisms.
+
+Evidence from the dependency graph:
+- The strongest structural hub is not AI but `src/lib/supabase.ts`.
+- OpenRouter is well isolated: one production consumer plus tests.
+- Feature organization is strong on the frontend, but the backend is organized around flat API endpoints plus shared infrastructure.
+- `account-retention.ts` is more architectural than it appears from the product UI: it is a cross-cutting write invariant.
+- `leitner.ts` has low fan-in, but high semantic importance because it affects both review UI and persisted review behavior.
+
+Decision implication:
+- When changing product behavior, navigate by feature.
+- When changing auth/data/session/write behavior, navigate by infrastructure hub and blast radius.
 
 ---
 
