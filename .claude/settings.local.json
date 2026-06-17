@@ -158,7 +158,12 @@
       "Bash(sed 's/\\(.*//')",
       "Bash(echo \"exit: $?\")",
       "Bash(npx depcruise *)",
-      "Bash(rm -f ._dc.json)"
+      "Bash(rm -f ._dc.json)",
+      "Bash(command -v ast-grep sg)",
+      "Bash(ast-grep --version)",
+      "Bash(sg --version)",
+      "Bash(ast-grep run *)",
+      "Bash(grep -v '^//')"
     ],
     "deny": [
       "Bash(rm -rf *)"

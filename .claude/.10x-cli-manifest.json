@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.8.0",
   "manifestVersion": 3,
-  "lastApplied": "2026-06-15T22:47:24.812Z",
-  "lessonId": "m4l2",
+  "lastApplied": "2026-06-17T19:08:19.422Z",
+  "lessonId": "m4l3",
   "course": "10xdevs3",
   "tool": "claude-code",
   "files": {
@@ -251,7 +251,9 @@
       "m4l2-1-territory-git-history.md",
       "m4l2-2-structure-dependency-cruiser.md",
       "m4l2-3-contributors-git.md",
-      "m4l2-repo-map-synthesis.md"
+      "m4l2-repo-map-synthesis.md",
+      "m4l3-1-research-with-map.md",
+      "m4l3-2-ast-grep-verification.md"
     ],
     "configs": [],
     "promptHashes": {
@@ -264,7 +266,9 @@
       "m4l2-1-territory-git-history.md": "37a48d9095fa02fe2147190a9d4fdcf74a780f556b1e9d25945dd06f33bec5f2",
       "m4l2-2-structure-dependency-cruiser.md": "0b0a15d46647bc28c0d41c901b2d07366edb9172bc0a529abe03488fb8de186c",
       "m4l2-3-contributors-git.md": "fc600f19f40cfbc16bec152e1326021b3118d95f43c7bd2519986dcf3318fb50",
-      "m4l2-repo-map-synthesis.md": "8112d4b13fcb4a909308a82a696a64ef1a659e9e3b20238eeae7cccf228352b4"
+      "m4l2-repo-map-synthesis.md": "8112d4b13fcb4a909308a82a696a64ef1a659e9e3b20238eeae7cccf228352b4",
+      "m4l3-1-research-with-map.md": "b21933bc50ad0de9ad32bf3908d6081bd33632ed4dfb2519747c1a4294b2cec4",
+      "m4l3-2-ast-grep-verification.md": "6d0c4cc38281f68a2bb728580c177499dc0d812988cb68ae84885080148d62b8"
     }
   },
   "lessons": {
@@ -1502,6 +1506,15 @@
         "m4l2-2-structure-dependency-cruiser.md",
         "m4l2-3-contributors-git.md",
         "m4l2-repo-map-synthesis.md"
+      ],
+      "configs": []
+    },
+    "m4l3": {
+      "appliedAt": "2026-06-17T19:08:19.422Z",
+      "skills": {},
+      "prompts": [
+        "m4l3-1-research-with-map.md",
+        "m4l3-2-ast-grep-verification.md"
       ],
       "configs": []
     }
