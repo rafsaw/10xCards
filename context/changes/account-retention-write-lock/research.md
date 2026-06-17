@@ -9,6 +9,7 @@ tags: [research, codebase, account-retention, write-lock, middleware, supabase, 
 status: complete
 last_updated: 2026-06-17
 last_updated_by: Rafal S
+last_updated_note: "Dodano §I — weryfikacja strukturalna ast-grep + grep; skorygowano fan-in OpenRouter/Supabase i liczność dostępów do account_deletion_requests."
 ---
 
 # Research: Account-retention / write-lock flow for mutating operations
@@ -183,7 +184,7 @@ Czego **NIE** udowadnia **[evidence/inference]**:
 | UI: konsumenci błędów (403) | `parse-error.ts:16`; FALLBACK w `CardRow.tsx:17`, `CreateCardForm.tsx:10`, `ReviewSession.tsx:19`, `PasteAndGenerateForm.tsx:13`, `DraftReviewList.tsx:16`, `DeleteAccountButton.tsx:11` | **Żaden komponent nie ma klucza `account_read_only`** — fallback na `message` z serwera; jedyna kopia tekstu to `account-retention.ts:12` | [evidence] grep + parse-error.ts:16-31 |
 | Migracje / RLS / sweep | `20260527150510_cards_and_account_deletion.sql:55-79` (tabela + 4 polityki RLS); `20260602120000_account_deletion_sweep.sql` (`sweep_expired_account_deletions()`, `retention_until < now()`, pg_cron `0 3 * * *`) | Redefinicja „pending" wymaga migracji tabeli, polityk RLS **i** predykatu sweepa | [evidence] oba pliki obecne lokalnie |
 
-Łańcuch największego zasięgu (zgodny z mapą): `supabase.ts` (fan-in 16) → `account-retention.ts` (fan-in 6) → `parse-error.ts` (fan-in 7). **[evidence: repo-map.md:104-105, 116-118]**
+Łańcuch największego zasięgu (mapa): `supabase.ts` (fan-in 16) → `account-retention.ts` (fan-in 6) → `parse-error.ts` (fan-in 7). **[evidence: repo-map.md:104-105, 116-118]** Zmierzono niezależnie (§I): account-retention **6 TS** = potwierdzone; parse-error **7** = 6 komponentów + test; supabase **15 TS/TSX** (nie 16) + 3 `.astro`. **[ast-grep+grep, §I]**
 
 ### H. Historia gita
 
@@ -193,6 +194,32 @@ Czego **NIE** udowadnia **[evidence/inference]**:
 - **`47e3cbc`** (2026-06-04 10:58, inny change-set „cross-user-isolation-write-authorization") — dodał test guardrail `retention-write-lock.test.ts` (+156). **[evidence] git show --stat**
 
 Twierdzenie mapy „2 commity w jeden dzień" dotyczy *implementacji* na `account-retention.ts` (26c850a + cbcccca, oba 2026-06-02) — **potwierdzone**. Pełna powierzchnia inwariantu obejmuje 4 commity w dwóch change-setach. **[evidence]**
+
+### I. Weryfikacja strukturalna (ast-grep + grep) — 2026-06-17
+
+Metoda: wzorce `ast-grep` 0.43.0 na TS/TSX; **każde zero z ast-grep skonfrontowane z `grep`**, by odróżnić realny brak wystąpień od ograniczenia wzorca. Wszystkie liczby fan-in z mapy (`repo-map.md`, źródło: dependency-cruiser, **tylko TS/TSX, `.astro` poza grafem**) zostały zmierzone niezależnie.
+
+| # | Twierdzenie strukturalne | Wynik | Dowód (file:line) |
+|---|---|---|---|
+| S1 | `readOnlyGuard` wołany 7× w 6 plikach | **potwierdzone** | `cards.ts:33`, `cards/[id].ts:30`+`:86`, `generations.ts:24`, `generations/save.ts:39`, `generations/discard.ts:18`, `reviews.ts:23` (wzorzec `readOnlyGuard($$$)`) |
+| S2 | Jednolity kształt: `const readOnly = readOnlyGuard(context.locals); if (readOnly) return readOnly;` | **potwierdzone** | 7× identyczne wywołanie + 7× identyczny `if (readOnly) return readOnly;` w liniach +1 (`reviews.ts:23-24`, `cards.ts:33-34`, `cards/[id].ts:30-31`+`86-87`, `generations.ts:24-25`, `save.ts:39-40`, `discard.ts:18-19`) |
+| S3 | Spośród mutujących tras tylko `cancel`+`delete` bez strażnika | **potwierdzone** | 11 plików tras w `src/pages/api/**`; 6 ze strażnikiem; bez: `account/cancel.ts`, `account/delete.ts` (lifecycle, celowo) oraz `auth/signin\|signout\|signup.ts` (mutują sesję, osobna kategoria — już opisana) |
+| S4 | `account-retention.ts` fan-in 6 | **potwierdzone + doprecyzowane** | 6 importerów TS (`readOnlyGuard`) = depcruise 6: `cards.ts:3`, `cards/[id].ts:3`, `generations.ts:4`, `discard.ts:3`, `save.ts:3`, `reviews.ts:3`. **+2 importery `.astro`** (`formatRetentionDate`): `RetentionBanner.astro:4`, `settings.astro:5` → **8 referencji łącznie**. **Zero** importerów TS/TSX dla `formatRetentionDate` (potwierdza, że żyje tylko w `.astro`, poza grafem). |
+| S5 | `parse-error.ts` fan-in 7; 6 komponentów-konsumentów | **potwierdzone + doprecyzowane** | 6 produkcyjnych importerów (`parseErrorBody`): `CardRow.tsx:4`, `CreateCardForm.tsx:3`, `ReviewSession.tsx:4`, `PasteAndGenerateForm.tsx:3`, `DraftReviewList.tsx:3`, `DeleteAccountButton.tsx:4`. **+`parse-error.test.ts:2`** = **7 importerów łącznie** (fan-in 7 = 6 komponentów + test). Call-site'y `parseErrorBody(response)`: po 1 w każdym z 6 komponentów (`CardRow.tsx:27`, `CreateCardForm.tsx:47`, `PasteAndGenerateForm.tsx:66`, `DraftReviewList.tsx:85`, `ReviewSession.tsx:131`, `DeleteAccountButton.tsx:42`). |
+| S6 | Żaden komponent nie ma klucza `account_read_only` | **potwierdzone** | `account_read_only` występuje wyłącznie w `account-retention.ts:11` (jedyna kopia produkcyjna) + 3 referencje testowe (`generations.test.ts:137,141`, `retention-write-lock.test.ts:125,132`). **Zero w `src/components`** (grep). |
+| S7 | OpenRouter fan-in 2 | **doprecyzowane** | Tylko **1 importer produkcyjny**: `generations.ts:5`; drugi to `openrouter.test.ts:2`. Produkcyjny fan-in = **1** (`generateCandidateCards` wołany raz w prod: `generations.ts:50`). Klient AI jest *bardziej* odizolowany niż sugeruje „2". |
+| S8 | `formatRetentionDate` konsumują tylko `RetentionBanner.astro` + `settings.astro` | **potwierdzone** | Dokładnie 2 importery: `RetentionBanner.astro:4`, `settings.astro:5`; oba `.astro` (niewidoczne dla depcruise). Brak innych konsumentów. |
+| S9 | `supabase.ts` fan-in 16 | **doprecyzowane / sporne** | Zmierzono **18 referencji**: 15 TS/TSX (12 produkcyjnych: `middleware.ts:2` + 11 endpointów; 3 testy: `cards.test.ts:29`, `retention-write-lock.test.ts:3`, `reviews.test.ts:30`) + **3 `.astro`** (`generate.astro:3`, `library.astro:3`, `review.astro:3`). depcruise (tylko TS/TSX) ⇒ **15**, nie 16 — mapowe „16" nieodtwarzalne dokładnie (±1). Peryferyjne dla samego inwariantu write-lock. |
+| S10 | Zapisy kart przez `from("cards")` | **potwierdzone + doprecyzowane** | insert: `cards.ts:59-60`, `generations.ts:82`; update: `cards/[id].ts:62-63`, `reviews.ts:60-61`; delete: `cards/[id].ts:102-103`, `discard.ts:26`. **`save.ts:66-67` to `from("cards").select`** (odczyt draftów) — realny zapis to RPC `finalize_drafts` (`save.ts:87-90`), nie bezpośredni insert/update na `cards`. |
+| S11 | Dostęp do `account_deletion_requests` w 3 miejscach | **doprecyzowane** | 3 pliki, ale **4 dostępy**: `middleware.ts:23` (select), `cancel.ts:27` (delete), `delete.ts:34` (insert) **oraz `delete.ts:45` (select w gałęzi obsługi duplikatu 23505)**. Raport pierwotnie pomijał ten drugi odczyt w `delete.ts`. |
+| S12 | Call-site'y `createClient` | **potwierdzone (nowa liczność)** | **13 produkcyjnych** wywołań, jednolity kształt `createClient(context.request.headers, context.cookies)`: `middleware.ts:7` + 12 w handlerach (`cards/[id].ts` dwukrotnie: `:33`, `:89`). „Zawsze przez `createClient`" — potwierdzone mechanicznie. |
+| S13 | Typ kandydata (`CandidateCard`) | **potwierdzone (uwaga: fałszywe zero ast-grep)** | Wzorzec ast-grep `CandidateCard` (goły identyfikator) zwrócił **0** — ograniczenie wzorca (nie łapie pozycji adnotacji typu). **grep potwierdza realne użycie**: typ zdefiniowany i zamknięty w `openrouter.ts:15` (interface), `:56` i `:130` (typy zwrotne); `generations.ts:5` importuje **tylko funkcję** `generateCandidateCards`/`OpenRouterError`, **nigdy samego typu** `CandidateCard`. Typ kandydata nie wycieka poza moduł. |
+
+**Zera ast-grep skonfrontowane z grep (realny brak vs ograniczenie wzorca):**
+- `import { … } from "@/lib/account-retention"` w `.tsx` → **0** (grep: realne zero — `formatRetentionDate` importują tylko `.astro`).
+- `import { … } from "@/lib/openrouter"` w `.tsx` → **0** (grep: realne zero — jedyni importerzy to `.ts`).
+- `import { … } from "@/lib/supabase"` w `.tsx` → **0** (grep: realne zero — importerzy to `.ts` + `.astro`, brak `.tsx`).
+- `CandidateCard` (S13) → **0** w ast-grep, ale grep pokazuje użycie ⇒ **fałszywe zero** (ograniczenie wzorca dla pozycji typowych).
 
 ---
 
