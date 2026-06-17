@@ -80,5 +80,13 @@
     "*.{json,css,md}": [
       "prettier --write"
     ]
+  },
+  "allowScripts": {
+    "@sentry/cli@2.58.6": true,
+    "esbuild@0.27.7": true,
+    "esbuild@0.27.3": true,
+    "sharp@0.34.5": true,
+    "supabase@2.98.2": true,
+    "workerd@1.20260507.1": true
   }
 }
