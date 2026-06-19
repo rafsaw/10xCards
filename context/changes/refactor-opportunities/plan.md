@@ -4,9 +4,11 @@
 
 Drop the dead Row-Level-Security policy `account_deletion_requests_update_own` via a single, reversible migration. This is candidate **C3**, ranked **#1** in `context/changes/refactor-opportunities/research.md` for highest value-to-cost: it closes a **real authorization bypass** (impl-review F1) rather than merely removing dead code, and costs ~3 lines of SQL with a DB/RLS-only blast radius.
 
-The bypass: the table has full default CRUD RLS, including `FOR UPDATE TO authenticated USING auth.uid() = user_id`. No application code ever issues `.update()` on this table (verified: 1 INSERT, 2 SELECT, 1 DELETE, zero UPDATE — research T4). But because the UPDATE policy is live, any logged-in user can `PATCH .../account_deletion_requests?user_id=eq.<own>` directly through PostgREST and freely move their own `retention_until` — deferring or shortening their own account deletion, bypassing the application entirely and defeating the immutable-retention-window invariant.
+The bypass: the table has full default CRUD RLS, including `FOR UPDATE TO authenticated USING auth.uid() = user_id`. No application code ever issues `.update()` on this table (verified: 1 INSERT, 2 SELECT, 1 DELETE, zero UPDATE — research T4). But because the UPDATE policy is live, any logged-in user can `PATCH .../account_deletion_requests?user_id=eq.<own>` directly through PostgREST and freely move their own `retention_until` — deferring or shortening their own account deletion, bypassing the application entirely.
 
-The plan brackets the drop with **empirical before/after probes** so the acceptance test proves the attack vector is closed, not just that the schema changed.
+**Scope of the win (important):** this change removes the **single-step UPDATE/PATCH vector** and reduces attack surface. It does **not** by itself make the immutable-retention-window invariant fully real at the DB layer: the `insert_own` and `delete_own` policies remain open to `authenticated`, and the INSERT policy places no constraint on the `retention_until` value (migration `:64-79`). So after this drop, a user can still move their own window in two steps — `DELETE` their row, then re-`INSERT` it with an arbitrary `retention_until` — via PostgREST. Closing that residual `DELETE+INSERT` vector requires DB-level immutability design (constrained insert/delete, a trigger, or a SECURITY DEFINER RPC) and is deferred to a follow-up (see "What We're NOT Doing"). This plan deliberately stays minimal and reversible.
+
+The plan brackets the drop with **empirical before/after probes** so the acceptance test proves the single-step UPDATE vector is closed, not just that the schema changed.
 
 ## Current State Analysis
 
@@ -18,7 +20,9 @@ The plan brackets the drop with **empirical before/after probes** so the accepta
 
 ## Desired End State
 
-The `account_deletion_requests` table exposes only `select` / `insert` / `delete` policies to `authenticated`; no `for update` policy exists. A logged-in user attempting `PATCH .../account_deletion_requests?user_id=eq.<own>` to change `retention_until` receives **403 / permission denied**, and the row's `retention_until` is unchanged. The application's request → cancel → sweep lifecycle (insert / select / delete) is fully unaffected. The change is reversible by re-creating the policy.
+The `account_deletion_requests` table exposes only `select` / `insert` / `delete` policies to `authenticated`; no `for update` policy exists. A logged-in user attempting the **single-step** `PATCH .../account_deletion_requests?user_id=eq.<own>` to change `retention_until` receives **403 / permission denied**, and the row's `retention_until` is unchanged. The application's request → cancel → sweep lifecycle (insert / select / delete) is fully unaffected. The change is reversible by re-creating the policy.
+
+This end state **narrows** the bypass; it does not eliminate it. The residual `DELETE+INSERT` re-open vector (a user deleting then re-inserting their row with an arbitrary `retention_until`) is **out of scope** here and routed to a follow-up — full DB-layer immutability is not claimed by this change.
 
 ### Key Discoveries:
 
@@ -35,6 +39,7 @@ The `account_deletion_requests` table exposes only `select` / `insert` / `delete
 - **C4** (two "pending" definitions: middleware row-exists vs sweep `retention_until < now()`) — out of scope; a product/domain decision (does read-only end at `retention_until`?), not a refactor (research §2.4).
 - No rewrite of any other RLS policy on this or any other table.
 - No application code, UI, or guardrail-test changes.
+- **Residual `DELETE+INSERT` retention_until re-open vector** — **deferred to a follow-up**. Because `insert_own`/`delete_own` stay open to `authenticated` and INSERT does not constrain `retention_until`, a user can still move their own window in two PostgREST calls (delete then re-insert). Fully closing this needs DB-level immutability design — constrained insert/delete, a trigger that forbids re-insert with a later `retention_until`, or routing request/cancel through a SECURITY DEFINER RPC. That is its own research + plan (closer in size to the excluded C1), intentionally kept out of this minimal C3 change.
 
 ## Implementation Approach
 
@@ -158,7 +163,7 @@ Prove the bypass is closed — the policy is gone and the same PATCH is now reje
 
 **Intent**: Prove the real attack vector is closed, identically to the Phase 1 reproduction.
 
-**Contract**: Repeat the Phase 1 PATCH as the same kind of logged-in test user (fresh test user + pending-deletion row). Assert the PATCH is **rejected (403 / permission denied)** and that reading the row back shows `retention_until` **unchanged**. Confirm the app lifecycle still works: `POST /api/account/delete` (insert) and `POST /api/account/cancel` (delete) succeed for the test user. Tear down the test user.
+**Contract**: Repeat the Phase 1 PATCH as the same kind of logged-in test user (fresh test user + pending-deletion row). Assert the **single-step UPDATE PATCH** is **rejected (403 / permission denied)** and that reading the row back shows `retention_until` **unchanged**. (This acceptance covers the UPDATE vector only — the `DELETE+INSERT` re-open path is a deferred follow-up and is **not** asserted closed here.) Confirm the app lifecycle still works: `POST /api/account/delete` (insert) and `POST /api/account/cancel` (delete) succeed for the test user. Tear down the test user.
 
 #### 3. Record reversal notes
 
@@ -211,7 +216,8 @@ There is no DB test harness and Supabase is remote-only, so verification is manu
 - Source policy: `supabase/migrations/20260527150510_cards_and_account_deletion.sql:72-75`
 - Origin finding (F1): `context/archive/2026-06-01-account-deletion-with-retention/reviews/impl-review.md:25-37`
 - Remote verification mechanics: `verification-and-deploy-workflow` memory (service_role test users, GoTrue domain block, PostgREST auth)
-- Deferred follow-up: N5 FS-scan guard test (research §3 #2, pattern `test/no-service-role-in-src.test.ts:21-54`)
+- Deferred follow-up: N5 FS-scan guard test (research §3 #2, pattern `test/no-service-role-in-src.test.ts:21-54`) — fold in a standing assertion that **no UPDATE policy remains on `account_deletion_requests`**, so this C3 drop can't be silently re-introduced by a future default-CRUD-RLS copy-paste (the probe in this plan is one-time/manual)
+- Deferred follow-up: close the `DELETE+INSERT` retention_until re-open vector (DB-level immutability — constrained insert/delete, trigger, or SECURITY DEFINER RPC); see "What We're NOT Doing". Source policies: `20260527150510_...sql:64-79`
 
 ## Progress
 
