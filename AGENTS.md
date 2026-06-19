@@ -1,6 +1,6 @@
 # Repository Guidelines
 
-10xCards is an AI-assisted spaced-repetition flashcard MVP: Astro 6, React 19, TypeScript, Tailwind 4, Supabase Auth, Cloudflare Workers. Only the starter skeleton and auth exist; product features are not built yet.
+10xCards is an AI-assisted spaced-repetition flashcard MVP: Astro 6, React 19, TypeScript, Tailwind 4, Supabase Auth, Cloudflare Workers. Core slices are built (AI generation, atomic save, manual CRUD, SRS review, account deletion); see `context/foundation/roadmap.md` for slice status.
 
 ## Agent Tripwires
 
@@ -25,7 +25,10 @@ Node `22.14.0` (`.nvmrc`); install with `npm install`.
 - `npm run dev` / `preview` — dev server and production preview.
 - `npm run build` — production build for Cloudflare.
 - `npm run lint` / `lint:fix` — type-aware ESLint, optionally auto-fixing.
+- `npm run typecheck` — `astro sync && astro check`.
 - `npm run format` — Prettier across the repo.
+- `npm test` / `test:watch` — Vitest unit tests; `npm run test:integration` — Vitest integration suite (`vitest.integration.config.ts`).
+- `npm run test:e2e` — Playwright end-to-end tests (`tests/e2e/`).
 - `npx astro sync` — regenerate Astro types; CI runs this before lint/build.
 
 ## Coding Style & Naming Conventions
@@ -36,7 +39,9 @@ Name React components `PascalCase.tsx`, route files with lowercase paths, and ut
 
 ## Testing Guidelines
 
-No test runner is configured yet. Validate with `npm run lint`, `npm run build`, and manual checks of affected routes (`/auth/*`, `/dashboard`). New tests: colocate `*.test.ts`/`*.test.tsx` and add the command to `package.json`.
+Vitest is the runner: unit/integration specs are colocated as `*.test.ts` / `*.integration.test.ts` next to source (e.g. `src/pages/api/reviews.test.ts`), with a shared harness, two-user fixture, and scoped Supabase mock under `test/integration/`. Playwright drives end-to-end specs in `tests/e2e/` (auth setup/teardown included; see `tests/e2e/AGENTS.md`). Stryker (`@stryker-mutator/vitest-runner`) is available for mutation testing.
+
+Validate changes with `npm run lint`, `npm run build`, the relevant test suite (`npm test`, `npm run test:integration`, and/or `npm run test:e2e`), and manual checks of affected routes (`/auth/*`, `/dashboard`, `/library`, `/generate`, `/review`). New tests: colocate `*.test.ts`/`*.test.tsx`; integration specs use the `test/integration/` harness, E2E specs follow `/10x-e2e`.
 
 ## Commit & Pull Request Guidelines
 

@@ -6,7 +6,7 @@ Claude-specific guidance:
 - For non-trivial work, post a short plan (files to touch + approach) before editing.
 - Prefer minimal diffs.
 - Avoid speculative refactors.
-- Before declaring a task done, run `npm run lint` and `npm run build`, and manually check affected routes — there is no test runner (see @AGENTS.md → Testing Guidelines).
+- Before declaring a task done, run `npm run lint`, `npm run build`, and the relevant tests (`npm test` for unit/integration, `npm run test:e2e` for Playwright), plus a manual check of affected routes (see @AGENTS.md → Testing Guidelines).
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
