@@ -163,7 +163,14 @@
       "Bash(ast-grep --version)",
       "Bash(sg --version)",
       "Bash(ast-grep run *)",
-      "Bash(grep -v '^//')"
+      "Bash(grep -v '^//')",
+      "Bash(command -v ast-grep)",
+      "Bash(command -v sg)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(echo \"rc=$? \\(1 = zero matches => confirmed absent\\)\")",
+      "Bash(echo \"rc=$? \\(1 = zero => confirmed\\)\")",
+      "Bash(echo \"ast-grep-sql-EXIT=$?\")",
+      "Bash(echo \"rc=$? \\(1 = no drop => still live\\)\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
