@@ -1,7 +1,7 @@
 ---
 change_id: refactor-opportunities
 title: Rank and sequence the refactors worth doing from the account-retention tech-debt analysis
-status: preparing
+status: planned
 created: 2026-06-18
 updated: 2026-06-18
 archived_at: null
