@@ -5,10 +5,10 @@
 
 ## 1. Projekty opisane w module
 
-- **Nazwa:** `10xCards` — AI-assisted spaced-repetition flashcard MVP (źródło: `context/map/repo-map.md` §1).
-- **Stack:** Astro 6 + React 19 + TypeScript + Tailwind 4; Supabase (`@supabase/ssr`, `@supabase/supabase-js`) jako Postgres + RLS + email-auth; deploy na Cloudflare Workers (`wrangler.jsonc`, `astro.config.mjs`); Sentry; testy Vitest + Playwright + Stryker (źródło: `package.json` deps + scripts).
-- **Skala (orientacyjnie):** cała historia repo ~26 dni, 178–181 commitów (źródło: `repo-map.md` §8); graf importów 60 modułów / 134 zależności, **0 cykli / 0 sierot / 0 naruszeń reguł** (źródło: `repo-map.md` stopka, z `artifact-2-structure.md`); 4 migracje SQL i 12 handlerów API w 11 plikach, wszystkie mutujące — zero GET/PUT (źródło: bezpośredni odczyt `supabase/migrations/`, `src/pages/api/**`; potwierdzone `context/changes/refactor-opportunities/research.md` T7); **bus factor = 1** (jedyny autor: Rafal S — `artifact-3-contributors.md` via `repo-map.md` §5).
-- **Występowanie:** L2 `context/map/*`; L3 `context/changes/account-retention-write-lock/*`; L4 `context/changes/refactor-opportunities/*`; L5 `context/domain/*`.
+- **Nazwa:** `10xCards` — AI-assisted spaced-repetition MVP
+- **Stack:** Astro/React/TS/Supabase/Cloudflare
+- **Skala (orientacyjnie):** młode repo, ~26 dni, 178–181 commitów
+- **Najważniejszy fakt:** zdrowy graf, ale bus factor 1
 
 ## 2. Mapa projektu z L2
 
@@ -30,14 +30,19 @@
 
 ## 4. Plan refaktoru z L4
 
-- **Co:** ranking długu z L3 → wybór, co naprawić, w jakim kształcie i w jakiej kolejności. Inwentarz: 3 kandydaci strukturalni **C1** (centralizacja write-locka), **C2** (rejestr kopii błędów + klucz `account_read_only`), **C3** (drop martwej polityki RLS); **C4** (dwie definicje „pending") → **STOP na granicy biznesowej**; N1–N5 nie-kandydaci (źródło: `refactor-opportunities/research.md` §1, §3).
-- **Wybrana opcja:** **C3 — drop `account_deletion_requests_update_own`** — #1 po ROI: zamyka realny bypass (PostgREST PATCH na własny `retention_until`), kosztuje ~3 linie SQL, blast radius tylko DB/RLS, w pełni odwracalny (źródło: `research.md` §3 #1; `plan.md` Overview).
-- **Czego świadomie NIE robimy:** C1 (odwraca udokumentowaną decyzję „the auditable pattern", duży blast radius), C2 i C4 (poza zakresem), N5 i **rezydualny wektor `DELETE+INSERT`** (`insert_own`/`delete_own` zostają otwarte, INSERT nie ogranicza `retention_until`) — **deferred follow-up**; ten plan nie twierdzi, że domyka niezmiennik immutable-window na poziomie DB (źródło: `plan.md` „What We're NOT Doing" + Desired End State).
-- **Fazy (każda z manualnym checkpointem; Supabase remote-only, brak DB harness, CI nie bramkuje):**
-  - Faza 1 — Baseline & reprodukcja F1: potwierdź politykę aktywną (`pg_policies`) i empirycznie odtwórz udany PATCH **przed** zmianą (weryfikacja **ręczna/empiryczna** + automat: lint/build).
-  - Faza 2 — Autor i apply migracji `drop policy if exists` na remote (weryfikacja: migracja jest najnowsza w `supabase/migrations/`, `migration list --linked` pokazuje applied — **ręczna na remote** + lint/build).
-  - Faza 3 — Weryfikacja domknięcia: ten sam PATCH teraz 403/permission denied, `retention_until` bez zmian, regresja delete/cancel działa, nota o rollbacku (**empiryczna ręczna** + lint/build) (źródło: `plan.md` Phase 1–3; `plan-brief.md` „Phases at a Glance").
-- **Plan-review / poprawki F1/F2:** brak osobnego `plan-review.md`; w artefaktach plan-review jest **wbudowany** — F1 to origin-finding bypassu (impl-review, confidence HIGH, decision PENDING — `plan.md` References). Korektą wniesioną w planie/research jest jawne ograniczenie zwycięstwa: C3 zamyka tylko **single-step UPDATE**, a wektor `DELETE+INSERT` zostaje (źródło: `plan.md:9,42`, `plan-brief.md:10,57`; `refactor-opportunities/research.md` §1a koryguje też D6 — „dlaczego" *jest* spisane w archiwalnym `plan.md:33,60`, nie tylko w sesjach AI).
+* **Co:** L4 przekształciła dług z L3 w ranking możliwych zmian. Wybrano **C3 — usunięcie martwej polityki RLS `account_deletion_requests_update_own`**, bo miała najlepszy stosunek ryzyka do kosztu: zamykała możliwość single-step UPDATE własnego `retention_until`, miała mały blast radius i była odwracalna.
+
+* **Docelowy kształt:** `account_deletion_requests` pozostaje tabelą lifecycle dla usuwania konta, ale bez polityki `FOR UPDATE`. Aplikacja nadal używa `INSERT`, `SELECT` i `DELETE`; brak ścieżki aplikacyjnej dla `UPDATE` zostaje odzwierciedlony w RLS.
+
+* **Czego świadomie NIE robimy:** nie centralizujemy jeszcze write-locka (**C1**), nie ruszamy kopii błędów/UI fallbacków (**C2**), nie rozstrzygamy definicji „pending” po `retention_until` (**C4**, decyzja produktowa), i nie domykamy w tym planie rezydualnego wektora `DELETE+INSERT`. Plan świadomie zamyka tylko single-step UPDATE, a nie cały immutable-window na poziomie DB.
+
+* **Fazy i weryfikacja:**
+
+  1. **Baseline:** potwierdzić istniejącą politykę i odtworzyć udany PATCH przed zmianą — ręcznie/empirycznie + lint/build.
+  2. **Migracja:** dodać i zaaplikować `drop policy if exists` na remote Supabase — ręcznie na remote + lint/build.
+  3. **Weryfikacja:** ten sam PATCH ma zwrócić 403/permission denied, a delete/cancel mają dalej działać — ręcznie/empirycznie + lint/build.
+
+* **Wniosek z plan-review:** zwycięstwo zostało celowo ograniczone. C3 usuwa realny, tani do zamknięcia bypass UPDATE, ale nie udaje pełnego rozwiązania wszystkich problemów write-locka; `DELETE+INSERT` i automatyczny guard dla przyszłych endpointów zostają jako follow-up.
 
 ## 5. Domena wg DDD z L5
 
@@ -48,7 +53,11 @@
 
 ## 6. Decyzje, które należą do mnie
 
-M4 pokazał, że agent/AI jest mocny w **odkrywaniu** struktury i jej weryfikacji: zmierzył fan-in i blast radius, odróżnił realne zera od ograniczeń wzorca (ast-grep skonfrontowany z grep), wyłapał rozjazdy model-vs-kod (R3/R4) i zwektorowane już ryzyko (bypass C3/F1). To są fakty, nie opinie. Natomiast cztery rozstrzygnięcia zostały — zgodnie z artefaktami — **świadomie zatrzymane na granicy człowieka**: (a) **C1 vs N5** — czy *strukturalnie* znieść możliwość pominięcia strażnika (drogo, odwraca udokumentowaną decyzję 26c850a), czy *mechanicznie* ją wykrywać (tanio); research wprost zostawia tę decyzję etapowi planu (`refactor-opportunities/research.md` §3 #2). (b) **C4** — czy read-only ma kończyć się na `retention_until`; to **pytanie produktowe**, nie refaktor — STOP na granicy biznesowej (§2.4). (c) **Zakres C3** — przyjęcie, że domykamy tylko single-step UPDATE i świadomie odraczamy `DELETE+INSERT` (`plan.md` Desired End State). (d) **Remote-only Supabase + brak bramki CI na `main`** — akceptacja, że siatką bezpieczeństwa jest zdyscyplinowana ręczna weryfikacja na remote (`plan.md` Current State). Tych decyzji nie wolno delegować w całości do AI, bo zależą od *intencji produktu i akceptacji ryzyka* właściciela — agent może je nazwać i wycenić, ale wybór progu (bezpieczeństwo vs koszt, „auditowalny wzorzec" vs centralizacja) należy do maintainera odpowiedzialnego za inwariant przy bus factor = 1.
+M4 pokazał, że AI/agent jest bardzo mocny w odkrywaniu i weryfikacji struktury: mierzy fan-in, blast radius, porównuje twierdzenia z kodem przez ast-grep/grep i wyciąga rozjazdy model-vs-kod. To są dobre wejścia do decyzji, ale nie same decyzje.
+
+Po mojej stronie jako maintainera/architekta zostały cztery rozstrzygnięcia. Po pierwsze: czy problem zapomnianego write-locka rozwiązywać strukturalnie przez centralizację (**C1**), czy taniej przez mechaniczny guard/test (**N5**). Po drugie: czy definicja read-only ma kończyć się po `retention_until` (**C4**) - to jest decyzja produktowa, nie refaktor. Po trzecie: zaakceptowałem ograniczony zakres **C3** - zamykamy single-step UPDATE, ale nie udajemy, że rozwiązaliśmy cały wektor `DELETE+INSERT`. Po czwarte: przy remote-only Supabase i braku pełnej bramki CI akceptuję, że część weryfikacji musi być ręczna i empiryczna.
+
+Tych decyzji nie powinno się delegować w całości do AI, bo zależą od intencji produktu, progu akceptowalnego ryzyka i odpowiedzialności za niezmienniki. Agent może nazwać problem i pokazać opcje, ale wybór między bezpieczeństwem, kosztem i zakresem należy do właściciela architektury.
 
 ---
 *Źródła: `context/map/{repo-map,self-vs-evidence,artifact-1/2/3}.md`; `context/changes/account-retention-write-lock/research.md`; `context/changes/refactor-opportunities/{change,research,plan,plan-brief}.md`; `context/domain/{01,02,03}*.md`; bezpośredni odczyt `package.json`, `src/`, `supabase/migrations/`, `wrangler.jsonc`.*
