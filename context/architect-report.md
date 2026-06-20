@@ -9,6 +9,7 @@
 - **Stack:** Astro/React/TS/Supabase/Cloudflare
 - **Skala (orientacyjnie):** młode repo, ~26 dni, 178–181 commitów
 - **Najważniejszy fakt:** zdrowy graf, ale bus factor 1
+   **Artefakty M4:** repo użyte we wszystkich lekcjach modułu: L2 mapa projektu, L3 research przepływu account-retention/write-lock, L4 plan refaktoru C3, L5 artefakty DDD (`01`, `02`, `03`).
 
 ## 2. Mapa projektu z L2
 
@@ -53,11 +54,7 @@
 
 ## 6. Decyzje, które należą do mnie
 
-M4 pokazał, że AI/agent jest bardzo mocny w odkrywaniu i weryfikacji struktury: mierzy fan-in, blast radius, porównuje twierdzenia z kodem przez ast-grep/grep i wyciąga rozjazdy model-vs-kod. To są dobre wejścia do decyzji, ale nie same decyzje.
-
-Po mojej stronie jako maintainera/architekta zostały cztery rozstrzygnięcia. Po pierwsze: czy problem zapomnianego write-locka rozwiązywać strukturalnie przez centralizację (**C1**), czy taniej przez mechaniczny guard/test (**N5**). Po drugie: czy definicja read-only ma kończyć się po `retention_until` (**C4**) - to jest decyzja produktowa, nie refaktor. Po trzecie: zaakceptowałem ograniczony zakres **C3** - zamykamy single-step UPDATE, ale nie udajemy, że rozwiązaliśmy cały wektor `DELETE+INSERT`. Po czwarte: przy remote-only Supabase i braku pełnej bramki CI akceptuję, że część weryfikacji musi być ręczna i empiryczna.
-
-Tych decyzji nie powinno się delegować w całości do AI, bo zależą od intencji produktu, progu akceptowalnego ryzyka i odpowiedzialności za niezmienniki. Agent może nazwać problem i pokazać opcje, ale wybór między bezpieczeństwem, kosztem i zakresem należy do właściciela architektury.
+AI/agent pomógł odkryć strukturę: fan-in, blast radius, rozjazdy model-vs-kod oraz miejsca potwierdzone grepem/ast-grepem. Po mojej stronie jako maintainera zostało rozstrzygnięcie zakresu: w L4 akceptuję ograniczony refaktor C3, który zamyka single-step UPDATE, ale nie udaje pełnego rozwiązania `DELETE+INSERT` ani centralizacji write-locka. Po mojej stronie zostaje też decyzja produktowa C4, czyli czy read-only ma kończyć się po `retention_until`, oraz decyzja, że część weryfikacji przy remote-only Supabase musi być ręczna/empiryczna. W L5 akceptuję I1 jako najważniejszy niezmiennik domenowy oraz Supabase jako największy ACL smell, mimo że OpenRouter był bardziej oczywistym podejrzeniem. Tych decyzji nie deleguję w całości do AI, bo zależą od intencji produktu, progu ryzyka i odpowiedzialności za niezmienniki.
 
 ---
 *Źródła: `context/map/{repo-map,self-vs-evidence,artifact-1/2/3}.md`; `context/changes/account-retention-write-lock/research.md`; `context/changes/refactor-opportunities/{change,research,plan,plan-brief}.md`; `context/domain/{01,02,03}*.md`; bezpośredni odczyt `package.json`, `src/`, `supabase/migrations/`, `wrangler.jsonc`.*
