@@ -1,3 +1,12 @@
+## Rozważane sygnały tarcia
+
+1. Po zmianach w 10xCards trudno szybko sprawdzić, czy zmiana naprawdę zamyka ryzyko i jakie mamy dowody.
+2. Artefakty AI, prompty i notatki kursowe są rozproszone między repo, Obsidianem i rozmowami z agentem.
+3. Review często wraca do tych samych tematów: RLS, izolacja użytkowników, Sentry, testy regresji i granice domeny.
+
+## Wybrana okazja
+Opportunity: 10xCards Release Safety Digest
+
 # M5L1 — Opportunity Card
 
 ## Opportunity
