@@ -1649,6 +1649,73 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   </div>
 </div>
 
+<!-- ===== MODULE 4 LESSON 5 — DDD / DOMAIN + ARCHITECT REPORT ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-amber)">⛉</span> Moduł 4, Lekcja 5 — domena wg DDD (<span style="color:var(--accent-amber)">mapuj domenę, nie kod → raport Architekta</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-amber)">Co to jest:</strong> domknięcie modułu — soczewka <strong>DDD na legacy</strong>. Produktem jest <strong>mapa domeny, nie kod</strong>: gdzie żyją pojęcia biznesowe i gdzie kod ich <em>nie</em> odwzorowuje. Czwarty artefakt to trzy ćwiczenia w <span style="font-family:var(--mono)">context/domain/</span> (<span style="font-family:var(--mono)">01</span> destylacja → <span style="font-family:var(--mono)">02</span> niezmiennik-strażnik → <span style="font-family:var(--mono)">03</span> Anti-Corruption Layer), a finał lekcji to <strong>synteza całego M4 w <span style="font-family:var(--mono)">context/architect-report.md</span></strong> (max 2 strony) — <strong>deliverable pod odznakę 10xArchitect</strong>. Ubiquitous Language ciągniesz <strong>najpierw z dokumentów</strong> (PRD/roadmap), a kod traktujesz jako drugie źródło: <em>co jest naprawdę egzekwowane</em>. Paczka promptów: <span style="font-family:var(--mono)">npx @przeprogramowani/10x-cli@latest get m4l5</span>.
+  </div>
+
+  <!-- PIPELINE CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-amber-dim);color:var(--accent-amber)">Ubiquitous Language</div><span class="chain-arrow">→</span>
+    <div class="chain-node">subdomeny <span style="color:var(--text3)">Core/Supporting/Generic</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">agregaty + niezmienniki</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-coral-dim);color:var(--accent-coral)">rozjazdy model-vs-kod</div><span class="chain-arrow">→</span>
+    <div class="chain-node"><span style="font-family:var(--mono)">02</span> strażnik · <span style="font-family:var(--mono)">03</span> ACL</div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-green-dim);color:var(--accent-green)">architect-report <span style="color:var(--text3)">(odznaka)</span></div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px">To <strong>nie klasyczne DDD</strong> z warstwą domenową w aplikacji: w 10xCards reguły żyją w <strong>DB (RLS + CHECK + funkcje SQL)</strong>, a handlery API są cienkie — świadoma decyzja (RLS jako fundament izolacji). „Agregat-strażnik" oznacza tu więc głównie <strong>zejście egzekucji niezmiennika na granicę danych</strong>, nie budowę encji w kodzie. Cała analiza to <strong>plan, nie implementacja</strong> — żaden kod produkcyjny nie jest zmieniany, każdy cytat <span style="font-family:var(--mono)">plik:linia</span> zweryfikowany odczytem.</p>
+
+  <!-- MODEL VS CODE -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">▤</span> Najcenniejsza część — rozjazdy MODEL vs KOD</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Po Ubiquitous Language (pojęcia z dokumentów <em>i</em> kodu) i klasyfikacji subdomen (Core = <strong>wedge</strong>: ręczna kuratela kandydatów AI; Supporting; Generic — tam nie inwestujesz) szukasz miejsc, gdzie <strong>wiedza domenowa istnieje, a kod jej nie odwzorowuje</strong> (albo odwrotnie). To one rządzą rankingiem refaktoru.</p>
+  <table class="dtable">
+    <thead>
+      <tr><th>Rozjazd</th><th>Dokument mówi</th><th>Kod robi</th><th>Waga</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-coral)">R3</td><td>karta <span style="font-family:var(--mono)">saved</span> ZAWSZE ma <span style="font-family:var(--mono)">next_due_at</span> (wchodzi w SR lifecycle)</td><td>kolumna <strong>nullable</strong>, niezmiennik trzymany proceduralnie w 3 ścieżkach zapisu; brak CHECK</td><td><strong style="color:var(--accent-coral)">Wysoka</strong> — „saved bez due" <em>cicho wypada z review</em> (fail-silent)</td></tr>
+      <tr><td style="color:var(--accent-coral)">R4</td><td>read-only lock to reguła <em>konta</em> (domenowa)</td><td>egzekwowana jako <strong>powtórzony guard</strong> w 6+ handlerach; RLS tego nie wymusza</td><td><strong style="color:var(--accent-coral)">Wysoka</strong> — nowy write-route łatwo „zapomni" guarda</td></tr>
+      <tr><td style="color:var(--accent-amber)">R1</td><td>passage „≥ 200 <em>słów</em>"</td><td>walidacja liczy <strong>znaki</strong> (≥200); górny limit 8000 bez odpowiednika w PRD</td><td>Średnia — kontrakt wejścia luźniejszy niż intencja</td></tr>
+      <tr><td style="color:var(--text2)">R2 · R6 · R7 · R8</td><td>≥1 kandydat · sesja jako byt · per-kandydat · limity długości</td><td>kod surowszy (3–10) · sesja = stan klienta · zapis batchowy · limit tylko na ścieżce AI</td><td>Niska — rozjazdy nazewniczo-intencyjne, decyzje świadome</td></tr>
+    </tbody>
+  </table>
+
+  <!-- INVARIANT GUARDIAN -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">§</span> Ćwiczenie 02 — niezmiennik #1 + agregat-strażnik</h2>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:0">
+    <strong style="color:var(--accent-purple)">Wybór = rdzeniowość × słabość egzekucji:</strong> <strong>I1 — <span style="font-family:var(--mono)">status='saved' ⇒ next_due_at IS NOT NULL</span></strong>, należy do <strong>agregatu Card</strong>. Najbardziej rdzeniowy (SR lifecycle = Secondary Success Criterion, <span style="font-family:var(--mono)">prd.md:38</span>) <em>i</em> najsłabiej egzekwowany (nullable, brak CHECK, spójność w 3 rozproszonych ścieżkach). Klasyczny zapach: <strong>niezmiennik wyciekł z granicy agregatu do warstwy aplikacji</strong>. Mechanizm awarii potwierdzony: w SQL <span style="font-family:var(--mono)">NULL &lt;= now()</span> daje <span style="font-family:var(--mono)">NULL</span>, więc karta <span style="font-family:var(--mono)">saved</span> bez daty <strong>nigdy nie pojawi się w review i nie rzuci błędu</strong> — fail-silent zamiast fail-fast.
+  </div>
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:12px">
+    <strong style="color:var(--accent-green)">Strażnik na granicy danych (najtańszy, najmocniejszy):</strong> <span style="font-family:var(--mono)">Warstwa 1</span> = DB CHECK <span style="font-family:var(--mono)">cards_saved_has_due: check (status &lt;&gt; 'saved' or next_due_at is not null)</span> — żadna ścieżka (istniejąca ani przyszła) nie utworzy „saved bez due", bo DB <em>odrzuci</em> zapis. <span style="font-family:var(--mono)">Warstwa 2</span> (opcjonalna) = konsolidacja mutacji w root agregatu Card z nazwanymi błędami domenowymi — czystość DDD, nie warunek poprawności. <strong>Manual data probe 2026-06-19 zwrócił 0</strong> wierszy łamiących regułę → CHECK nakłada się czysto, backfill zostaje jako siatka bezpieczeństwa.
+  </div>
+
+  <!-- ANTI-CORRUPTION LAYER -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">⌗</span> Ćwiczenie 03 — Anti-Corruption Layer dla przeciekającej zależności</h2>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:0">
+    <strong style="color:var(--accent-purple)">Paradoks wymienialności:</strong> #1 to <strong>Supabase</strong>, nie OpenRouter. <span style="font-family:var(--mono)">openrouter.ts</span> jest <em>deklarowany</em> wymienialny <strong>i</strong> już odizolowany (1 plik, własny port + typ błędu) — nie ma czego naprawiać. Supabase <em>nie</em> jest deklarowany wymienialny, a przecieka przez <strong>3 warstwy</strong> (UI <span style="font-family:var(--mono)">.astro</span> + middleware + każdy handler), <strong>19 plików / 14 produkcyjnych</strong>: fluent-query i <span style="font-family:var(--mono)">.rpc</span> budowane w warstwie widoku, typ biblioteki <span style="font-family:var(--mono)">User</span> w kontrakcie <span style="font-family:var(--mono)">App.Locals</span> (<span style="font-family:var(--mono)">env.d.ts:3</span>), idiomy <span style="font-family:var(--mono)">23505</span>/<span style="font-family:var(--mono)">overrideTypes</span> zduplikowane (7×). Najgorszy stosunek <em>rozsmarowanie × koszt wymiany</em>.
+  </div>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Sens ACL tutaj ≠ porzucenie Supabase</strong> (RLS to fundament izolacji — zostaje). Cel: <strong>zatrzymać wyciek persystencji do UI i kontraktu</strong> — wąskie porty domenowe (repozytorium per agregat, nie „opakuj cały SupabaseClient"), <strong>jeden katalog</strong> <span style="font-family:var(--mono)">persistence/supabase/**</span> zna kształt zapytań, typ domenowy <span style="font-family:var(--mono)">AuthUser</span> zamiast <span style="font-family:var(--mono)">@supabase</span> <span style="font-family:var(--mono)">User</span>. Kryterium sukcesu jest <strong>grepowalne</strong>: po refaktorze <span style="font-family:var(--mono)">@supabase</span> trafia wyłącznie w katalog adaptera. Owner-scoping zostaje w RLS — porty są per-user-implicit (świadomy wybór, nie pominięcie).
+  </div>
+
+  <!-- ARCHITECT REPORT + HUMAN DECISIONS -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">∿</span> Finał — raport Architekta + decyzje, które należą do człowieka</h2>
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:0">
+    <strong style="color:var(--accent-green)">Synteza, nie streszczenie:</strong> <span style="font-family:var(--mono)">context/architect-report.md</span> łączy L2–L5 w max 2 strony, 6 sekcji (projekt · mapa · analiza feature · plan refaktoru · domena DDD · decyzje moje). Reguła twarda: <strong>każda liczba/fan-in/„7 call-site'ów" ma źródło w artefakcie lub odczycie repo</strong> — nie z pamięci; sprzeczne artefakty → pokaż wersję najnowszą/zweryfikowaną i nazwij korektę. To nie nowy plan, to <strong>jak M4 zmienił rozumienie architektury</strong>: co myśleliśmy przed mapą, co pokazały dowody, jaki dług okazał się prawdziwy, co DDD ujawniło o modelu.
+  </div>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Decyzje, które należą do mnie (architect-report §6):</strong> AI/agent <strong>odkrył strukturę</strong> — fan-in, blast radius, rozjazdy model-vs-kod, miejsca potwierdzone grepem/ast-grepem. Po stronie <strong>maintainera</strong> zostaje to, co zależy od <em>intencji produktu, progu ryzyka i odpowiedzialności za niezmienniki</em>: w L4 akceptacja <strong>ograniczonego</strong> C3 (nie udaje pełnego rozwiązania write-locka); decyzja produktowa C4; zgoda, że przy remote-only Supabase część weryfikacji jest ręczna; w L5 wybór <strong>I1</strong> jako #1 niezmiennika i <strong>Supabase</strong> jako #1 ACL smell — mimo że OpenRouter był oczywistszym podejrzanym. <strong>Tego nie deleguje się w całości do AI.</strong>
+  </div>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:16px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> L5 = <strong>mapa domeny + raport</strong> (artefakt #4 + deliverable pod odznakę) — <strong>plan, nie implementacja</strong>; żaden kod produkcyjny nie jest zmieniany, żaden istniejący artefakt poza utworzeniem <span style="font-family:var(--mono)">architect-report.md</span> · Ubiquitous Language <strong>najpierw z dokumentów</strong>, kod jako dowód egzekucji — nie odwrotnie · to <strong>nie</strong> wykład o DDD: pokazujesz, co DDD ujawniło <em>konkretnie w 10xCards</em> (nie buduj klasycznej warstwy domenowej, skoro reguły świadomie żyją w DB) · niezmiennik egzekwuj na <strong>granicy danych</strong> (CHECK), zanim sięgniesz po agregat w kodzie · ACL to <strong>zatrzymanie wycieku</strong>, nie migracja off-Supabase · raport <strong>syntetyzuje</strong>, nie streszcza wszystkich artefaktów, i nie projektuje nowej architektury · decyzje zależne od intencji/ryzyka <strong>zostają po stronie człowieka</strong> — koniec łańcucha L1→L5.
+  </div>
+</div>
+
 <div class="footer">
   <span>Na podstawie kursu 10xDevs 3.0 — Przeprogramowani.pl</span>
   <span>Wygenerowano: czerwiec 2026</span>
