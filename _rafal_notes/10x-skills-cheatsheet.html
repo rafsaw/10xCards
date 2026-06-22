@@ -1527,6 +1527,67 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   </div>
 </div>
 
+<!-- ===== MODULE 4 LESSON 3 — DEEP FOCUS / FEATURE ANALYSIS ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-amber)">⛉</span> Moduł 4, Lekcja 3 — analiza feature (<span style="color:var(--accent-amber)">Deep Focus → AI jako analityk</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-amber)">Co to jest:</strong> mapa z L2 wskazała <strong>jedną strefę 🔴</strong> — schodzisz w nią głęboko. To <strong>Deep Focus</strong> po Wide Scanie: nie „przeczytaj cały feature", tylko <strong>prześledź jeden przepływ i opisz obecny stan z dowodami</strong>. Naczelna zasada modułu w pełnej sile: <strong>AI jest analitykiem, nie decydentem</strong> — śledztwo read-only, zero refaktoru, zero propozycji architektury (to dopiero <strong>L4</strong>). Drugi element raportu Architekta: <strong>Analiza feature</strong> → <span style="font-family:var(--mono)">context/changes/&lt;id&gt;/research.md</span> z dwiema jawnymi sekcjami: <strong>Feature overview</strong> + <strong>Technical debt</strong>. Paczka promptów: <span style="font-family:var(--mono)">npx @przeprogramowani/10x-cli@latest get m4l3</span>.
+  </div>
+
+  <!-- PIPELINE CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-amber-dim);color:var(--accent-amber)">strefa 🔴 z mapy <span style="color:var(--text3)">(L2)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node"><span class="cmd" style="font-size:11px">/10x-new</span> <span style="color:var(--text3)">intencja: tylko analiza</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node"><span class="cmd" style="font-size:11px">/10x-research</span> <span style="color:var(--text3)">3 sub-agenci</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-amber-dim);color:var(--accent-amber)">research.md</div><span class="chain-arrow">→</span>
+    <div class="chain-node">ast-grep <span style="color:var(--text3)">weryfikacja</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">plan refaktoru <span style="color:var(--text3)">(L4)</span></div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px"><span class="cmd" style="font-size:11px">/10x-new &lt;id&gt;</span> zakłada folder zmiany i <strong>ramuje intencję</strong> („eksploracja → decyzja → implementacja; na tym etapie nie zapada żadna decyzja i nie dzieje się refaktor"). Potem <span class="cmd" style="font-size:11px">/10x-research</span> z trzema równoległymi sub-agentami karmi raport dowodami, a ast-grep go <em>hartuje</em>. To samo <span style="font-family:var(--mono)">research.md</span> staje się <strong>priorem dla L4</strong> — tam zapadną decyzje.</p>
+
+  <!-- WHY DEEP FOCUS -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:0">
+    <strong style="color:var(--accent-coral)">Dlaczego Deep Focus, a nie „opisz cały feature":</strong> mapa już zrobiła robotę przesiewu — wskazała <em>gdzie</em> uważać. L3 nie wraca do szerokości; <strong>jeden przepływ, prześledzony end-to-end</strong>, daje konkret, którego płaskie streszczenie nigdy nie da. Wybór strefy nie jest losowy: bierzesz tę, którą <span style="font-family:var(--mono)">self-vs-evidence</span> oznaczył jako <strong>niedoceniane ryzyko</strong> (max zasięg, min śladu w historii) — nie tę, którą właściciel <em>uważał</em> za rdzeń. Dowód przed intuicją, i to dotyczy też wyboru tematu.
+  </div>
+
+  <!-- THREE SUB-AGENTS -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">▤</span> Trzej równolegli sub-agenci — trzy pytania o jeden przepływ</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Sub-agent</th><th>Pytanie</th><th>Co produkuje</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-amber)">Trace e2e</td><td>Którędy <em>realnie</em> płynie request — od endpointu, przez sprawdzenie inwariantu, po zapis do DB albo blokadę?</td><td>sekwencja kroków z <span style="font-family:var(--mono)">file:linia</span> + diagram Mermaid (min. cards, generations, reviews)</td></tr>
+      <tr><td style="color:var(--accent-amber)">Luki w testach</td><td>Które mutujące endpointy i gałęzie są <em>pokryte</em>, a które nie?</td><td>rozdział kontrakt / integracja / unit + lista brakujących ścieżek (błąd DB, brak usera, edge case po anulowaniu)</td></tr>
+      <tr><td style="color:var(--accent-amber)">Blast radius</td><td>Co musi zmienić się <em>razem</em> przy ruszeniu tego inwariantu?</td><td>graf statyczny + mapa + historia gita → lista plików/warstw współzależnych (lib, endpointy, RLS, typy błędów, UI)</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Dyscyplina dowodu — evidence / inference / unknown:</strong> każde twierdzenie raportu dostaje etykietę: <span style="font-family:var(--mono)">evidence</span> (potwierdzone w kodzie, z <span style="font-family:var(--mono)">file:linia</span>) · <span style="font-family:var(--mono)">inference</span> (interpretacja na bazie dowodów) · <span style="font-family:var(--mono)">unknown</span> (niepotwierdzone albo poza zasięgiem analizy). To nie ozdoba — to <strong>kontrakt z czytelnikiem</strong>: pozwala później zaufać raportowi bez ponownego śledztwa i jasno oddziela „wiem" od „zgaduję". Prompt jawnie zakazuje: <em>żadnych zmian w kodzie, dowody przed interpretacją, brak danych → pisz <span style="font-family:var(--mono)">unknown</span></em>.
+  </div>
+
+  <!-- AST-GREP VERIFICATION -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">⌗</span> Hartowanie raportu — ast-grep weryfikuje twierdzenia strukturalne</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Po napisaniu raportu drugi przebieg: <strong>wyciągnij z niego twierdzenia STRUKTURALNE</strong> (liczby call-site'ów, „tylko tutaj", „zawsze przez X", liczność metod, powtarzalne kształty wywołań), zbuduj dla każdego wzorzec <span style="font-family:var(--mono)">ast-grep</span>, odpal i porównaj. Werdykt per twierdzenie: <strong style="color:var(--accent-green)">potwierdzone</strong> / <strong style="color:var(--accent-amber)">doprecyzowane</strong> / <strong style="color:var(--accent-coral)">obalone</strong> — z plikami i liniami. Wynik wraca do <span style="font-family:var(--mono)">research.md</span> (poprawki w miejscu + sekcja „Weryfikacja twierdzeń").</p>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:0">
+    <strong style="color:var(--accent-coral)">Każde zero z ast-grep potwierdź klasycznym grepem.</strong> Zero trafień to <em>dwuznaczność</em>: albo realnie nic nie ma, albo wzorzec był zły. <span style="font-family:var(--mono)">grep</span> rozstrzyga — bez tego „0 wystąpień UPDATE" mogłoby znaczyć „nie ma bypassu" <em>albo</em> „źle napisałem zapytanie AST". AST patrzy na <strong>strukturę składni</strong> (a nie tekst), więc łapie kształt wywołania niezależnie od formatowania — ale ślepy wzorzec daje fałszywy spokój. To różnica między <em>„grep mówi może"</em> a <em>„ast-grep mówi co, grep potwierdza że naprawdę nie ma"</em>.
+  </div>
+
+  <!-- THIS PROJECT -->
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">W tym projekcie (10xCards, <span style="font-family:var(--mono)">account-retention-write-lock/research.md</span> + architect-report §3):</strong> przepływ to <strong>write-lock / read-only</strong> dla wszystkich mutujących operacji. Stan <span style="font-family:var(--mono)">locals.isReadOnly</span> liczony <strong>raz</strong> w <span style="font-family:var(--mono)">middleware.ts:18-40</span> (lookup <span style="font-family:var(--mono)">account_deletion_requests</span>, <strong>fail-closed</strong> na błędzie DB); blokada to <span style="font-family:var(--mono)">readOnlyGuard</span> → <strong>403 <span style="font-family:var(--mono)">account_read_only</span></strong>, wpięty ręcznie w <strong>7 call-site'ów (6 plików)</strong>; <span style="font-family:var(--mono)">cancel</span>/<span style="font-family:var(--mono)">delete</span> celowo omijają strażnika (escape hatch). <strong>Prawdziwy dług:</strong> (1) middleware ma <strong>zero testów</strong> obliczenia <span style="font-family:var(--mono)">isReadOnly</span> · (2) detekcja „zapomnianego strażnika" jest <strong>pozorna</strong> (ręczna tabela <span style="font-family:var(--mono)">writeRoutes</span>, brak skanu FS) · (3) martwa polityka RLS <span style="font-family:var(--mono)">account_deletion_requests_update_own</span> = <strong>realny bypass autoryzacji</strong> (kod nigdy nie robi <span style="font-family:var(--mono)">.update()</span> — ast-grep T4: zero UPDATE).
+  </div>
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:12px">
+    <strong style="color:var(--accent-green)">Pozornie groźne, faktycznie nie-dług:</strong> stan po stronie 7 handlerów jest <strong>spójny i poprawny</strong> — wszystkie wołają strażnika <em>przed</em> zapisem, w tej samej kolejności; dwa niestrzeżone (<span style="font-family:var(--mono)">cancel</span>/<span style="font-family:var(--mono)">delete</span>) pomijają go <strong>świadomie i z komentarzem</strong>. A headline-feature „AI" (<span style="font-family:var(--mono)">openrouter.ts</span>) jest strukturalnie <strong>najbezpieczniejszy</strong> (fan-in produkcyjny 1, własny port + typ błędu). To nie luka — to świadoma izolacja. <strong>Wartość L3 jest też w odróżnieniu długu od nie-długu</strong>, nie tylko w jego znajdowaniu.
+  </div>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:16px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> L3 = <strong>Deep Focus + Analiza feature</strong> (artefakt #2), opis <em>obecnego stanu</em> — NIE projektuj docelowej architektury, NIE proponuj refaktoru, NIE wybieraj co naprawić (to <strong>L4</strong>: <span class="cmd" style="font-size:11px">/10x-new refactor-opportunities</span> → ranking kandydatów z trade-offami → <span class="cmd" style="font-size:11px">/10x-plan</span>) · raport ma <strong>dwie jawne sekcje</strong>: Feature overview + Technical debt · twierdzenia strukturalne <strong>muszą</strong> przejść ast-grep, każde zero potwierdzone grepem · etykietuj <span style="font-family:var(--mono)">evidence/inference/unknown</span> — brak danych to <span style="font-family:var(--mono)">unknown</span>, nie domysł podany jako fakt · jeśli prawdziwa naprawa to <strong>przeprojektowanie pojęć biznesowych</strong> (nie struktury kodu) — powiedz to i zatrzymaj się (np. C4: definicja „pending" po <span style="font-family:var(--mono)">retention_until</span> to decyzja produktowa, nie refaktor).
+  </div>
+</div>
+
 <div class="footer">
   <span>Na podstawie kursu 10xDevs 3.0 — Przeprogramowani.pl</span>
   <span>Wygenerowano: czerwiec 2026</span>
