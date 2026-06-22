@@ -1588,6 +1588,67 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   </div>
 </div>
 
+<!-- ===== MODULE 4 LESSON 4 — REFACTOR OPPORTUNITIES / PLAN ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-amber)">⛉</span> Moduł 4, Lekcja 4 — plan refaktoru (<span style="color:var(--accent-amber)">ranking kandydatów → świadomie wąski plan</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-amber)">Co to jest:</strong> L3 opisała <em>co jest</em> i celowo zostawiła pytanie otwarte. L4 na nie odpowiada: <strong>KTÓRE z tych problemów warto naprawić, w jakim docelowym kształcie i w jakiej kolejności.</strong> Tu AI przesuwa się o krok — z analityka w stronę <strong>doradcy, który ranguje opcje z trade-offami</strong> — ale <strong>decyzja o zakresie zostaje po stronie maintainera</strong>. Trzeci element raportu Architekta: <strong>Plan refaktoru</strong>. Trzy etapy, ostro rozdzielone: <span style="font-family:var(--mono)">eksploracja → decyzja i plan → implementacja</span>; na etapie eksploracji <strong>nie zapada żadna decyzja i nie dzieje się refaktor</strong>. Paczka promptów: <span style="font-family:var(--mono)">npx @przeprogramowani/10x-cli@latest get m4l4</span>.
+  </div>
+
+  <!-- PIPELINE CHAIN -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-amber-dim);color:var(--accent-amber)">research.md <span style="color:var(--text3)">(L3, jako prior)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node"><span class="cmd" style="font-size:11px">/10x-new</span> refactor-opportunities</div><span class="chain-arrow">→</span>
+    <div class="chain-node"><span class="cmd" style="font-size:11px">/10x-research</span> <span style="color:var(--text3)">3 soczewki/kandydat</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">ranking C1–C4 <span style="color:var(--text3)">+ ast-grep</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-green-dim);color:var(--accent-green)"><span class="cmd" style="font-size:11px">/10x-plan</span> <span style="color:var(--text3)">wybór C3 (maintainer)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node"><span class="cmd" style="font-size:11px">/10x-plan-review</span></div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px"><span class="cmd" style="font-size:11px">/10x-research</span> czyta <span style="font-family:var(--mono)">research.md</span> z L3 jako <strong>zebrane dowody</strong> — nie wyprowadza ich na nowo, buduje na nich (a jeśli raport odsyła do mapy / wcześniejszego researchu, czyta je też jako priory). Eksploracja kończy się <strong>rankingiem opcji z trade-offami</strong>, nie wyborem. Wybór i plan to dopiero <span class="cmd" style="font-size:11px">/10x-plan</span> — i to <em>ty</em> wybierasz.</p>
+
+  <!-- CANDIDATE CLASSIFICATION -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:0">
+    <strong style="color:var(--accent-coral)">Najpierw klasyfikacja, wystawiona na audyt:</strong> wypisz <em>każdy</em> problem z raportu, niezależnie od etykiety (dług / ryzyko / hotspot / znalezisko), i sklasyfikuj: <strong style="color:var(--accent-amber)">KANDYDAT</strong> = problem, którego naprawa <em>zmieniłaby strukturę kodu</em>; <strong>wszystko inne</strong> (brakujący test, luka w dokumentacji, guard) nie jest kandydatem — ale zostaje jako wejście do oceny wykonalności i kosztu. Listę i klasyfikację podaj <strong>na początku wyniku</strong>, żeby maintainer mógł ją zaudytować, zanim agent pójdzie głębiej. To filtr przeciw „refaktorowaniu" rzeczy, które wcale nie są refaktorem.
+  </div>
+
+  <!-- THREE LENSES -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">▤</span> Trzy soczewki na każdego kandydata — bez tknięcia kodu</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Soczewka</th><th>Pytanie</th><th>Werdykt / wynik</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-amber)">Obecny kształt</td><td>Jaki kształt kandydat ma <em>dziś</em> — gdzie żyje logika, jak mieszają się odpowiedzialności, jakie abstrakcje już są?</td><td>cytat <span style="font-family:var(--mono)">plik:linia</span>, każde twierdzenie <span style="font-family:var(--mono)">evidence/inference/unknown</span></td></tr>
+      <tr><td style="color:var(--accent-amber)">Historia i intencjonalność</td><td>Dlaczego kod ma taki kształt — ADR-y/dokumenty, a jak ich brak: archeologia gita (log, blame, uzasadnienia w commitach)?</td><td><strong>świadome ograniczenie</strong> vs <strong>przypadkowa złożoność</strong> vs <span style="font-family:var(--mono)">unknown</span></td></tr>
+      <tr><td style="color:var(--accent-amber)">Wykonalność migracji</td><td>Czego wymagałaby <em>inkrementalna, odwracalna</em> ścieżka?</td><td>blast radius + istniejące testy + CI + <strong>pierwszy krok-prerekwizyt</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Werdykt intencjonalności decyduje, czy w ogóle ruszać:</strong> <strong>świadome ograniczenie</strong> ≠ <strong>przypadkowa złożoność</strong>. Kod, który wygląda na dług, może być celowym, udokumentowanym wyborem — wtedy „naprawa" to regresja, nie ulepszenie. Dlatego soczewka #2 czyta <em>dlaczego</em> (git, ADR), zanim ktokolwiek zaproponuje „jak inaczej". Twarde granice promptu: <strong>żadnych zmian w kodzie, dowody przed interpretacją</strong>, nie projektuj całej docelowej architektury (tylko <em>nazwij</em> adekwatny docelowy kształt per kandydat), a <strong>jeśli prawdziwa naprawa to przeprojektowanie pojęć biznesowych — powiedz to i zatrzymaj się</strong>.
+  </div>
+
+  <!-- RANKING -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">§</span> Sekcja „Refactor opportunities" — 2–3 najmocniejsi w rankingu</h2>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Synteza zamyka się rankingiem. Dla każdego kandydata: <strong>obecny → docelowy kształt</strong> · czemu zasługuje na to miejsce · <strong>koszt długu vs koszt zmiany</strong> · blast radius · szkic inkrementalnej ścieżki · pierwszy krok-prerekwizyt. Plus lista <em>rozważonych i odrzuconych</em> z krótkim powodem. Prompt jawnie mówi: <strong>NIE proś o wybór ani zgodę — zakończ zapisaniem gotowego raportu.</strong> Ranking to materiał do decyzji, nie sama decyzja.</p>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:0">
+    <strong style="color:var(--accent-coral)">ast-grep znów hartuje — ale z dyscypliną zakresu:</strong> weryfikujesz <strong>twierdzenia strukturalne, na których stoi ranking</strong> (liczby call-site'ów, „brak <span style="font-family:var(--mono)">.update()</span>", obecność polityki w migracji, inwentarz endpointów), każde zero potwierdzasz grepem. Aktualizacja raportu jest <strong>chirurgiczna</strong>: popraw błędne liczby/linie w miejscu (zostaw ślad korekty), dodaj sekcję „Weryfikacja twierdzeń (ast-grep)", zaktualizuj frontmatter (<span style="font-family:var(--mono)">last_updated</span>, tag <span style="font-family:var(--mono)">verified</span>) — ale <strong>sekcji „Refactor opportunities" ani werdyktów intencjonalności NIE zmieniaj</strong>. Jeśli wynik podważa pozycję kandydata: opisz to <em>tylko</em> w sekcji weryfikacji z adnotacją <span style="font-family:var(--mono)">„do decyzji na etapie planowania"</span>. Dowód koryguje fakty; ranking koryguje człowiek.
+  </div>
+
+  <!-- THIS PROJECT — THE DECISION -->
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">W tym projekcie (10xCards, <span style="font-family:var(--mono)">refactor-opportunities/</span> + architect-report §4, §6):</strong> z rankingu maintainer wybiera <strong>C3 — usunięcie martwej polityki RLS <span style="font-family:var(--mono)">account_deletion_requests_update_own</span></strong>. Powód: najlepszy stosunek <strong>ryzyka do kosztu</strong> — zamyka <em>realny bypass</em> (single-step UPDATE własnego <span style="font-family:var(--mono)">retention_until</span>), nie tylko sprząta kod; mały blast radius (<strong>tylko DB/RLS</strong>); mała i <strong>odwracalna</strong> migracja. Docelowo: tabela zostaje lifecycle'owa, ale bez <span style="font-family:var(--mono)">FOR UPDATE</span> — brak ścieżki aplikacyjnej dla UPDATE odzwierciedlony w RLS (<span style="font-family:var(--mono)">INSERT/SELECT/DELETE</span> dalej działają).
+  </div>
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:12px">
+    <strong style="color:var(--accent-green)">Świadomie wąski zakres (czego NIE robimy):</strong> nie centralizujemy jeszcze write-locka (<strong>C1</strong> — odwraca <em>udokumentowaną świadomą decyzję</em>, za duży blast radius) · nie ruszamy kopii błędów/UI (<strong>C2</strong> — niższy priorytet) · nie rozstrzygamy „pending" po <span style="font-family:var(--mono)">retention_until</span> (<strong>C4</strong> — <em>decyzja produktowa, nie refaktor</em>) · nie domykamy rezydualnego wektora <span style="font-family:var(--mono)">DELETE+INSERT</span>. <strong>Fazy:</strong> 1) Baseline — potwierdź politykę i odtwórz udany PATCH <em>przed</em> zmianą · 2) Migracja — <span style="font-family:var(--mono)">drop policy if exists</span> na remote Supabase · 3) Weryfikacja — ten sam PATCH ma zwrócić <strong>403/permission denied</strong>, a <span style="font-family:var(--mono)">delete</span>/<span style="font-family:var(--mono)">cancel</span> dalej działać. Remote-only Supabase → weryfikacja <strong>ręczna/empiryczna</strong> + lint/build. <strong>Wniosek z <span class="cmd" style="font-size:11px">/10x-plan-review</span>: zwycięstwo celowo ograniczone</strong> — C3 nie udaje pełnego rozwiązania write-locka; <span style="font-family:var(--mono)">DELETE+INSERT</span> i auto-guard dla przyszłych endpointów zostają jako follow-up.
+  </div>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:16px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> L4 = <strong>ranking + plan</strong> (artefakt #3) — eksploracja <strong>nie</strong> wybiera i <strong>nie</strong> refaktoruje; wybór zakresu to akt <strong>maintainera</strong> w <span class="cmd" style="font-size:11px">/10x-plan</span>, nie agenta (agent kończy raport bez proszenia o zgodę) · KANDYDAT = zmiana <em>struktury kodu</em>; brakujący test/guard/doc to wejście do kosztu, nie kandydat · <strong>świadome ograniczenie</strong> nie jest długiem — nie „naprawiaj" udokumentowanej decyzji (C1) · pojęcie biznesowe do przeprojektowania → zatrzymaj się i nazwij to decyzją produktową (C4) · ast-grep koryguje fakty, ale <strong>nie ranking ani werdykty intencjonalności</strong> · sama <em>implementacja</em> wybranego planu to już osobny łańcuch zmiany (<span class="cmd" style="font-size:11px">/10x-implement</span> / <span class="cmd" style="font-size:11px">/10x-tdd</span> z Modułu 2–3), nie L4 · dystylacja domeny i niezmienniki → <strong>L5</strong>.
+  </div>
+</div>
+
 <div class="footer">
   <span>Na podstawie kursu 10xDevs 3.0 — Przeprogramowani.pl</span>
   <span>Wygenerowano: czerwiec 2026</span>
