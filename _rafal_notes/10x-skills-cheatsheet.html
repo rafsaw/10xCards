@@ -363,7 +363,7 @@ body {
 <!-- HEADER -->
 <div class="header">
   <h1>10xDevs <span>Skills</span> Workflow<br>Cheat Sheet</h1>
-  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → testy → hooki → E2E → debugowanie)</div>
+  <div class="sub">Kurs: 10xDevs 3.0 · Przeprogramowani.pl<br>Moduł 1 (Sprint Zero) + Moduł 2 (Plan → Code → Review → Scale)<br>+ Moduł 3 (Kontrakt jakości → testy → hooki → E2E → debugowanie)<br>+ Moduł 4 (10xArchitect: architektura kontekstu → mapa → analiza → refaktor → domena)</div>
 </div>
 
 <!-- LEGEND -->
@@ -1354,6 +1354,99 @@ empty-js: { cwd_strategy: native-cwd }   # bootstrapper-config.yaml</pre>
   <!-- LESSON BOUNDARIES -->
   <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
     <strong style="color:var(--accent-coral)">Granice lekcji:</strong> NIE zmieniaj strategii ryzyka (L1 — <span style="font-family:var(--mono)">--status</span> do odczytu) · NIE pisz testów feature'owych od zera (L2 — tu testy <em>reprodukują znany defekt</em>) · NIE konfiguruj hooków (L3) · NIE generuj nowych E2E ani nie używaj healera na zmienione <em>zachowanie biznesowe</em> (L4 — red test → debug tutaj; healer by zamaskował bug) · charakteryzacja istniejącego kodu → <span style="font-family:var(--mono)">/10x-implement</span>, nie tdd · Sentry zawsze env-gated i zmockowany w testach · selekcja modelu VLM / koszt to też temat debugowania (L5), nie testowania (L4).
+  </div>
+</div>
+
+<!-- ===== MODULE 4 LESSON 1 — CONTEXT ARCHITECTURE AT SCALE ===== -->
+<div class="full-section">
+  <h2><span style="color:var(--accent-amber)">⛉</span> Moduł 4, Lekcja 1 — skalowanie kontekstu dla AI (<span style="color:var(--accent-amber)">architektura kontekstu</span>)</h2>
+
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-bottom:18px">
+    <strong style="color:var(--accent-amber)">Co to jest:</strong> otwarcie <strong>Modułu 4 — 10xArchitect</strong>: pracy z dużymi i legacy repozytoriami, gdzie <strong>AI jest analitykiem, nie decydentem</strong> (analiza read-only, nie budowanie feature'ów). L1 to <strong>fundament modułu — jedyna lekcja bez artefaktu</strong> (pierwszy element raportu powstaje dopiero w L2). Soczewką jest <strong>architektura kontekstu, która skaluje się razem z projektem</strong>. Pytanie nie brzmi „co agent powinien wiedzieć?", tylko: <strong>„co agent powinien wiedzieć <em>właśnie teraz</em>?"</strong> Rytm całego modułu (L2+): <span style="font-family:var(--mono)">soczewka</span> (na co patrzymy) → <span style="font-family:var(--mono)">narzędzia &amp; dane</span> (ekstrakcja z repo) → <span style="font-family:var(--mono)">element raportu</span> (co zostaje).
+  </div>
+
+  <!-- MODULE ARC / L2-L5 TEASER -->
+  <div class="chain">
+    <div class="chain-node" style="border-color:var(--accent-amber-dim);color:var(--accent-amber)">L1 fundament <span style="color:var(--text3)">(bez artefaktu)</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">L2 repo-map.md <span style="color:var(--text3)">mapa</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">L3 research.md <span style="color:var(--text3)">analiza feature</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">L4 plan.md <span style="color:var(--text3)">refaktor</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node">L5 context/domain/ <span style="color:var(--text3)">DDD</span></div><span class="chain-arrow">→</span>
+    <div class="chain-node" style="border-color:var(--accent-green-dim);color:var(--accent-green)">raport architektoniczny <span style="color:var(--text3)">(odznaka 10xArchitect)</span></div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:4px 0 18px">Cztery artefakty (L2–L5) łańcuchują się jeden w drugi i składają na raport pod odznakę. Każda lekcja to samodzielne ćwiczenie — można je zrobić nawet na różnych repo, byle cała czwórka była <em>twoja</em>, czyli taka, którą potrafisz obronić.</p>
+
+  <!-- CONTEXT ECONOMY -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">∿</span> Ekonomia kontekstu przy dużej skali</h2>
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin:0 0 8px">
+    <strong style="color:var(--accent-amber)">Maximum Effective Context Window:</strong> okno kontekstowe to skończony <strong>budżet uwagi</strong>, nie magazyn — użyteczność spada, im więcej wrzucisz. Oficjalne „1M tokenów" jest mocno zawyżone vs okno efektywne: kierunkowo najmocniejsze modele trzymają jakość do <strong>~250K</strong>, tańsze tracą już ok. <strong>~100K</strong> (liczby orientacyjne, zależą od modelu i zadania). Ta sama zasada zaraz wróci przy kodzie — agent (i ty) <strong>nie wczyta całego repo na raz</strong> → progresywne ujawnianie skali w L2–L5.
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin:0 0 8px">Cztery tryby awarii monolitycznego kontekstu (OpenAI, <em>harness engineering</em>) — czyli co psuje się, gdy jeden plik instrukcji rośnie bez końca:</p>
+  <table class="dtable">
+    <thead>
+      <tr><th>Tryb awarii</th><th>Co się dzieje</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-amber)">Wypycha zadanie</td><td>Im więcej stałych instrukcji, tym mniej miejsca i uwagi na to, co robisz tu i teraz</td></tr>
+      <tr><td style="color:var(--accent-amber)">Rozcieńcza wskazówki</td><td>Kiedy wszystko jest ważne, nic nie jest ważne — kluczowa reguła ginie wśród pobocznych</td></tr>
+      <tr><td style="color:var(--accent-amber)">Gnije</td><td>Reguły dezaktualizują się szybciej, niż ktokolwiek je przegląda</td></tr>
+      <tr><td style="color:var(--accent-amber)">Utrudnia weryfikację</td><td>Im dłuższy plik, tym trudniej sprawdzić, czy agent w ogóle się go trzyma</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    Anthropic ostrzega: <strong>przepełniony <span style="font-family:var(--mono)">CLAUDE.md</span> sprawia, że Claude ignoruje realne instrukcje</strong> — nie odrzuca ich, tylko gubią się w szumie. Badania (Codex, małe PR-y, kierunkowo): zwięzły <span style="font-family:var(--mono)">AGENTS.md</span> ↓ czas ~28% i tokeny ~17%; nadmiarowy/redundantny kontekst ↓ skuteczność o &gt;20% i ↑ koszt. <strong>Zacznij od higieny</strong>: wytnij zbędne reguły, zanim cokolwiek przebudujesz.
+  </div>
+
+  <!-- THREE CONTEXT TYPES -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">▤</span> Architektura: lean root + <span style="font-family:var(--mono)">context/</span></h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Rodzaj kontekstu</th><th>Co to</th><th>Gdzie mieszka</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-amber)">Konwencje</td><td>Jak pracujemy w projekcie (nie wynika wprost z kodu)</td><td><span style="font-family:var(--mono)">AGENTS.md</span> / <span style="font-family:var(--mono)">CLAUDE.md</span> + <span style="font-family:var(--mono)">rules/</span></td></tr>
+      <tr><td style="color:var(--accent-amber)">Referencje</td><td>PRD, plany, research, decyzje</td><td><span style="font-family:var(--mono)">context/</span></td></tr>
+      <tr><td style="color:var(--accent-amber)">Procedury</td><td>Powtarzalne kroki</td><td>skille, prompty</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Zmiana myślenia:</strong> root <span style="font-family:var(--mono)">AGENTS.md</span> to <strong>spis treści, nie encyklopedia</strong> — trzyma tylko to, co dotyczy całego projektu i jest stale potrzebne (konwencje, kluczowe komendy, wskaźniki do reszty). PRD/plany/research/decyzje lądują w <span style="font-family:var(--mono)">context/</span> jako <strong>system-of-record</strong>, do którego agent sięga <em>just-in-time</em> — czasem sam, częściej bo <strong>ty</strong> przekazujesz mu referencję do konkretnego pliku. Agent wykonuje; ty odpowiadasz za to, żeby dostał kontekst potrzebny do bieżącego zadania.
+  </div>
+
+  <!-- MATURITY LADDER -->
+  <h2 style="font-size:15px;margin-top:24px;margin-bottom:4px"><span style="color:var(--accent-amber)">⇗</span> Drabina dojrzałości — wchodzisz <em>na żądanie</em>, nie po kolei</h2>
+  <table class="dtable">
+    <thead>
+      <tr><th>Szczebel</th><th>Struktura</th><th>Kiedy</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--accent-amber)">1 · start</td><td>root <span style="font-family:var(--mono)">AGENTS.md</span> + jeden <span style="font-family:var(--mono)">context/</span></td><td>Punkt wyjścia <strong>każdego</strong> projektu — centralizacja dopóki projekt na to pozwala</td></tr>
+      <tr><td style="color:var(--accent-amber)">2 · per moduł</td><td><span style="font-family:var(--mono)">AGENTS.md</span> w module + indeks dzieci w roocie</td><td>Moduł ma konwencje zbyt specyficzne, by zmieścić je w (już dużym) roocie; albo dedykowany zespół</td></tr>
+      <tr><td style="color:var(--accent-amber)">3 · własny context/</td><td><span style="font-family:var(--mono)">context/</span> wewnątrz modułu (<span style="font-family:var(--mono)">/10x-init</span> tam)</td><td>Moduł wymaga dedykowanego PRD/roadmapy — osobny zespół albo praca na tyle intensywna, że główny <span style="font-family:var(--mono)">context/</span> nie wystarcza</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="border-left-color:var(--accent-amber-dim);margin-top:12px">
+    <strong style="color:var(--accent-amber)">Sygnały eskalacji</strong> (ważniejsze niż szczeble): root puchnie i robi się nieczytelny (Anthropic: cel &lt;~200 linii, my rekomendujemy podział &gt;300) · agent <strong>wielokrotnie gubi</strong> kontekst konkretnego modułu mimo poprawek · przy każdej pracy przekazujesz coraz więcej referencji albo brak ci dedykowanego PRD/roadmapy · moduł zyskuje <strong>własny deploy albo właściciela</strong>. <strong>Reguła decyzyjna: dziel według granicy własności + złożoności + realnej potrzeby — NIE liczby folderów ani poczucia „moja appka jest duża".</strong>
+  </div>
+
+  <!-- CALIBRATION -->
+  <div class="note" style="border-left-color:var(--accent-purple-dim);margin-top:12px">
+    <strong style="color:var(--accent-purple)">Kalibracja — MVP vs większe repo:</strong> projekt kursowy (<span style="font-family:var(--mono)">10xCards</span>, <span style="font-family:var(--mono)">CLAUDE.md</span> = <strong>82 linie</strong>) → <strong>zostań na szczeblu 1 jak najdłużej</strong>; per-folderowe pliki byłyby płaceniem za strukturę, z której nic nie wynika. Repozytoria do podpatrzenia: <span style="font-family:var(--mono)">cloudflare/workers-sdk</span> (wzorzec: zwięzły root + jawny indeks dzieci + child z linią dziedziczenia „<em>see root AGENTS.md</em>", zero kopiowania) · <span style="font-family:var(--mono)">open-mercato</span> (wariant ciężki, 400+ root) · <span style="font-family:var(--mono)">openai/codex</span> (minimalny: 286 root, jedno dziecko mimo dziesiątek modułów). <strong>Liczby to pochodna strategii, nie cel</strong> — i to tylko <em>układ</em> repo, nikt nie zmierzył, czy poprawia wynik agenta. Nie przenoś tych wzorców wprost do MVP.
+  </div>
+
+  <!-- MAKING RULES WORK -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:12px">
+    <strong style="color:var(--accent-coral)">Żeby reguły modułu naprawdę zadziałały — dwa miejsca, gdzie łatwo stracić korzyść:</strong> <strong>1) katalog startu</strong> decyduje, co auto-ładuje się do kontekstu. Claude Code z roota → wczytuje tylko root <span style="font-family:var(--mono)">CLAUDE.md</span>; plik modułu doczyta się <em>leniwie</em> i <strong>zawodnie</strong> (agent potrafi go pominąć). Z wnętrza modułu → ładuje jego plik <em>plus</em> wszystkie nadrzędne, w pełni przewidywalnie. Wniosek: <strong>odpalaj agenta z wnętrza modułu albo przekaż jawną referencję</strong>. <strong>2) utrzymanie:</strong> nie wkładaj szybko zmieniających się faktów do wolno zmieniającego się pliku; rób okresowy przegląd (np. miesięczny/kwartalny) <span style="font-family:var(--mono)">/10x-rule-review</span> + własna krytyka. Rozbudowuj architekturę <strong>jeden moduł naraz, w odpowiedzi na sygnał</strong>.
+  </div>
+
+  <!-- SKILLS -->
+  <div class="note" style="border-left-color:var(--accent-green-dim);margin-top:12px">
+    <strong style="color:var(--accent-green)">Skille (znasz je z M1 — tu dostają <em>uzasadnienie i drabinę skali</em>):</strong> <span class="cmd" style="font-size:11px">/10x-init</span> tworzy szkielet <span style="font-family:var(--mono)">context/</span> · <span class="cmd" style="font-size:11px">/10x-agents-md</span> generuje <strong>lean root</strong>, który <em>odsyła</em> do <span style="font-family:var(--mono)">context/</span> zamiast wciągać go w siebie · <span class="cmd" style="font-size:11px">/10x-rule-review</span> ocenia, czy root nie spuchł. Te same skille widać już w sekcji „⚙ Konfiguracja &amp; infrastruktura" i w tabeli decyzyjnej — M4L1 mówi, <em>dlaczego</em> root ma być chudy i <em>kiedy</em> wspinać się wyżej.
+  </div>
+
+  <!-- LESSON BOUNDARIES -->
+  <div class="note" style="border-left-color:var(--accent-coral-dim);margin-top:16px">
+    <strong style="color:var(--accent-coral)">Granice lekcji:</strong> L1 to <strong>fundament bez artefaktu</strong> — artefakty produkują lekcje wyzwaniowe L2–L5 (mapa → analiza → refaktor → domena) · NIE rozbijaj kontekstu „na zapas" (przedwczesna struktura kosztuje jak przepełniony root) · zostań na szczeblu 1, dopóki agent nie wyśle sygnałów z drabiny · Deep Dive (mechanika ładowania plików per narzędzie: Claude Code/Codex/Cursor/Copilot = <strong>scalanie addytywne</strong>, nie podmiana; multi-repo / Shared AI Registry → buduje się w <strong>M5L3</strong>; badania o <span style="font-family:var(--mono)">AGENTS.md</span>) jest opcjonalny i poza zakresem tej karty.
   </div>
 </div>
 
