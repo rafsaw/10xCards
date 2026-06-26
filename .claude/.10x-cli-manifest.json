@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.9.0",
   "manifestVersion": 3,
-  "lastApplied": "2026-06-22T21:46:11.465Z",
-  "lessonId": "m5l1",
+  "lastApplied": "2026-06-24T00:39:39.297Z",
+  "lessonId": "m5l2",
   "course": "10xdevs3",
   "tool": "claude-code",
   "files": {
@@ -275,7 +275,8 @@
       "m4l4-3-ranking-ast-grep-verification.md",
       "m4l5-1-domain-distillation.md",
       "m4l5-2-invariant-aggregate-refactor.md",
-      "m4l5-3-anti-corruption-layer.md"
+      "m4l5-3-anti-corruption-layer.md",
+      "m5l2-agent.md"
     ],
     "configs": [],
     "promptHashes": {
@@ -296,7 +297,8 @@
       "m4l4-3-ranking-ast-grep-verification.md": "986364bd6fda83c28d746ef7bbd9f9383d6b9d26af84430cc6a28e89c74138c2",
       "m4l5-1-domain-distillation.md": "9ff353da7881fb0e08f7950f18c3d3a3bf31dfd8b15a12d52d7cfbb02e2be20a",
       "m4l5-2-invariant-aggregate-refactor.md": "fcf22eb1676913dabf73e278515b7d8e47d04bc271ed46bc658c08a3792b7721",
-      "m4l5-3-anti-corruption-layer.md": "c3ad9792233c1eeeadbb6f9522f01f0d4594448f17bbfd2e4002a6eabfb9e386"
+      "m4l5-3-anti-corruption-layer.md": "c3ad9792233c1eeeadbb6f9522f01f0d4594448f17bbfd2e4002a6eabfb9e386",
+      "m5l2-agent.md": "76fdba2cd34ad290ffefef3c28d4adb9d6cac7964dc74bf57b84084ead8f336b"
     }
   },
   "lessons": {
@@ -1581,6 +1583,14 @@
         }
       },
       "prompts": [],
+      "configs": []
+    },
+    "m5l2": {
+      "appliedAt": "2026-06-24T00:39:39.296Z",
+      "skills": {},
+      "prompts": [
+        "m5l2-agent.md"
+      ],
       "configs": []
     }
   }
