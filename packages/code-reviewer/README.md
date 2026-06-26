@@ -10,12 +10,16 @@ further code-review features.
 
 ## Stack
 
-| Package | Version | Why |
-| --- | --- | --- |
-| `ai` | `^6.0.212` | Newest line the **stable** OpenRouter provider peers on (`ai@^6`). `ai@7` only pairs with an alpha provider. |
-| `@openrouter/ai-sdk-provider` | `^2.10.0` | Stable OpenRouter provider for the AI SDK. |
-| `zod` | `^4.4.3` | Runtime schema + structured-output contract. |
-| `tsx`, `typescript`, `@types/node` | dev | Run/typecheck TypeScript on Node directly. |
+
+| Package                            | Version    | Why                                                                                                          |
+| ---------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| `ai`                               | `^6.0.212` | Newest line the **stable** OpenRouter provider peers on (`ai@^6`). `ai@7` only pairs with an alpha provider. |
+| `@openrouter/ai-sdk-provider`      | `^2.10.0`  | Stable OpenRouter provider for the AI SDK.                                                                   |
+| `zod`                              | `^4.4.3`   | Runtime schema + structured-output contract.                                                                 |
+| `tsx`, `typescript`, `@types/node` | dev        | Run/typecheck TypeScript on Node directly.                                                                   |
+
+
+
 
 ## Setup
 
@@ -28,19 +32,45 @@ cp .env.example .env   # then add your OPENROUTER_API_KEY
 Environment (loaded from `.env` via Node's native `process.loadEnvFile()` — no
 extra dependency; see `loadEnv()` in `src/index.ts`):
 
-| Var | Required | Default |
-| --- | --- | --- |
-| `OPENROUTER_API_KEY` | yes | — |
-| `OPENROUTER_MODEL` | no | `anthropic/claude-sonnet-4.5` |
+
+| Var                  | Required | Default                       |
+| -------------------- | -------- | ----------------------------- |
+| `OPENROUTER_API_KEY` | yes      | —                             |
+| `OPENROUTER_MODEL`   | no       | `anthropic/claude-sonnet-4.5` |
+
+
+
 
 ## Scripts
 
-| Command | Action |
-| --- | --- |
-| `npm start` | Run `src/index.ts` once (demo) via `tsx`. |
-| `npm run dev` | Same, in watch mode. |
-| `npm run typecheck` | `tsc --noEmit`. |
-| `npm run build` | Emit JS + `.d.ts` to `dist/`. |
+
+| Command             | Action                                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `npm start`         | Run `src/index.ts` once (demo) via `tsx`.                                                                                |
+| `npm run dev`       | Same, in watch mode.                                                                                                     |
+| `npm run check`     | End-to-end integration check: one **real** OpenRouter call, validated against the zod schema. Exits non-zero on failure. |
+| `npm run typecheck` | `tsc --noEmit`.                                                                                                          |
+| `npm run build`     | Emit JS + `.d.ts` to `dist/`.                                                                                            |
+
+
+
+
+## Verifying the integration
+
+`npm run check` confirms the whole pipeline end-to-end — env → OpenRouter
+provider → model → `generateText` → zod-validated output — with a single
+minimal (billable) request:
+
+```bash
+npm run check
+# • API key present
+# • Model: anthropic/claude-sonnet-4.5
+# • Sending a minimal review request to OpenRouter...
+# ✓ Integration OK in 1234ms
+#   verdict: approve, findings: 0
+```
+
+Without a key it fails fast (`✗ OPENROUTER_API_KEY is not set`, exit code 1).
 
 ## Usage
 
@@ -72,9 +102,12 @@ const r: Review = await reviewer.reviewCode("function f(){}", "Optional context"
               title: string; detail: string; suggestion?: string }[] }
 ```
 
+
+
 ## Notes
 
 - Uses `generateText({ output: Output.object({ schema }) })` — the current AI SDK
-  v6 structured-output API (`generateObject` is deprecated in v6).
+v6 structured-output API (`generateObject` is deprecated in v6).
 - Importing the module is side-effect-free; `.env` is only loaded when run as a
-  CLI (`main()` calls `loadEnv()`), so consumers control env loading themselves.
+CLI (`main()` calls `loadEnv()`), so consumers control env loading themselves.
+
