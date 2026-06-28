@@ -2,7 +2,10 @@ import { pathToFileURL } from "node:url";
 
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateText, Output } from "ai";
-import { z } from "zod";
+
+import { buildReviewPrompt, reviewSystemPrompt } from "./prompts.js";
+import { reviewSchema } from "./schemas.js";
+import type { Review } from "./schemas.js";
 
 /**
  * Basic entry-point wiring the AI SDK (`ai`) to the OpenRouter provider with a
@@ -11,25 +14,11 @@ import { z } from "zod";
  * `reviewCode` / `createReviewer` without triggering the demo.
  */
 
-/** Structured shape we ask the model to return — also our runtime contract. */
-export const reviewSchema = z.object({
-  summary: z.string().describe("One-paragraph overview of the change."),
-  verdict: z
-    .enum(["approve", "comment", "request_changes"])
-    .describe("Overall recommendation for the change."),
-  findings: z
-    .array(
-      z.object({
-        severity: z.enum(["info", "minor", "major", "critical"]),
-        title: z.string(),
-        detail: z.string(),
-        suggestion: z.string().optional(),
-      }),
-    )
-    .describe("Concrete, actionable review findings."),
-});
-
-export type Review = z.infer<typeof reviewSchema>;
+// Public re-exports: schema/type and prompt helpers now live in their own
+// modules; re-export them here so existing importers keep working unchanged.
+export { reviewSchema } from "./schemas.js";
+export type { Review } from "./schemas.js";
+export { buildReviewPrompt, reviewSystemPrompt } from "./prompts.js";
 
 export interface ReviewerConfig {
   /** OpenRouter API key. Defaults to `process.env.OPENROUTER_API_KEY`. */
@@ -73,12 +62,8 @@ export function createReviewer(config: ReviewerConfig = {}) {
       const { output } = await generateText({
         model,
         output: Output.object({ schema: reviewSchema }),
-        system:
-          "You are a meticulous senior code reviewer. Be specific and actionable. " +
-          "Only flag real issues; prefer the lowest accurate severity.",
-        prompt: [context ? `Context:\n${context}` : null, "Review this code:", "```", code, "```"]
-          .filter(Boolean)
-          .join("\n"),
+        system: reviewSystemPrompt,
+        prompt: buildReviewPrompt(code, context),
       });
       return output;
     },

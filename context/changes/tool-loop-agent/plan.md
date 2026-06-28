@@ -236,12 +236,12 @@ Public API is preserved (`createReviewer`, `reviewCode`, `reviewSchema`, `Review
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npm run typecheck`
-- [ ] 1.2 No remaining inline `reviewSchema`/prompt definitions in `index.ts` (grep)
+- [x] 1.1 Type checking passes: `npm run typecheck`
+- [x] 1.2 No remaining inline `reviewSchema`/prompt definitions in `index.ts` (grep)
 
 #### Manual
 
-- [ ] 1.3 `npm start` smoke run prints a shape-identical review (behavior-neutral extraction)
+- [x] 1.3 `npm start` smoke run prints a shape-identical review (behavior-neutral extraction)
 
 ### Phase 2: Provider factory, ToolLoopAgent, CLI, and barrel rewire
 
