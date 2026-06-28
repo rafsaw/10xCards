@@ -1,9 +1,9 @@
 ---
 change_id: tool-loop-agent
 title: Rozbuduj code-reviewer w agenta z pętlą narzędziową (AI SDK tool-calling)
-status: preparing
+status: planned
 created: 2026-06-26
-updated: 2026-06-26
+updated: 2026-06-27
 archived_at: null
 ---
 
