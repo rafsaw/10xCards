@@ -1,12 +1,26 @@
 # @10xcards/code-reviewer
 
-AI-assisted code reviewer sub-app. A small, standalone entry-point wiring the
-[AI SDK](https://ai-sdk.dev) (`ai`) to the [OpenRouter](https://openrouter.ai)
-provider with [zod](https://zod.dev)-validated structured output — the seed for
-further code-review features.
+AI-assisted code reviewer sub-app. A small, standalone module wiring the
+[AI SDK](https://ai-sdk.dev) (`ai`) `ToolLoopAgent` to the
+[OpenRouter](https://openrouter.ai) provider with
+[zod](https://zod.dev)-validated structured output — built tool-ready so review
+tools can be added later without restructuring.
 
 > Standalone package: it has its own `package.json` / `node_modules` and does
 > **not** modify the monorepo root.
+
+## Module layout
+
+Flat split, single files, no barrels except `index.ts`:
+
+| Module          | Responsibility                                                              |
+| --------------- | -------------------------------------------------------------------------- |
+| `schemas.ts`    | `reviewSchema` (+ `severity`/`verdict`/`finding` sub-schemas) and `Review`. |
+| `prompts.ts`    | `reviewSystemPrompt` + `buildReviewPrompt(code, options?)`.                  |
+| `provider.ts`   | `createModel(config)` factory, `loadEnv`, `FALLBACK_MODEL`.                  |
+| `agent.ts`      | `createReviewAgent` (`ToolLoopAgent`), `createReviewer`, `reviewCode`.       |
+| `index.ts`      | Pure barrel — public re-exports only.                                        |
+| `cli.ts`        | `npm start` smoke-run entry (the only side effects).                         |
 
 ## Stack
 
@@ -30,7 +44,7 @@ cp .env.example .env   # then add your OPENROUTER_API_KEY
 ```
 
 Environment (loaded from `.env` via Node's native `process.loadEnvFile()` — no
-extra dependency; see `loadEnv()` in `src/index.ts`):
+extra dependency; see `loadEnv()` in `src/provider.ts`):
 
 
 | Var                  | Required | Default                       |
@@ -46,7 +60,7 @@ extra dependency; see `loadEnv()` in `src/index.ts`):
 
 | Command             | Action                                                                                                                   |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `npm start`         | Run `src/index.ts` once (demo) via `tsx`.                                                                                |
+| `npm start`         | Run the CLI (`src/cli.ts`) once — a smoke test via `tsx`.                                                                |
 | `npm run dev`       | Same, in watch mode.                                                                                                     |
 | `npm run check`     | End-to-end integration check: one **real** OpenRouter call, validated against the zod schema. Exits non-zero on failure. |
 | `npm run typecheck` | `tsc --noEmit`.                                                                                                          |
@@ -58,7 +72,7 @@ extra dependency; see `loadEnv()` in `src/index.ts`):
 ## Verifying the integration
 
 `npm run check` confirms the whole pipeline end-to-end — env → OpenRouter
-provider → model → `generateText` → zod-validated output — with a single
+provider → model → `ToolLoopAgent` → zod-validated output — with a single
 minimal (billable) request:
 
 ```bash
@@ -74,24 +88,33 @@ Without a key it fails fast (`✗ OPENROUTER_API_KEY is not set`, exit code 1).
 
 ## Usage
 
-The demo reviews a buggy snippet:
+The CLI smoke-run reviews a buggy snippet (or a code string passed as the first
+arg):
 
 ```bash
 npm start
 ```
 
-As a library, for further integration:
+As a library, for further integration — **`reviewCode` is the eval-facing
+export** a future [promptfoo](https://promptfoo.dev) eval would drive (the eval
+environment is not configured here):
 
 ```ts
 import { createReviewer, reviewCode, reviewSchema, type Review } from "./src/index.ts";
 
-// One-shot
-const review = await reviewCode("export const x = 1", { apiKey: process.env.OPENROUTER_API_KEY });
+// One-shot. Second arg is review-time options (`language`, `context`);
+// an optional third arg selects the provider/model.
+const review = await reviewCode("export const x = 1", { language: "typescript" });
 
-// Reusable, model bound once
+// Reusable, model bound once.
 const reviewer = createReviewer({ model: "anthropic/claude-sonnet-4.5" });
-const r: Review = await reviewer.reviewCode("function f(){}", "Optional context");
+const r: Review = await reviewer.reviewCode("function f(){}", { context: "Optional context" });
 ```
+
+Under the hood `createReviewer` builds a `ToolLoopAgent` (via
+`createReviewAgent`) with `instructions: reviewSystemPrompt` and
+`output: Output.object({ schema: reviewSchema })`; the validated review is read
+from `result.output` of `agent.generate({ prompt })`.
 
 `reviewCode` returns a value validated against `reviewSchema`:
 
@@ -106,8 +129,12 @@ const r: Review = await reviewer.reviewCode("function f(){}", "Optional context"
 
 ## Notes
 
-- Uses `generateText({ output: Output.object({ schema }) })` — the current AI SDK
-v6 structured-output API (`generateObject` is deprecated in v6).
-- Importing the module is side-effect-free; `.env` is only loaded when run as a
-CLI (`main()` calls `loadEnv()`), so consumers control env loading themselves.
+- The review verdict comes from a `ToolLoopAgent` (`ai` v6) with
+`output: Output.object({ schema })` — the current structured-output API
+(`generateObject` is deprecated in v6). With no tools the default
+`stopWhen: stepCountIs(20)` never trips, so it issues a single generation today;
+the agent is the seam for adding review tools later.
+- Importing the barrel (`index.ts`) is side-effect-free; `.env` is only loaded by
+the CLI (`src/cli.ts` calls `loadEnv()`), so consumers control env loading
+themselves. The `package.json` `exports` map formalizes the barrel as the entry.
 

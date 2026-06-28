@@ -5,9 +5,16 @@
   "type": "module",
   "description": "AI-assisted code reviewer sub-app (AI SDK + OpenRouter + zod).",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/cli.ts",
+    "start": "tsx src/cli.ts",
     "check": "tsx src/check.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit"

@@ -236,23 +236,23 @@ Public API is preserved (`createReviewer`, `reviewCode`, `reviewSchema`, `Review
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run typecheck`
-- [x] 1.2 No remaining inline `reviewSchema`/prompt definitions in `index.ts` (grep)
+- [x] 1.1 Type checking passes: `npm run typecheck` — ac2e692
+- [x] 1.2 No remaining inline `reviewSchema`/prompt definitions in `index.ts` (grep) — ac2e692
 
 #### Manual
 
-- [x] 1.3 `npm start` smoke run prints a shape-identical review (behavior-neutral extraction)
+- [x] 1.3 `npm start` smoke run prints a shape-identical review (behavior-neutral extraction) — ac2e692
 
 ### Phase 2: Provider factory, ToolLoopAgent, CLI, and barrel rewire
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npm run typecheck`
-- [ ] 2.2 `reviewCode`, `createReviewer`, `createReviewAgent`, `ReviewOptions` exported from `index.ts` (grep)
-- [ ] 2.3 `index.ts` contains only re-exports — no `generateText`/`main()`/inline `system:`/`Output.object` (grep)
-- [ ] 2.4 `src/provider.ts` + `src/cli.ts` exist; `package.json` `start` points at `src/cli.ts` and has an `exports` map (grep)
+- [x] 2.1 Type checking passes: `npm run typecheck`
+- [x] 2.2 `reviewCode`, `createReviewer`, `createReviewAgent`, `ReviewOptions` exported from `index.ts` (grep)
+- [x] 2.3 `index.ts` contains only re-exports — no `generateText`/`main()`/inline `system:`/`Output.object` (grep)
+- [x] 2.4 `src/provider.ts` + `src/cli.ts` exist; `package.json` `start` points at `src/cli.ts` and has an `exports` map (grep)
 
 #### Manual
 
-- [ ] 2.5 `npm start` smoke run prints a `reviewSchema`-valid review flagging the subtraction bug (fails fast without the key)
-- [ ] 2.6 `reviewCode(code, { language })` returns a typed `Review`; the `language` hint reaches the prompt (eval-readiness)
+- [x] 2.5 `npm start` smoke run prints a `reviewSchema`-valid review flagging the subtraction bug (fails fast without the key)
+- [x] 2.6 `reviewCode(code, { language })` returns a typed `Review`; the `language` hint reaches the prompt (eval-readiness)
