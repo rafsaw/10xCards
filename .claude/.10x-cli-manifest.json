@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.10.0",
   "manifestVersion": 3,
-  "lastApplied": "2026-06-29T19:37:37.723Z",
-  "lessonId": "m5l2",
+  "lastApplied": "2026-06-29T19:38:13.753Z",
+  "lessonId": "m5l3",
   "course": "10xdevs3",
   "tool": "claude-code",
   "files": {
@@ -255,6 +255,18 @@
         "contentHashes": {
           "SKILL.md": "6b992b77c723413a9b805280cf83da0ca5b848742dca49129d34f59e241149e8"
         }
+      },
+      "10x-impl-review-ci": {
+        "files": [
+          "references/impl-review-instructions.md",
+          "references/workflow-template.yml",
+          "SKILL.md"
+        ],
+        "contentHashes": {
+          "references/impl-review-instructions.md": "b045095889ac573f6f03b6e4d5c79f0bf199bb530a2dd40b3fee319d44af1cee",
+          "references/workflow-template.yml": "f9c039b74d595790ebb931876e08b30061d2f4d4064d0cb5466c52a064d64904",
+          "SKILL.md": "329af627486e1f0fd68e7546a0a758cee1c3cb2cd911c6d490a8152cceb03378"
+        }
       }
     },
     "prompts": [
@@ -276,7 +288,10 @@
       "m4l5-1-domain-distillation.md",
       "m4l5-2-invariant-aggregate-refactor.md",
       "m4l5-3-anti-corruption-layer.md",
-      "m5l2-agent.md"
+      "m5l2-agent.md",
+      "m5l3-requirements.md",
+      "m5l3-cicd.md",
+      "m5l3-promptfoo.md"
     ],
     "configs": [],
     "promptHashes": {
@@ -298,7 +313,10 @@
       "m4l5-1-domain-distillation.md": "9ff353da7881fb0e08f7950f18c3d3a3bf31dfd8b15a12d52d7cfbb02e2be20a",
       "m4l5-2-invariant-aggregate-refactor.md": "fcf22eb1676913dabf73e278515b7d8e47d04bc271ed46bc658c08a3792b7721",
       "m4l5-3-anti-corruption-layer.md": "c3ad9792233c1eeeadbb6f9522f01f0d4594448f17bbfd2e4002a6eabfb9e386",
-      "m5l2-agent.md": "76fdba2cd34ad290ffefef3c28d4adb9d6cac7964dc74bf57b84084ead8f336b"
+      "m5l2-agent.md": "76fdba2cd34ad290ffefef3c28d4adb9d6cac7964dc74bf57b84084ead8f336b",
+      "m5l3-requirements.md": "9afb43da9b7b35370c0a2e0f540e279911062cd4978e1f7ef8778eb2a9aaaa12",
+      "m5l3-cicd.md": "872a98942779fbb17172920e1c61d4f69a3397d7fb19231a2cd05ef0c3ae2767",
+      "m5l3-promptfoo.md": "806be147011125baf15437661ead810aa24bdb55e80089aa185ed6fd4894ae7f"
     }
   },
   "lessons": {
@@ -1590,6 +1608,24 @@
       "skills": {},
       "prompts": [
         "m5l2-agent.md"
+      ],
+      "configs": []
+    },
+    "m5l3": {
+      "appliedAt": "2026-06-29T19:38:13.753Z",
+      "skills": {
+        "10x-impl-review-ci": {
+          "files": [
+            "references/impl-review-instructions.md",
+            "references/workflow-template.yml",
+            "SKILL.md"
+          ]
+        }
+      },
+      "prompts": [
+        "m5l3-requirements.md",
+        "m5l3-cicd.md",
+        "m5l3-promptfoo.md"
       ],
       "configs": []
     }
