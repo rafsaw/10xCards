@@ -170,7 +170,14 @@
       "Bash(echo \"rc=$? \\(1 = zero matches => confirmed absent\\)\")",
       "Bash(echo \"rc=$? \\(1 = zero => confirmed\\)\")",
       "Bash(echo \"ast-grep-sql-EXIT=$?\")",
-      "Bash(echo \"rc=$? \\(1 = no drop => still live\\)\")"
+      "Bash(echo \"rc=$? \\(1 = no drop => still live\\)\")",
+      "Skill(10x-research)",
+      "Bash(grep -nvE \"^\\\\s*\\(//|/\\\\*|\\\\*|export |import type|$\\)\" src/index.ts)",
+      "Bash(cp .env .env.bak)",
+      "Bash(rm -f .env)",
+      "Bash(OPENROUTER_API_KEY= tsx src/cli.ts)",
+      "Bash(mv .env.bak .env)",
+      "Bash(OPENROUTER_API_KEY= npx tsx src/cli.ts)"
     ],
     "deny": [
       "Bash(rm -rf *)"
