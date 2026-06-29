@@ -48,7 +48,9 @@ export function createReviewer(config: ReviewerConfig = {}) {
   return {
     /** Review a snippet of code and return validated, structured feedback. */
     async reviewCode(code: string, options?: ReviewOptions): Promise<Review> {
-      const { output } = await agent.generate({ prompt: buildReviewPrompt(code, options) });
+      const { output } = await agent.generate({ 
+        prompt: buildReviewPrompt(code, options) 
+      });
       return output;
     },
   };
@@ -61,4 +63,15 @@ export function createReviewer(config: ReviewerConfig = {}) {
  */
 export async function reviewCode(code: string, options?: ReviewOptions, config?: ReviewerConfig): Promise<Review> {
   return createReviewer(config).reviewCode(code, options);
+}
+
+/**
+ same as reviewCode, but without the reviewer object. This is the video lesson code.
+ */
+export async function reviewCodeVideoLessonCode(code: string, options?: ReviewOptions, config?: ReviewerConfig): Promise<Review> {
+  const agent = createReviewAgent(config);
+  const { output } = await agent.generate({ 
+    prompt: buildReviewPrompt(code, options) 
+  });
+  return output;
 }
