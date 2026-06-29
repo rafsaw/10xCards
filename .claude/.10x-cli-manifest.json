@@ -1,8 +1,8 @@
 {
   "package": "@przeprogramowani/10x-cli",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "manifestVersion": 3,
-  "lastApplied": "2026-06-24T00:39:39.297Z",
+  "lastApplied": "2026-06-29T19:37:37.723Z",
   "lessonId": "m5l2",
   "course": "10xdevs3",
   "tool": "claude-code",
@@ -1586,7 +1586,7 @@
       "configs": []
     },
     "m5l2": {
-      "appliedAt": "2026-06-24T00:39:39.296Z",
+      "appliedAt": "2026-06-29T19:37:37.723Z",
       "skills": {},
       "prompts": [
         "m5l2-agent.md"
