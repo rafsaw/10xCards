@@ -29,7 +29,7 @@ fi
 
 # Hidden marker reserved for a future single-canonical-comment dedup pass; this
 # MVP still posts a new comment per run.
-printf '<!-- ai-code-review -->\n'
+# printf '<!-- ai-code-review -->\n'
 printf '## 🤖 AI Code Review — %s\n\n' "$badge"
 printf '%s\n\n' "$summary"
 

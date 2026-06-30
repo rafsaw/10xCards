@@ -320,8 +320,8 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 
 #### Automated
 
-- [x] 2.1 `action.yml` parses without schema errors
-- [x] 2.2 Markdown formatting produces a well-formed comment from a sample JSON fixture
+- [x] 2.1 `action.yml` parses without schema errors — f0c8484
+- [x] 2.2 Markdown formatting produces a well-formed comment from a sample JSON fixture — f0c8484
 
 #### Manual
 
