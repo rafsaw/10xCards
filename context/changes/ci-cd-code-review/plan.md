@@ -306,28 +306,30 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run typecheck`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Unit tests pass (incl. new `verdict.test.ts`): `npm test`
-- [x] 1.4 `npm run ci` prints valid JSON with six scores + `pass`
+- [x] 1.1 Type checking passes: `npm run typecheck` — dfd69c3
+- [x] 1.2 Linting passes: `npm run lint` — dfd69c3
+- [x] 1.3 Unit tests pass (incl. new `verdict.test.ts`): `npm test` — dfd69c3
+- [x] 1.4 `npm run ci` prints valid JSON with six scores + `pass` — dfd69c3
 
 #### Manual
 
-- [x] 1.5 Hand-run against a small real diff produces calibrated per-criterion scores
-- [x] 1.6 `reviewCode` signature and `cli.ts` behavior unchanged
+- [x] 1.5 Hand-run against a small real diff produces calibrated per-criterion scores — dfd69c3
+- [x] 1.6 `reviewCode` signature and `cli.ts` behavior unchanged — dfd69c3
 
 ### Phase 2: Composite Action
 
 #### Automated
 
-- [ ] 2.1 `action.yml` parses without schema errors
-- [ ] 2.2 Markdown formatting produces a well-formed comment from a sample JSON fixture
+- [x] 2.1 `action.yml` parses without schema errors
+- [x] 2.2 Markdown formatting produces a well-formed comment from a sample JSON fixture
 
 #### Manual
 
 - [ ] 2.3 Comment renders the six-score table correctly (via `act`/draft PR)
 - [ ] 2.4 Oversized diff triggers truncation note; lockfile changes excluded
 - [ ] 2.5 Correct label applied, opposite removed, colors correct
+
+> Manual checks 2.3–2.5 deferred to Phase 4: they need a live PR run, but the triggering workflow (`.github/workflows/ai-code-review.yml`) does not exist until Phase 3. They will surface in the Phase 4 final-phase manual rollup and be verified against the throwaway test PR.
 
 ### Phase 3: GitHub Workflow
 
