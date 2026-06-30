@@ -11,6 +11,9 @@ inputs:
   pr-number:
     description: "Pull request number to review."
     required: true
+  base-sha:
+    description: "Base commit SHA of the PR (github.event.pull_request.base.sha), diffed against HEAD."
+    required: true
   pr-title:
     description: "Pull request title, passed to the agent as review context."
     required: false
@@ -40,16 +43,21 @@ runs:
     - name: Extract PR diff
       id: diff
       shell: bash
+      env:
+        BASE_SHA: ${{ inputs.base-sha }}
       run: |
         set -euo pipefail
         DIFF_FILE="$RUNNER_TEMP/pr.diff"
-        # `gh pr diff` accepts at most one PR arg and rejects git pathspecs, so
-        # diff the checked-out PR branch against `main` directly. Fetch the base
-        # first: the default pull_request checkout is shallow (depth 1) and lacks
-        # origin/main. Exclude generated/noisy paths *before* the byte cap so a
-        # large lockfile change can't consume the budget before real code is seen.
-        git fetch origin main --depth=1
-        git diff --no-ext-diff --unified=3 origin/main...HEAD -- \
+        # Diff against the PR's base SHA, not `origin/main...HEAD`: the default
+        # pull_request checkout is shallow, so the base and head histories share
+        # no commit and the three-dot form fails with "no merge base". Fetch the
+        # exact base commit, then use a two-dot diff (BASE_SHA HEAD) which needs
+        # no merge base. With the default merge-ref checkout, HEAD's tree is the
+        # PR merged onto base, so this yields exactly the PR's changes. Exclude
+        # generated/noisy paths *before* the byte cap so a large lockfile change
+        # can't consume the budget before real code is seen.
+        git fetch --no-tags --depth=1 origin "$BASE_SHA"
+        git diff --no-ext-diff --unified=3 "$BASE_SHA" HEAD -- \
           . \
           ':(exclude)package-lock.json' \
           ':(exclude)pnpm-lock.yaml' \
