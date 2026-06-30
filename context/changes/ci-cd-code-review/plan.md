@@ -335,8 +335,8 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 
 #### Automated
 
-- [x] 3.1 `actionlint` passes on `ai-code-review.yml`
-- [x] 3.2 Workflow parses and references the composite action by correct relative path
+- [x] 3.1 `actionlint` passes on `ai-code-review.yml` — 0200831
+- [x] 3.2 Workflow parses and references the composite action by correct relative path — 0200831
 
 #### Manual
 

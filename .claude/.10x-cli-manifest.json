@@ -1,6 +1,7 @@
 {
   "package": "@przeprogramowani/10x-cli",
   "version": "1.10.0",
+  "version": "1.10.0",
   "manifestVersion": 3,
   "lastApplied": "2026-06-29T19:38:13.753Z",
   "lessonId": "m5l3",
@@ -317,8 +318,7 @@
       "m5l2-agent.md": "76fdba2cd34ad290ffefef3c28d4adb9d6cac7964dc74bf57b84084ead8f336b",
       "m5l3-requirements.md": "9afb43da9b7b35370c0a2e0f540e279911062cd4978e1f7ef8778eb2a9aaaa12",
       "m5l3-cicd.md": "872a98942779fbb17172920e1c61d4f69a3397d7fb19231a2cd05ef0c3ae2767",
-      "m5l3-promptfoo.md": "806be147011125baf15437661ead810aa24bdb55e80089aa185ed6fd4894ae7f",
-      "mvp-check.md": "925dbc3beb572cb90e858c8ec1ed6c813803cc7169bbf8be727cf29a83ccd839"
+      "m5l3-promptfoo.md": "806be147011125baf15437661ead810aa24bdb55e80089aa185ed6fd4894ae7f"
     }
   },
   "lessons": {
