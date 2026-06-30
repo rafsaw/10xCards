@@ -335,8 +335,8 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 
 #### Automated
 
-- [ ] 3.1 `actionlint` passes on `ai-code-review.yml`
-- [ ] 3.2 Workflow parses and references the composite action by correct relative path
+- [x] 3.1 `actionlint` passes on `ai-code-review.yml`
+- [x] 3.2 Workflow parses and references the composite action by correct relative path
 
 #### Manual
 
@@ -345,6 +345,8 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 - [ ] 3.5 `ai-cr:review` re-runs the review and is auto-removed
 - [ ] 3.6 Unrelated label does not trigger a run
 - [ ] 3.7 Fork PR is skipped
+
+> Manual checks 3.3–3.7 deferred to Phase 4: they need a live PR run against `main`, and the user will set/confirm the `OPENROUTER_API_KEY` secret (3.3) before that live test. They will surface in the Phase 4 final-phase manual rollup and be verified against the throwaway test PR.
 
 ### Phase 4: End-to-End Testing & Screenshots
 
