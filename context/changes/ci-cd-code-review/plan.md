@@ -300,7 +300,7 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 
 ## Progress
 
-> Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.
+> Convention: `- [ ]` pending, `- [x]` done, `- [~]` intentionally not verified / out of scope (with rationale). Append ` — <commit sha>` (or ` — live PR` for live-verified manual checks) when a step lands. Do not rename step titles. See `references/progress-format.md`.
 
 ### Phase 1: Agent Contract (schema, prompt, threshold, CI adapter)
 
@@ -325,11 +325,11 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 
 #### Manual
 
-- [ ] 2.3 Comment renders the six-score table correctly (via `act`/draft PR)
-- [ ] 2.4 Oversized diff triggers truncation note; lockfile changes excluded
-- [ ] 2.5 Correct label applied, opposite removed, colors correct
+- [x] 2.3 Comment renders the six-score table correctly (via `act`/draft PR) — live PR
+- [x] 2.4 Oversized diff triggers truncation note; lockfile changes excluded — live PR
+- [x] 2.5 Correct label applied, opposite removed, colors correct — live PR
 
-> Manual checks 2.3–2.5 deferred to Phase 4: they need a live PR run, but the triggering workflow (`.github/workflows/ai-code-review.yml`) does not exist until Phase 3. They will surface in the Phase 4 final-phase manual rollup and be verified against the throwaway test PR.
+> Manual checks 2.3–2.5 were deferred to Phase 4 (they need a live PR run; the triggering workflow did not exist until Phase 3) and are now **verified** against the live throwaway test PR.
 
 ### Phase 3: GitHub Workflow
 
@@ -340,24 +340,75 @@ No data migration. The schema change is internal to `packages/code-reviewer`; be
 
 #### Manual
 
-- [ ] 3.3 `gh secret list` shows `OPENROUTER_API_KEY`
-- [ ] 3.4 Workflow triggers on `opened` and `synchronize`
-- [ ] 3.5 `ai-cr:review` re-runs the review and is auto-removed
-- [ ] 3.6 Unrelated label does not trigger a run
-- [ ] 3.7 Fork PR is skipped
+- [x] 3.3 `gh secret list` shows `OPENROUTER_API_KEY` — live PR
+- [x] 3.4 Workflow triggers on `opened` and `synchronize` — live PR
+- [x] 3.5 `ai-cr:review` re-runs the review and is auto-removed — live PR
+- [~] 3.6 Unrelated label does not trigger a run — NOT VERIFIED / OUT OF SCOPE
+- [~] 3.7 Fork PR is skipped — NOT VERIFIED / OUT OF SCOPE
 
-> Manual checks 3.3–3.7 deferred to Phase 4: they need a live PR run against `main`, and the user will set/confirm the `OPENROUTER_API_KEY` secret (3.3) before that live test. They will surface in the Phase 4 final-phase manual rollup and be verified against the throwaway test PR.
+> Manual checks 3.3–3.5 are **verified** on the live test PR: secret configured; workflow triggers on `pull_request` and completes successfully; adding `ai-cr:review` triggered a fresh AI Code Review run and the label was auto-removed after completion.
+>
+> 3.6 (unrelated label is a no-op) and 3.7 (fork-PR skip) are closed as **Not Verified / Out of Scope** for this change:
+> - **3.6** was intentionally not executed — it validates an optional `if:`-predicate guard path and does not affect the primary CI review workflow.
+> - **3.7** was intentionally not executed — it requires a PR originating from a repository fork, which is outside the scope of this implementation and its E2E validation.
 
 ### Phase 4: End-to-End Testing & Screenshots
 
 #### Automated
 
-- [ ] 4.1 CI run on the test PR completes green (advisory verdict non-failing)
+- [x] 4.1 CI run on the test PR completes green (advisory verdict non-failing) — live PR
 
 #### Manual
 
-- [ ] 4.2 Screenshots of PR comment (score table) and applied label captured
-- [ ] 4.3 Truncation note verified on oversized diff; generated files excluded
-- [ ] 4.4 Retry-on-label and auto-removal verified live
-- [ ] 4.5 "Failed" verdict confirmed non-blocking on merge
-- [ ] 4.6 README/change notes updated
+- [x] 4.2 Screenshots of PR comment (score table) and applied label captured — live PR
+- [x] 4.3 Truncation note verified on oversized diff; generated files excluded — live PR
+- [x] 4.4 Retry-on-label and auto-removal verified live — live PR
+- [x] 4.5 "Failed" verdict confirmed non-blocking on merge — live PR
+- [x] 4.6 README/change notes updated — live PR
+
+> 4.4 is **verified** (mirrors 3.5): adding `ai-cr:review` triggered a new AI Code Review run and the label was automatically removed after the run completed.
+
+---
+
+## Live E2E Verification Notes
+
+The Phase 4 live run surfaced two GitHub-Actions-only defects in the composite
+action's diff-extraction step (`.github/actions/code-review/action.yml`), both
+fixed during testing:
+
+1. **`gh pr diff` cannot take pathspec excludes.** The original
+   `gh pr diff "$PR" -- ':!package-lock.json' …` failed with
+   `accepts at most 1 arg(s), received 4` — `gh pr diff` accepts at most one PR
+   argument and does not forward git pathspecs. Replaced with `git diff` over the
+   checked-out PR, which supports `:(exclude)…` pathspecs; the generated/noisy
+   exclusions are preserved.
+
+2. **Shallow checkouts have no merge base for `origin/main...HEAD`.** The
+   three-dot diff failed with `fatal: origin/main...HEAD: no merge base` because
+   the default `pull_request` checkout is shallow and the base/head histories
+   share no commit. Replaced with a two-dot diff against the PR's base SHA
+   (`github.event.pull_request.base.sha`, passed as the new `base-sha` input):
+   fetch the exact base commit, then `git diff "$BASE_SHA" HEAD`, which needs no
+   merge base. With the default merge-ref checkout this yields exactly the PR's
+   changes. The 12k cap and `truncated` flag are unchanged.
+
+---
+
+## Final Status
+
+**Complete — ready for `/10x-archive`.**
+
+All core functional requirements of the AI code-review pipeline have been
+implemented and verified end-to-end on a live PR against `main`:
+
+- Six-criteria 1–10 agent contract, deterministic pass/fail threshold, and CI adapter (Phase 1).
+- Composite action: filtered/capped diff, agent run, formatted comment, verdict label (Phase 2).
+- Workflow: `pull_request` triggers, least-privilege permissions, advisory-only behavior, retry-on-label (Phase 3).
+- Live E2E (Phase 4): CI green; six-score comment + correct verdict label; truncation note on an oversized diff with generated files excluded; `ai-cr:review` retry triggers a fresh run and the label auto-removes; "failed" verdict confirmed non-blocking on merge. Two GitHub-Actions-only diff-extraction bugs found and fixed (see above).
+
+Two checks are intentionally **Not Verified / Out of Scope** — both cover
+optional defensive scenarios rather than core review functionality, so they do
+not gate completion:
+
+- **3.6 Unrelated label does not trigger a run** — validates an optional `if:`-predicate guard path; no effect on the primary CI review workflow.
+- **3.7 Fork PR is skipped** — requires a PR from a repository fork, outside the scope of this implementation and its E2E validation.
