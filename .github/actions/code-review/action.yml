@@ -40,17 +40,24 @@ runs:
     - name: Extract PR diff
       id: diff
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.github-token }}
-        GH_REPO: ${{ github.repository }}
-        PR_NUMBER: ${{ inputs.pr-number }}
       run: |
         set -euo pipefail
         DIFF_FILE="$RUNNER_TEMP/pr.diff"
-        # Exclude generated/noisy paths *before* the byte cap so a large lockfile
-        # change can't consume the budget before real code is seen.
-        gh pr diff "$PR_NUMBER" \
-          -- ':!package-lock.json' ':!**/dist/**' ':!**/*.generated.*' \
+        # `gh pr diff` accepts at most one PR arg and rejects git pathspecs, so
+        # diff the checked-out PR branch against `main` directly. Fetch the base
+        # first: the default pull_request checkout is shallow (depth 1) and lacks
+        # origin/main. Exclude generated/noisy paths *before* the byte cap so a
+        # large lockfile change can't consume the budget before real code is seen.
+        git fetch origin main --depth=1
+        git diff --no-ext-diff --unified=3 origin/main...HEAD -- \
+          . \
+          ':(exclude)package-lock.json' \
+          ':(exclude)pnpm-lock.yaml' \
+          ':(exclude)yarn.lock' \
+          ':(exclude)bun.lockb' \
+          ':(exclude)**/dist/**' \
+          ':(exclude)**/build/**' \
+          ':(exclude)**/*.generated.*' \
           > "$DIFF_FILE"
         CAP=12000
         SIZE=$(wc -c < "$DIFF_FILE")
