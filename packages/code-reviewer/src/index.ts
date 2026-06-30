@@ -4,8 +4,15 @@
  * eval-facing export a future promptfoo eval drives.
  */
 
-export { reviewSchema, severitySchema, verdictSchema, findingSchema } from "./schemas.js";
-export type { Review } from "./schemas.js";
+export {
+  reviewSchema,
+  severitySchema,
+  findingSchema,
+  criterionScoreSchema,
+  criteriaSchema,
+  CRITERION_KEYS,
+} from "./schemas.js";
+export type { Review, Criteria, CriterionScore, CriterionKey } from "./schemas.js";
 
 export { reviewSystemPrompt, buildReviewPrompt } from "./prompts.js";
 
@@ -14,3 +21,6 @@ export type { ReviewerConfig } from "./provider.js";
 
 export { createReviewAgent, createReviewer, reviewCode } from "./agent.js";
 export type { ReviewOptions } from "./agent.js";
+
+export { computeVerdict, PASS_THRESHOLD, CORRECTNESS_FLOOR, SECURITY_FLOOR } from "./verdict.js";
+export type { VerdictResult } from "./verdict.js";

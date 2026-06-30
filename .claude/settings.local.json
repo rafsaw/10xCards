@@ -177,7 +177,12 @@
       "Bash(rm -f .env)",
       "Bash(OPENROUTER_API_KEY= tsx src/cli.ts)",
       "Bash(mv .env.bak .env)",
-      "Bash(OPENROUTER_API_KEY= npx tsx src/cli.ts)"
+      "Bash(OPENROUTER_API_KEY= npx tsx src/cli.ts)",
+      "Bash(DIFF_FILE=\"C:/Users/rafal/AppData/Local/Temp/claude/C--Users-rafal-repos-10xDevs3-10xCards/e34c377c-bf04-4389-bc20-322c66868c9d/scratchpad/sample.diff\" PR_TITLE=\"Fix add\\(\\) arithmetic\" PR_BODY=\"Corrects the addition helper.\" npm run ci)",
+      "Bash(DIFF_FILE=\"C:/Users/rafal/AppData/Local/Temp/claude/C--Users-rafal-repos-10xDevs3-10xCards/e34c377c-bf04-4389-bc20-322c66868c9d/scratchpad/pr.diff\" PR_TITLE=\"Add six-criteria CI code-review schema + adapter\" PR_BODY=\"Phase 1: replace 3-way verdict with six 1-10 criteria schema, embed rubric in prompt, add computeVerdict threshold helper \\(mean>=6 and correctness>=6 and security>=6\\), add src/ci.ts adapter reading PR title/body from env and diff from a file path, plus verdict.test.ts.\" npm run ci)",
+      "Bash(DIFF_FILE=\"C:/Users/rafal/AppData/Local/Temp/claude/C--Users-rafal-repos-10xDevs3-10xCards/e34c377c-bf04-4389-bc20-322c66868c9d/scratchpad/pr.diff\" PR_TITLE=\"Add six-criteria CI code-review schema + adapter\" PR_BODY=\"Phase 1: replace 3-way verdict with six 1-10 criteria schema, embed rubric in prompt, add computeVerdict threshold helper \\(mean>=6 and correctness>=6 and security>=6\\), add src/ci.ts adapter reading PR title/body from env and diff from a file path, plus verdict.test.ts.\" npm --prefix packages/code-reviewer run ci)",
+      "Bash(DIFF_FILE=\"C:/Users/rafal/AppData/Local/Temp/claude/C--Users-rafal-repos-10xDevs3-10xCards/e34c377c-bf04-4389-bc20-322c66868c9d/scratchpad/pr.diff\" PR_TITLE=\"Add six-criteria CI code-review schema + adapter\" PR_BODY=\"Phase 1: six-criteria schema, prompt rubric, computeVerdict, src/ci.ts adapter, verdict.test.ts.\" npm --prefix packages/code-reviewer run ci)",
+      "Bash(DIFF_FILE=\"C:/Users/rafal/AppData/Local/Temp/claude/C--Users-rafal-repos-10xDevs3-10xCards/e34c377c-bf04-4389-bc20-322c66868c9d/scratchpad/pr.diff\" PR_TITLE=\"Add six-criteria CI code-review schema + adapter\" PR_BODY=\"Phase 1: six-criteria schema, prompt rubric, computeVerdict, src/ci.ts adapter, verdict.test.ts.\" OPENROUTER_MODEL=\"anthropic/claude-sonnet-4.5\" npm --prefix packages/code-reviewer run ci)"
     ],
     "deny": [
       "Bash(rm -rf *)"
