@@ -189,7 +189,8 @@
       "Bash(/tmp/actionlint-bin -color .github/workflows/ai-code-review.yml)",
       "Bash(echo \"---exit:$?---\")",
       "Bash(command -v shellcheck)",
-      "Bash(echo \"---actionlint exit:$?---\")"
+      "Bash(echo \"---actionlint exit:$?---\")",
+      "WebFetch(domain:www.githubstatus.com)"
     ],
     "deny": [
       "Bash(rm -rf *)"
