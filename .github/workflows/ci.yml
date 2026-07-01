@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   ci:
@@ -16,6 +16,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # packages/code-reviewer is a standalone sub-project (not an npm
+      # workspace) with its own lockfile — the root `npm ci` above doesn't
+      # touch it, but its type-aware lint rules need its deps resolvable.
+      - run: npm ci --prefix packages/code-reviewer
       - run: npx astro sync
       - run: npm run lint
       - run: npm run build
