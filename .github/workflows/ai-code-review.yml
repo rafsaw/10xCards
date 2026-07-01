@@ -1,0 +1,62 @@
+name: AI Code Review
+
+# Advisory PR code review. On every PR to `main` the composite action scores the
+# diff against six 1-10 criteria, posts a summary comment, and applies an
+# `ai-cr:passed` / `ai-cr:failed` label. It NEVER blocks merge.
+#
+# `labeled` is included so re-adding `ai-cr:review` re-runs the review; the job
+# `if:` predicate ignores every other label event. We commit nothing back, so
+# there is no recursion guard / `[skip ci]` dance — the only loop risk is a
+# self-triggered label event, which the predicate filters out.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+
+# Least privilege at the top; the job re-grants exactly what the action needs.
+permissions: {}
+
+concurrency:
+  group: ai-code-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Fork guard: fork PRs can't read the OPENROUTER_API_KEY secret, so skip them
+    # cleanly rather than failing. Retry-on-label: on a `labeled` event run only
+    # when the label that fired is `ai-cr:review` (github.event.label.name is the
+    # single label that triggered the event); non-label events always run.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (github.event.action != 'labeled' || github.event.label.name == 'ai-cr:review')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # post the review comment
+      issues: write # create/apply the labels
+    steps:
+      # Checkout puts the local composite action (./.github/actions/code-review)
+      # on disk so the `uses:` below can resolve it.
+      - uses: actions/checkout@v4
+
+      # PR title/body reach the action as inputs (not inline `run:`
+      # interpolation), so attacker-controlled text can't break out of a shell.
+      - uses: ./.github/actions/code-review
+        with:
+          openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-number: ${{ github.event.pull_request.number }}
+          base-sha: ${{ github.event.pull_request.base.sha }}
+          pr-title: ${{ github.event.pull_request.title }}
+          pr-body: ${{ github.event.pull_request.body }}
+
+      # Remove the `ai-cr:review` trigger label so it can be re-added to request
+      # another pass. `always()` so the label clears even if the review failed.
+      - name: Remove retry label
+        if: ${{ always() && github.event.action == 'labeled' && github.event.label.name == 'ai-cr:review' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR_NUMBER" --remove-label "ai-cr:review"

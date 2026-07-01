@@ -1,4 +1,4 @@
-import { createReviewer, loadEnv, reviewSchema } from "./index.js";
+import { computeVerdict, createReviewer, loadEnv, reviewSchema } from "./index.js";
 
 /**
  * End-to-end integration check: env -> OpenRouter provider -> model ->
@@ -29,9 +29,10 @@ async function check(): Promise<void> {
     // Re-validate explicitly to prove the zod contract holds end-to-end.
     reviewSchema.parse(review);
 
+    const { pass, overall } = computeVerdict(review.criteria);
     const ms = Date.now() - start;
     console.log(`✓ Integration OK in ${ms}ms`);
-    console.log(`  verdict: ${review.verdict}, findings: ${review.findings.length}`);
+    console.log(`  overall: ${overall.toFixed(1)}, pass: ${pass}, findings: ${review.findings?.length ?? 0}`);
     console.log(JSON.stringify(review, null, 2));
   } catch (error) {
     console.error("✗ Integration check FAILED:");

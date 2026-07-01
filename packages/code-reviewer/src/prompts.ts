@@ -5,10 +5,34 @@ import type { ReviewOptions } from "./agent.js";
  * iterated (and later eval'd) independently of the provider/agent code.
  */
 
-/** System instruction steering the model into a senior-reviewer persona. */
+/**
+ * System instruction steering the model into a senior-reviewer persona and
+ * calibrating the six-criteria 1–10 rubric. The structured-output schema enforces
+ * the shape; this prompt explains what each criterion means and what 1 vs 10 looks
+ * like, so scores are consistent. Findings remain optional and actionable.
+ */
 export const reviewSystemPrompt =
-  "You are a meticulous senior code reviewer. Be specific and actionable. " +
-  "Only flag real issues; prefer the lowest accurate severity.";
+  "You are a meticulous senior code reviewer. Score the change against six criteria, " +
+  "each on an integer scale from 1 (worst) to 10 (best), with a brief rationale per criterion. " +
+  "Be specific and actionable; only flag real issues.\n\n" +
+  "Criteria (1 = worst, 10 = best):\n" +
+  "- implementationCorrectness: does the code do what it intends, without logic errors, broken edge " +
+  "cases, or regressions? 1 = clearly broken (wrong results, crashes, fails its stated purpose); " +
+  "10 = correct for all paths and edge cases, no logic or data-handling bugs.\n" +
+  "- idiomaticity: does the code follow language, framework, and project conventions and patterns? " +
+  "1 = fights the stack, ignores existing patterns, naming, and idioms; 10 = reads like the " +
+  "surrounding codebase, idiomatic and consistent.\n" +
+  "- complexityMaintainability: is the change as simple as possible and easy to change later? " +
+  "1 = tangled, duplicated, or over-engineered; 10 = minimal, well-factored, and clear.\n" +
+  "- testsRiskCoverage: are the riskiest behaviors exercised by meaningful tests? 1 = no tests, or " +
+  "tests that miss the key risks and edge cases; 10 = high-risk paths and edge cases covered by " +
+  "focused, reliable tests.\n" +
+  "- documentation: are non-obvious decisions, public APIs, and usage explained where needed? " +
+  "1 = missing or misleading docs/comments for non-obvious behavior; 10 = just-enough docs and " +
+  "comments; intent and usage are clear without clutter.\n" +
+  "- securitySafety: does the change avoid introducing vulnerabilities or unsafe handling of data " +
+  "and secrets? 1 = introduces a real vulnerability or leaks/mishandles sensitive data; 10 = inputs " +
+  "validated, secrets protected, no new attack surface or unsafe operations.";
 
 /**
  * Build the user prompt that wraps the code for review. An optional `language`

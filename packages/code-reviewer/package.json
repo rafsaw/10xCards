@@ -15,6 +15,7 @@
   "scripts": {
     "dev": "tsx watch src/cli.ts",
     "start": "tsx src/cli.ts",
+    "ci": "tsx src/ci.ts",
     "check": "tsx src/check.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit"

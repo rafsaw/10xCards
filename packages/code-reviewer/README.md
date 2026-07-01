@@ -13,17 +13,18 @@ tools can be added later without restructuring.
 
 Flat split, single files, no barrels except `index.ts`:
 
-| Module          | Responsibility                                                              |
-| --------------- | -------------------------------------------------------------------------- |
-| `schemas.ts`    | `reviewSchema` (+ `severity`/`verdict`/`finding` sub-schemas) and `Review`. |
-| `prompts.ts`    | `reviewSystemPrompt` + `buildReviewPrompt(code, options?)`.                  |
-| `provider.ts`   | `createModel(config)` factory, `loadEnv`, `FALLBACK_MODEL`.                  |
-| `agent.ts`      | `createReviewAgent` (`ToolLoopAgent`), `createReviewer`, `reviewCode`.       |
-| `index.ts`      | Pure barrel — public re-exports only.                                        |
-| `cli.ts`        | `npm start` smoke-run entry (the only side effects).                         |
+| Module        | Responsibility                                                                |
+| ------------- | ----------------------------------------------------------------------------- |
+| `schemas.ts`  | `reviewSchema` (+ `criterion`/`criteria`/`finding` sub-schemas) and `Review`. |
+| `prompts.ts`  | `reviewSystemPrompt` + `buildReviewPrompt(code, options?)`.                   |
+| `provider.ts` | `createModel(config)` factory, `loadEnv`, `FALLBACK_MODEL`.                   |
+| `verdict.ts`  | `computeVerdict(criteria)` — pure pass/fail from the six scores + thresholds. |
+| `agent.ts`    | `createReviewAgent` (`ToolLoopAgent`), `createReviewer`, `reviewCode`.        |
+| `index.ts`    | Pure barrel — public re-exports only.                                         |
+| `cli.ts`      | `npm start` smoke-run entry (a side-effecting smoke harness).                 |
+| `ci.ts`       | `npm run ci` PR-reviewer entry — reads PR inputs, prints verdict JSON.        |
 
 ## Stack
-
 
 | Package                            | Version    | Why                                                                                                          |
 | ---------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
@@ -31,9 +32,6 @@ Flat split, single files, no barrels except `index.ts`:
 | `@openrouter/ai-sdk-provider`      | `^2.10.0`  | Stable OpenRouter provider for the AI SDK.                                                                   |
 | `zod`                              | `^4.4.3`   | Runtime schema + structured-output contract.                                                                 |
 | `tsx`, `typescript`, `@types/node` | dev        | Run/typecheck TypeScript on Node directly.                                                                   |
-
-
-
 
 ## Setup
 
@@ -46,28 +44,21 @@ cp .env.example .env   # then add your OPENROUTER_API_KEY
 Environment (loaded from `.env` via Node's native `process.loadEnvFile()` — no
 extra dependency; see `loadEnv()` in `src/provider.ts`):
 
-
 | Var                  | Required | Default                       |
 | -------------------- | -------- | ----------------------------- |
 | `OPENROUTER_API_KEY` | yes      | —                             |
 | `OPENROUTER_MODEL`   | no       | `anthropic/claude-sonnet-4.5` |
 
-
-
-
 ## Scripts
 
-
-| Command             | Action                                                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `npm start`         | Run the CLI (`src/cli.ts`) once — a smoke test via `tsx`.                                                                |
-| `npm run dev`       | Same, in watch mode.                                                                                                     |
-| `npm run check`     | End-to-end integration check: one **real** OpenRouter call, validated against the zod schema. Exits non-zero on failure. |
-| `npm run typecheck` | `tsc --noEmit`.                                                                                                          |
-| `npm run build`     | Emit JS + `.d.ts` to `dist/`.                                                                                            |
-
-
-
+| Command             | Action                                                                                                                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm start`         | Run the CLI (`src/cli.ts`) once — a smoke test via `tsx`.                                                                                                                               |
+| `npm run dev`       | Same, in watch mode.                                                                                                                                                                    |
+| `npm run check`     | End-to-end integration check: one **real** OpenRouter call, validated against the zod schema. Exits non-zero on failure.                                                                |
+| `npm run ci`        | PR-reviewer entry (`src/ci.ts`): reads `PR_TITLE`/`PR_BODY`/`DIFF_FILE`, runs the agent, prints `{ summary, criteria, findings?, overall, pass }` JSON. Drives the CI composite action. |
+| `npm run typecheck` | `tsc --noEmit`.                                                                                                                                                                         |
+| `npm run build`     | Emit JS + `.d.ts` to `dist/`.                                                                                                                                                           |
 
 ## Verifying the integration
 
@@ -81,7 +72,7 @@ npm run check
 # • Model: anthropic/claude-sonnet-4.5
 # • Sending a minimal review request to OpenRouter...
 # ✓ Integration OK in 1234ms
-#   verdict: approve, findings: 0
+#   overall: 7.5, pass: true, findings: 0
 ```
 
 Without a key it fails fast (`✗ OPENROUTER_API_KEY is not set`, exit code 1).
@@ -116,25 +107,71 @@ Under the hood `createReviewer` builds a `ToolLoopAgent` (via
 `output: Output.object({ schema: reviewSchema })`; the validated review is read
 from `result.output` of `agent.generate({ prompt })`.
 
-`reviewCode` returns a value validated against `reviewSchema`:
+`reviewCode` returns a value validated against `reviewSchema` — six per-criterion
+1–10 scores plus optional findings:
 
 ```ts
 { summary: string;
-  verdict: "approve" | "comment" | "request_changes";
-  findings: { severity: "info" | "minor" | "major" | "critical";
-              title: string; detail: string; suggestion?: string }[] }
+  criteria: {
+    implementationCorrectness: { score: number; rationale: string };
+    idiomaticity:              { score: number; rationale: string };
+    complexityMaintainability: { score: number; rationale: string };
+    testsRiskCoverage:         { score: number; rationale: string };
+    documentation:             { score: number; rationale: string };
+    securitySafety:            { score: number; rationale: string };
+  };
+  findings?: { severity: "info" | "minor" | "major" | "critical";
+               title: string; detail: string; suggestion?: string }[] }
 ```
 
+Pass/fail is **not** part of the schema — the model scores, code judges.
+`computeVerdict(review.criteria)` derives `{ pass, overall }` deterministically:
+`overall` is the mean of the six scores, and `pass` requires `overall >= 6` **and**
+`implementationCorrectness.score >= 6` **and** `securitySafety.score >= 6` (named
+constants `PASS_THRESHOLD` / `CORRECTNESS_FLOOR` / `SECURITY_FLOOR` in `verdict.ts`).
 
+## CI integration (advisory PR review)
+
+This agent runs automatically on every pull request to `main`:
+
+- **Workflow:** `.github/workflows/ai-code-review.yml` — triggers on `pull_request`
+  (`opened`, `synchronize`, `reopened`, `labeled`) to `main`. Top-level
+  `permissions: {}`; the job re-grants `pull-requests: write` + `issues: write`.
+  Fork PRs are skipped (they can't read the secret), and `labeled` events only run
+  when the label is `ai-cr:review`.
+- **Composite action:** `.github/actions/code-review/action.yml` owns the mechanics
+  — `npm ci`, extract the PR diff (excluding `package-lock.json`, `**/dist/**`,
+  `**/*.generated.*` **before** a ~12 KB byte cap), run `npm run ci`, format the
+  comment (`format-comment.sh`), post it, and apply the verdict label.
+- **Required secret:** repository secret `OPENROUTER_API_KEY` (set via
+  `gh secret set OPENROUTER_API_KEY` or repo Settings → Secrets). The optional
+  `model` action input overrides `OPENROUTER_MODEL`.
+
+**Criteria & threshold.** The agent scores six 1–10 criteria —
+implementation-correctness, idiomaticity, complexity/maintainability,
+tests/risk-coverage, documentation, and security/safety. CI then computes the
+verdict in code (`computeVerdict`): **pass** = overall mean ≥ 6 **and**
+correctness ≥ 6 **and** security ≥ 6.
+
+**Side-effects.** One PR comment with the summary + six-score table (plus a
+truncation note when the diff is capped), and exactly one of two labels —
+`ai-cr:passed` (green) or `ai-cr:failed` (red). Re-add the `ai-cr:review` label to
+request another pass; the workflow removes it after running.
+
+**Advisory only.** The review **never blocks merge** — the job does not `exit 1` on
+a "failed" verdict; it's not a required status check.
+
+**Known limitation.** This MVP posts a **new comment per run** — there is no comment
+deduplication, so repeated runs accumulate comments on the PR. Single-canonical-comment
+dedup is a noted future enhancement.
 
 ## Notes
 
 - The review verdict comes from a `ToolLoopAgent` (`ai` v6) with
-`output: Output.object({ schema })` — the current structured-output API
-(`generateObject` is deprecated in v6). With no tools the default
-`stopWhen: stepCountIs(20)` never trips, so it issues a single generation today;
-the agent is the seam for adding review tools later.
+  `output: Output.object({ schema })` — the current structured-output API
+  (`generateObject` is deprecated in v6). With no tools the default
+  `stopWhen: stepCountIs(20)` never trips, so it issues a single generation today;
+  the agent is the seam for adding review tools later.
 - Importing the barrel (`index.ts`) is side-effect-free; `.env` is only loaded by
-the CLI (`src/cli.ts` calls `loadEnv()`), so consumers control env loading
-themselves. The `package.json` `exports` map formalizes the barrel as the entry.
-
+  the CLI (`src/cli.ts` calls `loadEnv()`), so consumers control env loading
+  themselves. The `package.json` `exports` map formalizes the barrel as the entry.

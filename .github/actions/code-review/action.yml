@@ -1,0 +1,151 @@
+name: "AI Code Review"
+description: "Review a PR diff with the OpenRouter code-review agent, post a summary comment, and apply a pass/fail label. Advisory only."
+
+inputs:
+  openrouter-api-key:
+    description: "OpenRouter API key for the review agent."
+    required: true
+  github-token:
+    description: "Token used by the gh CLI to read the diff, comment, and label."
+    required: true
+  pr-number:
+    description: "Pull request number to review."
+    required: true
+  base-sha:
+    description: "Base commit SHA of the PR (github.event.pull_request.base.sha), diffed against HEAD."
+    required: true
+  pr-title:
+    description: "Pull request title, passed to the agent as review context."
+    required: false
+    default: ""
+  pr-body:
+    description: "Pull request body, passed to the agent as review context (the agent truncates it)."
+    required: false
+    default: ""
+  model:
+    description: "Optional OpenRouter model id override (e.g. anthropic/claude-sonnet-4.5)."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+
+    - name: Install reviewer dependencies
+      shell: bash
+      working-directory: packages/code-reviewer
+      run: npm ci
+
+    - name: Extract PR diff
+      id: diff
+      shell: bash
+      env:
+        BASE_SHA: ${{ inputs.base-sha }}
+      run: |
+        set -euo pipefail
+        DIFF_FILE="$RUNNER_TEMP/pr.diff"
+        # Diff against the PR's base SHA, not `origin/main...HEAD`: the default
+        # pull_request checkout is shallow, so the base and head histories share
+        # no commit and the three-dot form fails with "no merge base". Fetch the
+        # exact base commit, then use a two-dot diff (BASE_SHA HEAD) which needs
+        # no merge base. With the default merge-ref checkout, HEAD's tree is the
+        # PR merged onto base, so this yields exactly the PR's changes. Exclude
+        # generated/noisy paths *before* the byte cap so a large lockfile change
+        # can't consume the budget before real code is seen.
+        git fetch --no-tags --depth=1 origin "$BASE_SHA"
+        git diff --no-ext-diff --unified=3 "$BASE_SHA" HEAD -- \
+          . \
+          ':(exclude)package-lock.json' \
+          ':(exclude)pnpm-lock.yaml' \
+          ':(exclude)yarn.lock' \
+          ':(exclude)bun.lockb' \
+          ':(exclude)**/dist/**' \
+          ':(exclude)**/build/**' \
+          ':(exclude)**/*.generated.*' \
+          > "$DIFF_FILE"
+        CAP=12000
+        SIZE=$(wc -c < "$DIFF_FILE")
+        TRUNCATED=false
+        if [ "$SIZE" -gt "$CAP" ]; then
+          head -c "$CAP" "$DIFF_FILE" > "$DIFF_FILE.capped"
+          mv "$DIFF_FILE.capped" "$DIFF_FILE"
+          TRUNCATED=true
+        fi
+        echo "diff-file=$DIFF_FILE" >> "$GITHUB_OUTPUT"
+        echo "truncated=$TRUNCATED" >> "$GITHUB_OUTPUT"
+        echo "Diff: ${SIZE} bytes (cap ${CAP}, truncated=${TRUNCATED})"
+
+    - name: Run review agent
+      id: review
+      shell: bash
+      working-directory: packages/code-reviewer
+      env:
+        OPENROUTER_API_KEY: ${{ inputs.openrouter-api-key }}
+        MODEL_INPUT: ${{ inputs.model }}
+        PR_TITLE: ${{ inputs.pr-title }}
+        PR_BODY: ${{ inputs.pr-body }}
+        DIFF_FILE: ${{ steps.diff.outputs.diff-file }}
+      run: |
+        set -euo pipefail
+        # Only set OPENROUTER_MODEL when a non-empty override is supplied: the
+        # provider uses `?? FALLBACK_MODEL`, which an empty string would defeat.
+        if [ -n "${MODEL_INPUT}" ]; then
+          export OPENROUTER_MODEL="${MODEL_INPUT}"
+        fi
+        REVIEW_JSON="$RUNNER_TEMP/review.json"
+        # --silent suppresses npm's lifecycle banner so only the agent's JSON
+        # lands on stdout; agent errors go to stderr and won't corrupt the file.
+        npm run --silent ci > "$REVIEW_JSON"
+        echo "review-json=$REVIEW_JSON" >> "$GITHUB_OUTPUT"
+        echo "Review JSON: $(wc -c < "$REVIEW_JSON") bytes"
+
+    - name: Format PR comment
+      id: format
+      shell: bash
+      env:
+        REVIEW_JSON: ${{ steps.review.outputs.review-json }}
+        TRUNCATED: ${{ steps.diff.outputs.truncated }}
+      run: |
+        set -euo pipefail
+        REVIEW_MD="$RUNNER_TEMP/review.md"
+        bash "$GITHUB_ACTION_PATH/format-comment.sh" "$REVIEW_JSON" "$TRUNCATED" > "$REVIEW_MD"
+        PASS=$(jq -r '.pass' "$REVIEW_JSON")
+        echo "review-md=$REVIEW_MD" >> "$GITHUB_OUTPUT"
+        echo "pass=$PASS" >> "$GITHUB_OUTPUT"
+
+    - name: Post PR comment
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        GH_REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        REVIEW_MD: ${{ steps.format.outputs.review-md }}
+      run: |
+        set -euo pipefail
+        gh pr comment "$PR_NUMBER" --body-file "$REVIEW_MD"
+
+    - name: Apply verdict label
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        GH_REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        PASS: ${{ steps.format.outputs.pass }}
+      run: |
+        set -euo pipefail
+        # Idempotently ensure the label set exists with the agreed colors.
+        gh label create "ai-cr:passed" --color "1a7f37" --description "AI code review passed" --force
+        gh label create "ai-cr:failed" --color "d1242f" --description "AI code review failed" --force
+        gh label create "ai-cr:review" --color "ededed" --description "Re-run the AI code review" --force
+        if [ "$PASS" = "true" ]; then
+          ADD="ai-cr:passed"; REMOVE="ai-cr:failed"
+        else
+          ADD="ai-cr:failed"; REMOVE="ai-cr:passed"
+        fi
+        gh pr edit "$PR_NUMBER" --add-label "$ADD"
+        # Removing a label the PR doesn't currently carry is a no-op we tolerate.
+        gh pr edit "$PR_NUMBER" --remove-label "$REMOVE" || true
