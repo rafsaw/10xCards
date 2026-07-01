@@ -76,8 +76,11 @@ export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   // Claude Code agent tooling (hooks, skills, commands) is not application
   // source and is not part of any tsconfig project — exclude it from the
-  // type-checked lint pass.
-  { ignores: [".claude/**"] },
+  // type-checked lint pass. `**/.claude/**` so nested package dirs (e.g.
+  // packages/code-reviewer/.claude/**) are covered too.
+  // .dependency-cruiser.cjs is a dotfile, which tsconfig's `**/*` include
+  // does not match, so the type-aware parser can't find its project — ignore.
+  { ignores: ["**/.claude/**", ".dependency-cruiser.cjs"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
