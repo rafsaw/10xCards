@@ -6,6 +6,7 @@
 
 - Committing runs `npx lint-staged` (`.husky/pre-commit`): `eslint --fix` on staged `*.{ts,tsx,astro}`, `prettier --write` on `*.{json,css,md}`. Expect staged files to change — re-stage after.
 - CI (`@.github/workflows/ci.yml`) runs `lint` + `build` on push/PR to `main`. It does not run the test suites (`npm test`, `test:integration`, `test:e2e`) — verify those locally.
+- `@.github/workflows/ai-code-review.yml` posts an advisory AI review comment on every PR to `main` (never blocks merge); re-run it by re-adding the `ai-cr:review` label.
 - Never overwrite `context/` — the 10x-workflow source of truth (PRD, tech-stack, plans). `context/archive/**` and `context/foundation/archive/**` are immutable.
 - Edits inside `CLAUDE.md`'s `<!-- BEGIN/END @przeprogramowani/10x-cli -->` markers are lost on the next `10x get` — put durable guidance above the first marker.
 
