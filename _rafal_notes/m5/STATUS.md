@@ -34,5 +34,3 @@ f837ef4 chore(tool-loop-agent): close out plan (epilogue)
 `ToolLoopAgent`) — **NIE** ukończone zadanie lekcyjne M5L3. Prefiks `m5l3` mówi
 "dotyczy lekcji M5L3", a nie "lekcja M5L3 zaliczona". Samo zadanie praktyczne
 M5L3 wciąż przed Tobą.
-
-**Tutaj testowy tekst**
