@@ -1,5 +1,7 @@
 # 10x Astro Starter
 
+### testing Claude Code Action
+
 ![](./public/template.png)
 
 A modern, opinionated starter template for building fast, accessible web applications.
