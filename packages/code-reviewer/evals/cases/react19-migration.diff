@@ -1,0 +1,153 @@
+diff --git a/src/index.jsx b/src/index.jsx
+index 3f8a1c2..b7e4d90 100644
+--- a/src/index.jsx
++++ b/src/index.jsx
+@@ -1,11 +1,12 @@
+ import React from "react";
+-import ReactDOM from "react-dom";
++import ReactDOM from "react-dom/client";
+ import App from "./App";
+ import { NotificationsProvider } from "./NotificationsProvider";
+
+-ReactDOM.render(
+-  <NotificationsProvider>
+-    <App />
+-  </NotificationsProvider>,
+-  document.getElementById("root"),
+-);
++// React 19 upgrade: mount the tree through the new client entry point.
++ReactDOM.render(
++  <NotificationsProvider>
++    <App />
++  </NotificationsProvider>,
++  document.getElementById("root"),
++);
+diff --git a/src/NotificationsPanel.jsx b/src/NotificationsPanel.jsx
+index a91f2b0..c3d5e71 100644
+--- a/src/NotificationsPanel.jsx
++++ b/src/NotificationsPanel.jsx
+@@ -1,77 +1,58 @@
+-import React, { Component } from "react";
++import React, { useState, useEffect, useRef, useCallback } from "react";
+ import PropTypes from "prop-types";
+ import { notificationBus } from "./notificationBus";
+ import { formatTimestamp } from "./format";
+
+-class NotificationsPanel extends Component {
+-  constructor(props) {
+-    super(props);
+-    this.state = {
+-      items: [],
+-      unread: 0,
+-      filter: props.initialFilter,
+-    };
+-    this.handleIncoming = this.handleIncoming.bind(this);
+-    this.markAllRead = this.markAllRead.bind(this);
+-  }
+-
+-  componentDidMount() {
+-    // Subscribe to the live notification stream.
+-    this.unsubscribe = notificationBus.subscribe(this.props.channel, this.handleIncoming);
+-  }
+-
+-  componentWillReceiveProps(nextProps) {
+-    if (nextProps.channel !== this.props.channel) {
+-      this.unsubscribe();
+-      this.unsubscribe = notificationBus.subscribe(nextProps.channel, this.handleIncoming);
+-    }
+-  }
+-
+-  componentWillUnmount() {
+-    // Tear down the subscription so we don't leak listeners.
+-    this.unsubscribe();
+-  }
+-
+-  handleIncoming(notification) {
+-    this.setState((prev) => ({
+-      items: [notification, ...prev.items].slice(0, 50),
+-      unread: prev.unread + 1,
+-    }));
+-  }
+-
+-  markAllRead() {
+-    this.setState({ unread: 0 });
+-  }
+-
+-  render() {
+-    const { items, unread, filter } = this.state;
+-    const visible = items.filter((n) => filter === "all" || n.category === filter);
+-    return (
+-      <section className="notifications-panel" ref="panelRoot">
+-        <header>
+-          <h2>Notifications</h2>
+-          <span className="badge">{unread}</span>
+-          <button type="button" onClick={this.markAllRead}>
+-            Mark all read
+-          </button>
+-        </header>
+-        <ul>
+-          {visible.map((n) => (
+-            <li key={n.id} className={`row row--${n.category}`}>
+-              <time>{formatTimestamp(n.createdAt)}</time>
+-              <span className="title">{n.title}</span>
+-              <p className="body">{n.body}</p>
+-            </li>
+-          ))}
+-        </ul>
+-      </section>
+-    );
+-  }
+-}
++function NotificationsPanel({ channel, initialFilter = "all" }) {
++  const [items, setItems] = useState([]);
++  const [unread, setUnread] = useState(0);
++  const [filter, setFilter] = useState(initialFilter);
++  const panelRoot = useRef(null);
++
++  const handleIncoming = useCallback((notification) => {
++    setItems((prev) => [notification, ...prev].slice(0, 50));
++    setUnread((prev) => prev + 1);
++  }, []);
++
++  // Subscribe to the live notification stream for the current channel.
++  useEffect(() => {
++    const unsubscribe = notificationBus.subscribe(channel, handleIncoming);
++  }, [channel, handleIncoming]);
++
++  const markAllRead = useCallback(() => setUnread(0), []);
++
++  const visible = items.filter((n) => filter === "all" || n.category === filter);
++
++  return (
++    <section className="notifications-panel" ref={panelRoot}>
++      <header>
++        <h2>Notifications</h2>
++        <span className="badge">{unread}</span>
++        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
++          <option value="all">All</option>
++          <option value="mentions">Mentions</option>
++          <option value="system">System</option>
++        </select>
++        <button type="button" onClick={markAllRead}>
++          Mark all read
++        </button>
++      </header>
++      <ul>
++        {visible.map((n) => (
++          <li key={n.id} className={`row row--${n.category}`}>
++            <time>{formatTimestamp(n.createdAt)}</time>
++            <span className="title">{n.title}</span>
++            <p className="body" dangerouslySetInnerHTML={{ __html: n.bodyHtml }} />
++          </li>
++        ))}
++      </ul>
++    </section>
++  );
++}
+
+ NotificationsPanel.propTypes = {
+   channel: PropTypes.string.isRequired,
+   initialFilter: PropTypes.oneOf(["all", "mentions", "system"]),
+ };
+
+ export default NotificationsPanel;
