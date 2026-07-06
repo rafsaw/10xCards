@@ -27,6 +27,17 @@ export interface ReviewOptions {
   language?: string;
   /** Optional extra context prepended to the prompt. */
   context?: string;
+  /**
+   * Trusted, validated kebab-case change id under review. When set, the reviewer
+   * can read `context/changes/<changeId>/plan.md` via the `readPlan` tool (Phase 3).
+   * Absent → tool-less diff-only review, identical to before. Not a model input.
+   */
+  changeId?: string;
+  /**
+   * Override for the context root that holds `changes/<id>/plan.md`. Defaults to
+   * `<cwd>/../../context`. Review-time input, not provider config.
+   */
+  contextRoot?: string;
 }
 
 /** Build a `ToolLoopAgent` that returns a `reviewSchema`-validated review. */

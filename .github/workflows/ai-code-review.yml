@@ -49,6 +49,7 @@ jobs:
           base-sha: ${{ github.event.pull_request.base.sha }}
           pr-title: ${{ github.event.pull_request.title }}
           pr-body: ${{ github.event.pull_request.body }}
+          head-ref: ${{ github.event.pull_request.head.ref }}
 
       # Remove the `ai-cr:review` trigger label so it can be re-added to request
       # another pass. `always()` so the label clears even if the review failed.

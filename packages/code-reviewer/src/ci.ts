@@ -36,7 +36,12 @@ async function main(): Promise<void> {
 
   const context = [`PR title: ${title}`, body ? `PR description:\n${body}` : null].filter(Boolean).join("\n\n");
 
-  const review = await reviewCode(diff, { language: "typescript", context });
+  // Optional change-id from the CI action (derived from the PR branch). An unset
+  // or empty value degrades to a plain diff-only review, identical to before.
+  const changeIdRaw = process.env.CHANGE_ID?.trim();
+  const changeId = changeIdRaw === "" ? undefined : changeIdRaw;
+
+  const review = await reviewCode(diff, { language: "typescript", context, changeId });
   const { pass, overall } = computeVerdict(review.criteria);
 
   console.log(JSON.stringify({ ...review, overall, pass }, null, 2));
