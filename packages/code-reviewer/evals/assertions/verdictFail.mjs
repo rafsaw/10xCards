@@ -26,7 +26,7 @@ export default function verdictFail(output) {
   }
 
   const verdict = computeVerdict(parsed.data.criteria);
-  const failedAsExpected = verdict.pass === false;
+  const failedAsExpected = !verdict.pass;
   const overall = verdict.overall.toFixed(2);
 
   return {
