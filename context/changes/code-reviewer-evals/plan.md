@@ -355,29 +355,29 @@ signature and the review schema are preserved (a hard constraint from prior chan
 
 #### Automated
 
-- [x] 2.1 Fixture file exists: `evals/cases/react19-migration.diff`
-- [x] 2.2 File is a well-formed unified diff (parses; non-empty hunks)
+- [x] 2.1 Fixture file exists: `evals/cases/react19-migration.diff` — 5bba380
+- [x] 2.2 File is a well-formed unified diff (parses; non-empty hunks) — 5bba380
 
 #### Manual
 
-- [x] 2.3 Each of the three flaws is genuinely present and impactful
-- [x] 2.4 The three flaws map to correctness / React-19-API / security categories
-- [x] 2.5 Benign migration changes present so flaws aren't the only edits
-- [x] 2.6 A human reviewer would plausibly fail the change
+- [x] 2.3 Each of the three flaws is genuinely present and impactful — 5bba380
+- [x] 2.4 The three flaws map to correctness / React-19-API / security categories — 5bba380
+- [x] 2.5 Benign migration changes present so flaws aren't the only edits — 5bba380
+- [x] 2.6 A human reviewer would plausibly fail the change — 5bba380
 
 ### Phase 3: Assertions, config wiring, docs & run
 
 #### Automated
 
-- [ ] 3.1 Assertion + config files exist and Promptfoo loads them without error
-- [ ] 3.2 `npm run eval` completes with a matrix result for all three models
-- [ ] 3.3 The `verdictFail` static assertion passes (verdict = fail, schema valid)
-- [ ] 3.4 Type checking still passes: `npm run typecheck`
+- [x] 3.1 Assertion + config files exist and Promptfoo loads them without error
+- [x] 3.2 `npm run eval` completes with a matrix result for all three models
+- [x] 3.3 The `verdictFail` static assertion passes (verdict = fail, schema valid)
+- [x] 3.4 Type checking still passes: `npm run typecheck`
 
 #### Manual
 
-- [ ] 3.5 Side-by-side output shows each model's review + pass/fail per assertion
-- [ ] 3.6 `llm-rubric` verdicts sensibly reflect whether each model caught the three flaws
-- [ ] 3.7 Cost/latency guardrails catch runaway calls but don't trip on normal runs
-- [ ] 3.8 `npm run eval:view` renders the comparison
-- [ ] 3.9 README "Evals" section is accurate and runnable verbatim
+- [x] 3.5 Side-by-side output shows each model's review + pass/fail per assertion
+- [x] 3.6 `llm-rubric` verdicts sensibly reflect whether each model caught the three flaws
+- [x] 3.7 Cost/latency guardrails catch runaway calls but don't trip on normal runs
+- [x] 3.8 `npm run eval:view` renders the comparison
+- [x] 3.9 README "Evals" section is accurate and runnable verbatim

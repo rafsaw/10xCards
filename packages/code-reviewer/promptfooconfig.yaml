@@ -1,0 +1,86 @@
+# Promptfoo eval: compare 3 OpenRouter models on ONE deliberately-flawed
+# React 16→19 migration diff. Each model's review is graded two ways:
+#   1. llm-rubric  — did the review identify the three planted flaws?
+#   2. javascript  — is the output schema-valid AND does computeVerdict() FAIL it?
+# A latency guardrail catches a hung/runaway call.
+#
+# Run from THIS package dir (so the TS loader resolves tsconfig.json):
+#   npm run eval          # run the matrix
+#   npm run eval:view     # browse the side-by-side comparison UI
+# Requires OPENROUTER_API_KEY (loaded from .env). See README "Evals".
+
+description: "code-reviewer model comparison — flawed React 16→19 migration diff (3 models × LLM-judge + deterministic verdict)"
+
+# Static prompt: the custom provider loads the diff itself (from the `diff` path
+# var) and passes it to reviewCode(). The diff is NOT interpolated here — the
+# fixture contains literal `{{ }}` (React's dangerouslySetInnerHTML) that would
+# break Nunjucks templating. See evals/reviewerProvider.ts.
+prompts:
+  - "Review the React 16→19 migration diff for correctness, React 19 API removals, and security issues."
+
+# Three entries, same custom provider, differing ONLY by config.model → the
+# comparison matrix. The provider wraps the real reviewCode() agent, so the
+# system prompt, rubric, and structured-output schema are what's under test.
+# Model ids verified against https://openrouter.ai/models at authoring time —
+# edit here if they drift.
+providers:
+  - id: file://./evals/reviewerProvider.ts
+    label: glm-5.1
+    config:
+      model: z-ai/glm-5.1
+  - id: file://./evals/reviewerProvider.ts
+    label: deepseek-v4-flash
+    config:
+      model: deepseek/deepseek-v4-flash
+  - id: file://./evals/reviewerProvider.ts
+    label: claude-sonnet-4.5
+    config:
+      model: anthropic/claude-sonnet-4.5
+
+# Applied uniformly to every model so all three are graded identically.
+defaultTest:
+  # Independent, cheap judge at temperature 0 — decoupled from the models under
+  # test, so the grader doesn't grade itself. Uses OPENROUTER_API_KEY too.
+  # gpt-4o-mini (non-reasoning) is used deliberately: gpt-5-mini (a reasoning
+  # model) intermittently echoed the grader's JSON schema placeholder
+  # (`reason: "string"`) instead of grading — a reminder that the JUDGE's own
+  # reliability is part of what an eval must control for.
+  options:
+    provider:
+      id: openrouter:openai/gpt-4o-mini
+      config:
+        temperature: 0
+  assert:
+    # 1. LLM-as-a-judge: did the review catch all three planted flaws?
+    - type: llm-rubric
+      value: |
+        The reviewed code is a React 16→19 migration containing exactly three
+        planted flaws. Grade by SYMPTOM, not exact wording. Pass ONLY if the
+        review (its summary or findings) clearly identifies ALL THREE of:
+        {{expected_flaws}}
+        Fail if any one of the three is missed.
+    # 2. Deterministic: schema-valid Review that computeVerdict() FAILS.
+    - type: javascript
+      value: file://./evals/assertions/verdictFail.mjs
+    # 3. Guardrail: catch a hung/runaway call. (Cost is not asserted — the frozen
+    #    reviewCode() doesn't surface token usage, so the provider has no per-call
+    #    cost to return; see README "Evals".)
+    - type: latency
+      threshold: 120000
+
+tests:
+  - description: "flawed React 16→19 migration — reviewer must catch all three planted flaws and fail the change"
+    vars:
+      # Plain path (NOT file://) so Promptfoo doesn't load + Nunjucks-render the
+      # diff content; the provider reads this file directly. See prompts note above.
+      diff: ./evals/cases/react19-migration.diff
+      expected_flaws: |
+        1. Missing effect cleanup (CORRECTNESS): the useEffect that subscribes to
+           notificationBus never returns an unsubscribe function, so the
+           subscription leaks on every channel change and on unmount.
+        2. React 19 removed API (REACT-19 API): ReactDOM.render is still called
+           after switching the import to react-dom/client — render() was removed in
+           React 19 and must be replaced with createRoot(container).render(...).
+        3. Unsafe HTML injection (SECURITY): the notification body is rendered via
+           dangerouslySetInnerHTML with unvalidated, user-controlled bodyHtml — an
+           XSS vector introduced by the migration.
