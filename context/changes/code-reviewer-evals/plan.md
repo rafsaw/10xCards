@@ -342,14 +342,14 @@ signature and the review schema are preserved (a hard constraint from prior chan
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npm run typecheck`
-- [ ] 1.2 `promptfoo` is installed: `npm ls promptfoo` resolves
-- [ ] 1.3 Provider file exists and default-exports a class: `evals/reviewerProvider.ts`
+- [x] 1.1 Type checking passes: `npm run typecheck`
+- [x] 1.2 `promptfoo` is installed: `npm ls promptfoo` resolves
+- [x] 1.3 Provider file exists and default-exports a class: `evals/reviewerProvider.ts`
 
 #### Manual
 
-- [ ] 1.4 Provider imports resolve from source without a build
-- [ ] 1.5 `config.model` is threaded through to `reviewCode`'s third arg
+- [x] 1.4 Provider imports resolve from source without a build
+- [x] 1.5 `config.model` is threaded through to `reviewCode`'s third arg
 
 ### Phase 2: Flawed React 16→19 migration fixture
 
