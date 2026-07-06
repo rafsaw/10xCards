@@ -25,9 +25,9 @@ prompts:
 # edit here if they drift.
 providers:
   - id: file://./evals/reviewerProvider.ts
-    label: glm-5.1
+    label: glm-5.2
     config:
-      model: z-ai/glm-5.1
+      model: z-ai/glm-5.2
   - id: file://./evals/reviewerProvider.ts
     label: deepseek-v4-flash
     config:
@@ -45,9 +45,10 @@ defaultTest:
   # model) intermittently echoed the grader's JSON schema placeholder
   # (`reason: "string"`) instead of grading — a reminder that the JUDGE's own
   # reliability is part of what an eval must control for.
+# RS changed to claude-sonnet-4.5 or gpt-5.2 we should use powerfull model as a judge 
   options:
     provider:
-      id: openrouter:openai/gpt-4o-mini
+      id: openrouter:openai/gpt-5.2
       config:
         temperature: 0
   assert:
