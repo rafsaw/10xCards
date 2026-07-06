@@ -190,7 +190,11 @@
       "Bash(echo \"---exit:$?---\")",
       "Bash(command -v shellcheck)",
       "Bash(echo \"---actionlint exit:$?---\")",
-      "WebFetch(domain:www.githubstatus.com)"
+      "WebFetch(domain:www.githubstatus.com)",
+      "WebFetch(domain:www.promptfoo.dev)",
+      "WebFetch(domain:www.evalite.dev)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:v1.evalite.dev)"
     ],
     "deny": [
       "Bash(rm -rf *)"
