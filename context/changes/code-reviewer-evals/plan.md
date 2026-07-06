@@ -369,15 +369,15 @@ signature and the review schema are preserved (a hard constraint from prior chan
 
 #### Automated
 
-- [x] 3.1 Assertion + config files exist and Promptfoo loads them without error
-- [x] 3.2 `npm run eval` completes with a matrix result for all three models
-- [x] 3.3 The `verdictFail` static assertion passes (verdict = fail, schema valid)
-- [x] 3.4 Type checking still passes: `npm run typecheck`
+- [x] 3.1 Assertion + config files exist and Promptfoo loads them without error — 64c9d94
+- [x] 3.2 `npm run eval` completes with a matrix result for all three models — 64c9d94
+- [x] 3.3 The `verdictFail` static assertion passes (verdict = fail, schema valid) — 64c9d94
+- [x] 3.4 Type checking still passes: `npm run typecheck` — 64c9d94
 
 #### Manual
 
-- [x] 3.5 Side-by-side output shows each model's review + pass/fail per assertion
-- [x] 3.6 `llm-rubric` verdicts sensibly reflect whether each model caught the three flaws
-- [x] 3.7 Cost/latency guardrails catch runaway calls but don't trip on normal runs
-- [x] 3.8 `npm run eval:view` renders the comparison
-- [x] 3.9 README "Evals" section is accurate and runnable verbatim
+- [x] 3.5 Side-by-side output shows each model's review + pass/fail per assertion — 64c9d94
+- [x] 3.6 `llm-rubric` verdicts sensibly reflect whether each model caught the three flaws — 64c9d94
+- [x] 3.7 Cost/latency guardrails catch runaway calls but don't trip on normal runs — 64c9d94
+- [x] 3.8 `npm run eval:view` renders the comparison — 64c9d94
+- [x] 3.9 README "Evals" section is accurate and runnable verbatim — 64c9d94
