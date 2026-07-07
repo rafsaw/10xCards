@@ -72,6 +72,15 @@ async function main(): Promise<void> {
   console.log(`readPlan tool calls: ${readPlanCalls.length}`);
   console.log(`\nsummary:\n${result.output.summary}`);
 
+  const pa = result.output.planAlignment;
+  if (pa) {
+    console.log(
+      `\nplan alignment (planFound=${pa.planFound}): ` +
+        `implemented=${pa.implemented.length} missing=${pa.missing.length} ` +
+        `scopeDrift=${pa.scopeDrift.length} outOfPlan=${pa.outOfPlan.length}`,
+    );
+  }
+
   const findings = result.output.findings ?? [];
   if (findings.length > 0) {
     console.log(`\nfindings (${findings.length}):`);

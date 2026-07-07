@@ -46,11 +46,16 @@ export const planReviewInstructions =
   "You MUST call `readPlan` first, before scoring, to fetch the implementation plan.\n" +
   "Call it with NO arguments — it already targets the change under review. Do NOT guess or " +
   "pass a `changeId` (a wrong guess makes it report no plan).\n" +
-  "- If it returns `found: true`, compare the diff against the plan and put your " +
-  "implemented / missing / scope-drift (built beyond the plan) / out-of-plan observations in " +
-  "`summary`. Also emit `findings[]` entries — one per missing plan item and per out-of-plan " +
-  "change — with a severity matching its impact.\n" +
-  '- If it returns `found: false`, state "no plan found" in `summary` and review the diff only.\n' +
+  "After reading, you MUST populate the structured `planAlignment` field so the diff↔plan " +
+  "comparison is explicit and machine-renderable:\n" +
+  "- Set `planFound` to whether `readPlan` returned `found: true`.\n" +
+  "- Fill all four lists: `implemented`, `missing`, `scopeDrift` (built beyond the plan), and " +
+  "`outOfPlan` (in the diff but not described by the plan). Use an EMPTY list for a bucket with " +
+  'no items — never omit a bucket, so an empty one reads as an explicit "none".\n' +
+  "- If `readPlan` returned `found: false`, set `planFound: false`, leave all four lists empty, " +
+  'state "no plan found" in `summary`, and review the diff only.\n' +
+  "Also mirror each `missing` and `outOfPlan` item as a `findings[]` entry (severity per " +
+  "impact), and give a one- or two-sentence alignment recap in `summary`.\n" +
   "The six-criteria 1–10 scoring rubric above is unchanged; plan alignment informs your " +
   "rationale and findings but does not add or remove criteria.";
 

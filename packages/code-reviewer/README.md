@@ -133,7 +133,11 @@ from `result.output` of `agent.generate({ prompt })`.
     securitySafety:            { score: number; rationale: string };
   };
   findings?: { severity: "info" | "minor" | "major" | "critical";
-               title: string; detail: string; suggestion?: string }[] }
+               title: string; detail: string; suggestion?: string }[];
+  // Present only on the plan-aware path (readPlan); an explicit diff↔plan comparison.
+  planAlignment?: { planFound: boolean;
+                    implemented: string[]; missing: string[];
+                    scopeDrift: string[]; outOfPlan: string[] } }
 ```
 
 Pass/fail is **not** part of the schema — the model scores, code judges.
@@ -212,9 +216,13 @@ values there if they drift.
 
 The reviewer is a **tool-loop agent**: when a change is under review it can call one
 read-only tool, `readPlan`, to fetch that change's implementation plan and compare the
-diff against it (implemented / missing / scope-drift / out-of-plan) — reported in the
-`summary` and as `findings[]`. The output contract (`reviewSchema`) is unchanged; with
-no change under review the reviewer is tool-less and behaves exactly as before.
+diff against it (implemented / missing / scope-drift / out-of-plan). The comparison is
+emitted in a dedicated structured `planAlignment` field (`planFound` + the four lists,
+each empty when it has no items) as well as recapped in `summary` and mirrored as
+`findings[]`. The CI comment renders `planAlignment` as its own **Plan alignment**
+section so the diff↔plan check is always visible, never buried in prose. With no change
+under review the reviewer is tool-less, `planAlignment` is omitted, and behavior is
+exactly as before.
 
 - **What it reads.** Only `context/changes/<changeId>/plan.md` — nothing else. The model
   never supplies a filesystem path, only an optional `changeId`; the filename `plan.md`
