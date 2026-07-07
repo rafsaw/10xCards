@@ -22,5 +22,15 @@ export type { ReviewerConfig } from "./provider.js";
 export { createReviewAgent, createReviewer, reviewCode } from "./agent.js";
 export type { ReviewOptions } from "./agent.js";
 
+export {
+  readPlan,
+  resolvePlanPath,
+  createReadPlanTool,
+  defaultContextRoot,
+  CHANGE_ID_PATTERN,
+  PlanAccessError,
+} from "./readPlan.js";
+export type { PlanRef, ResolvedPlanPath, ReadPlanResult } from "./readPlan.js";
+
 export { computeVerdict, PASS_THRESHOLD, CORRECTNESS_FLOOR, SECURITY_FLOOR } from "./verdict.js";
 export type { VerdictResult } from "./verdict.js";

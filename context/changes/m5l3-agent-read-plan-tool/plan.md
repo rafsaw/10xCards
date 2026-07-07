@@ -501,32 +501,32 @@ every path (`reviewCode`, `ci.ts`, evals, `check`) behaves exactly as before.
 
 #### Automated
 
-- [x] 1.1 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
-- [x] 1.2 Lint passes: `npm run lint` (repo root)
-- [x] 1.3 Build passes: `npm run build` (repo root)
-- [x] 1.4 Existing unit tests still pass: `npm test` (repo root)
-- [x] 1.5 Action YAML remains valid
+- [x] 1.1 Typecheck passes: `cd packages/code-reviewer && npm run typecheck` — a4fc30d
+- [x] 1.2 Lint passes: `npm run lint` (repo root) — a4fc30d
+- [x] 1.3 Build passes: `npm run build` (repo root) — a4fc30d
+- [x] 1.4 Existing unit tests still pass: `npm test` (repo root) — a4fc30d
+- [x] 1.5 Action YAML remains valid — a4fc30d
 
 #### Manual
 
-- [x] 1.6 `CHANGE_ID` unset → `npm run ci` output shape unchanged (diff-only)
-- [x] 1.7 `HEAD_REF##*/` yields `m5l3-agent-read-plan-tool` for the branch
-- [x] 1.8 `action.yml` diff pathspec includes `':(exclude)context/**'` (F3)
+- [x] 1.6 `CHANGE_ID` unset → `npm run ci` output shape unchanged (diff-only) — a4fc30d
+- [x] 1.7 `HEAD_REF##*/` yields `m5l3-agent-read-plan-tool` for the branch — a4fc30d
+- [x] 1.8 `action.yml` diff pathspec includes `':(exclude)context/**'` (F3) — a4fc30d
 
 ### Phase 2: readPlan Helper + Path Guardrails
 
 #### Automated
 
-- [ ] 2.1 Guardrail unit tests pass: `npm test` (repo root)
-- [ ] 2.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
-- [ ] 2.3 Lint passes: `npm run lint` (repo root)
-- [ ] 2.4 Build passes: `npm run build` (repo root)
+- [x] 2.1 Guardrail unit tests pass: `npm test` (repo root)
+- [x] 2.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
+- [x] 2.3 Lint passes: `npm run lint` (repo root)
+- [x] 2.4 Build passes: `npm run build` (repo root)
 
 #### Manual
 
-- [ ] 2.5 Reject/accept matrix confirmed by reading the tests
-- [ ] 2.6 No absolute paths appear in any `readPlan` failure reason
-- [ ] 2.7 Symlinked `plan.md` escaping `allowedRoot` is rejected (F4 realpath re-check)
+- [x] 2.5 Reject/accept matrix confirmed by reading the tests
+- [x] 2.6 No absolute paths appear in any `readPlan` failure reason
+- [x] 2.7 Symlinked `plan.md` escaping `allowedRoot` is rejected (F4 realpath re-check)
 
 ### Phase 3: Agent Wiring — Bounded Tool Loop + Plan-Aware Instructions
 
