@@ -33,6 +33,42 @@ fi
 printf '## 🤖 AI Code Review — %s\n\n' "$badge"
 printf '%s\n\n' "$summary"
 
+# Plan alignment: the explicit diff↔plan comparison. Present only on the plan-aware
+# path (the `readPlan` tool read a change's plan.md); rendered as its own section so
+# the comparison is unmistakable instead of buried in the summary prose. Each bucket
+# is always shown — an empty one prints "_none_" so "Missing: none" is stated.
+has_plan_alignment=$(jq -r 'if .planAlignment then "true" else "false" end' "$REVIEW_JSON")
+if [ "$has_plan_alignment" = "true" ]; then
+  printf '### Plan alignment\n\n'
+  plan_found=$(jq -r '.planAlignment.planFound' "$REVIEW_JSON")
+  if [ "$plan_found" != "true" ]; then
+    printf '> ℹ️ No implementation plan found for this change — reviewed the diff only.\n\n'
+  else
+    # Sanitize newlines in each item so a multi-line entry can't break the list.
+    jq -r '
+      .planAlignment as $p
+      | [
+          ["✅ Implemented", $p.implemented],
+          ["❌ Missing",     $p.missing],
+          ["➕ Scope drift", $p.scopeDrift],
+          ["❓ Out of plan", $p.outOfPlan]
+        ]
+      | map(
+          "**\(.[0])**\n\n"
+          + ( if (.[1] | length) > 0
+              then (.[1] | map("- \(. | gsub("\n"; " "))") | join("\n"))
+              else "- _none_" end )
+          + "\n"
+        )
+      | join("\n")
+    ' "$REVIEW_JSON"
+    printf '\n'
+    if [ "$TRUNCATED" = "true" ]; then
+      printf '> ⚠️ The code diff was truncated (12 KB cap), but the **plan was read in full** via the `readPlan` tool; "Missing" may list code the reviewer did not see.\n\n'
+    fi
+  fi
+fi
+
 printf '### Scores\n\n'
 printf '| Criterion | Score | Notes |\n'
 printf '| --- | --- | --- |\n'

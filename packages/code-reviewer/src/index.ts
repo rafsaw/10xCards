@@ -10,9 +10,10 @@ export {
   findingSchema,
   criterionScoreSchema,
   criteriaSchema,
+  planAlignmentSchema,
   CRITERION_KEYS,
 } from "./schemas.js";
-export type { Review, Criteria, CriterionScore, CriterionKey } from "./schemas.js";
+export type { Review, Criteria, CriterionScore, CriterionKey, PlanAlignment } from "./schemas.js";
 
 export { reviewSystemPrompt, buildReviewPrompt } from "./prompts.js";
 

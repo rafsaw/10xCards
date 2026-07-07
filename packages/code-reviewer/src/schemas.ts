@@ -52,13 +52,32 @@ export const criteriaSchema = z.object({
   securitySafety: criterionScoreSchema,
 });
 
+/**
+ * Explicit diff↔plan comparison, emitted only on the plan-aware path (when the
+ * `readPlan` tool is bound to a change under review). Its own field — rather than
+ * prose folded into `summary` — so the comparison renders as a dedicated,
+ * always-present section in the PR comment. Every bucket is a list that is empty
+ * (never omitted) when it has no items, so "Missing: none" is stated, not implied.
+ */
+export const planAlignmentSchema = z.object({
+  planFound: z.boolean().describe("Whether `readPlan` returned a plan for the change under review."),
+  implemented: z.array(z.string()).describe("Plan items the diff implements."),
+  missing: z.array(z.string()).describe("Plan items not yet implemented in the diff."),
+  scopeDrift: z.array(z.string()).describe("Work built beyond what the plan describes (more than planned)."),
+  outOfPlan: z.array(z.string()).describe("Changes present in the diff but not described by the plan."),
+});
+
 /** Structured shape we ask the model to return — also our runtime contract. */
 export const reviewSchema = z.object({
   summary: z.string().describe("One-paragraph overview of the change."),
   criteria: criteriaSchema.describe("Per-criterion 1–10 scores against the six review criteria."),
   findings: z.array(findingSchema).describe("Concrete, actionable review findings.").optional(),
+  planAlignment: planAlignmentSchema
+    .describe("Explicit diff↔plan comparison; present only when a change/plan was under review.")
+    .optional(),
 });
 
 export type CriterionScore = z.infer<typeof criterionScoreSchema>;
 export type Criteria = z.infer<typeof criteriaSchema>;
+export type PlanAlignment = z.infer<typeof planAlignmentSchema>;
 export type Review = z.infer<typeof reviewSchema>;
