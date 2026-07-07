@@ -65,6 +65,7 @@ extra dependency; see `loadEnv()` in `src/provider.ts`):
 | `npm start`         | Run the CLI (`src/cli.ts`) once — a smoke test via `tsx`.                                                                                                                               |
 | `npm run dev`       | Same, in watch mode.                                                                                                                                                                    |
 | `npm run check`     | End-to-end integration check: one **real** OpenRouter call, validated against the zod schema. Exits non-zero on failure.                                                                |
+| `npm run verify:plan` | Live plan-usage proof: reviews this branch's own `packages/code-reviewer` diff with the plan-aware agent and asserts a `readPlan` tool call fired. One **real** call; exits non-zero if the plan wasn't consulted. See "readPlan (plan-aware review)". |
 | `npm run ci`        | PR-reviewer entry (`src/ci.ts`): reads `PR_TITLE`/`PR_BODY`/`DIFF_FILE`, runs the agent, prints `{ summary, criteria, findings?, overall, pass }` JSON. Drives the CI composite action. |
 | `npm run typecheck` | `tsc --noEmit`.                                                                                                                                                                         |
 | `npm run build`     | Emit JS + `.d.ts` to `dist/`.                                                                                                                                                           |
@@ -206,6 +207,43 @@ values there if they drift.
 > the CI review action (`.github/actions/code-review/action.yml`) runs `npm ci`
 > inside this package on every PR — so it installs `promptfoo` even though CI never
 > runs the eval. We accept that install cost rather than complicating the action.
+
+## readPlan (plan-aware review)
+
+The reviewer is a **tool-loop agent**: when a change is under review it can call one
+read-only tool, `readPlan`, to fetch that change's implementation plan and compare the
+diff against it (implemented / missing / scope-drift / out-of-plan) — reported in the
+`summary` and as `findings[]`. The output contract (`reviewSchema`) is unchanged; with
+no change under review the reviewer is tool-less and behaves exactly as before.
+
+- **What it reads.** Only `context/changes/<changeId>/plan.md` — nothing else. The model
+  never supplies a filesystem path, only an optional `changeId`; the filename `plan.md`
+  is hardcoded.
+- **Guardrail.** `changeId` must match kebab-case `^[a-z0-9]+(-[a-z0-9]+)*$`, and the
+  resolved path must stay within `context/changes/` (a `realpath` re-check also rejects a
+  symlinked `plan.md` escaping the root). Traversal (`../../.env`), absolute paths,
+  dotfiles, and arbitrary files are rejected deterministically; failures return a terse,
+  repo-relative reason and never leak an absolute path. Covered by `src/readPlan.test.ts`
+  (pure, no API).
+- **Inputs.** `reviewCode(code, { changeId })` (library) or `CHANGE_ID` env (CI, derived
+  from the PR branch's last path segment). Absent/unmatched → a graceful diff-only review.
+- **Loop bound.** The plan-aware agent is bounded by `stopWhen: stepCountIs(3)` — one
+  `readPlan` call plus the final structured generation, never an unbounded loop.
+- **Read-only / no side effects.** No writes, no PR comments or labels, no network beyond
+  the single model call.
+
+**Verify it end-to-end:**
+
+```bash
+cd packages/code-reviewer
+# ensure .env has OPENROUTER_API_KEY
+npm run verify:plan          # reviews this branch's diff; asserts readPlan fired (real call)
+```
+
+It prints the `readPlan` tool-call count, the review `summary`, and any plan-gap findings,
+then exits non-zero if `readPlan` was not called. Override the target with
+`CHANGE_ID=<id>` and the diff base with `BASE_REF=<ref>` (default `main`), or feed a
+prepared diff via `DIFF_FILE=<path>`.
 
 ## CI integration (advisory PR review)
 

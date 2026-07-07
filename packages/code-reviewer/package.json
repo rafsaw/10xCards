@@ -17,6 +17,7 @@
     "start": "tsx src/cli.ts",
     "ci": "tsx src/ci.ts",
     "check": "tsx src/check.ts",
+    "verify:plan": "tsx src/verify-plan-usage.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "eval": "promptfoo eval -c promptfooconfig.yaml",

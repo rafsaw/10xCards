@@ -26,6 +26,10 @@ inputs:
     description: "Optional OpenRouter model id override (e.g. anthropic/claude-sonnet-4.5)."
     required: false
     default: ""
+  head-ref:
+    description: "PR head branch ref (github.event.pull_request.head.ref). Its last path segment becomes the change-id, letting the reviewer read that change's plan.md when one exists. Optional; a miss degrades to a diff-only review."
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -66,6 +70,7 @@ runs:
           ':(exclude)**/dist/**' \
           ':(exclude)**/build/**' \
           ':(exclude)**/*.generated.*' \
+          ':(exclude)context/**' \
           > "$DIFF_FILE"
         CAP=12000
         SIZE=$(wc -c < "$DIFF_FILE")
@@ -89,12 +94,20 @@ runs:
         PR_TITLE: ${{ inputs.pr-title }}
         PR_BODY: ${{ inputs.pr-body }}
         DIFF_FILE: ${{ steps.diff.outputs.diff-file }}
+        HEAD_REF: ${{ inputs.head-ref }}
       run: |
         set -euo pipefail
         # Only set OPENROUTER_MODEL when a non-empty override is supplied: the
         # provider uses `?? FALLBACK_MODEL`, which an empty string would defeat.
         if [ -n "${MODEL_INPUT}" ]; then
           export OPENROUTER_MODEL="${MODEL_INPUT}"
+        fi
+        # Derive the change-id from the PR branch's last path segment (e.g.
+        # `learning/m5l3-agent-read-plan-tool` → `m5l3-agent-read-plan-tool`). The
+        # reviewer validates it and reads that change's plan.md when one exists; a
+        # branch without a matching plan degrades gracefully to a diff-only review.
+        if [ -n "${HEAD_REF}" ]; then
+          export CHANGE_ID="${HEAD_REF##*/}"
         fi
         REVIEW_JSON="$RUNNER_TEMP/review.json"
         # --silent suppresses npm's lifecycle banner so only the agent's JSON

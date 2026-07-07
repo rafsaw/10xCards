@@ -35,6 +35,26 @@ export const reviewSystemPrompt =
   "validated, secrets protected, no new attack surface or unsafe operations.";
 
 /**
+ * Additive instructions attached ONLY when the `readPlan` tool is bound (a
+ * `changeId` is under review). Steers the model to consult the implementation
+ * plan and report diff↔plan alignment. The base six-criteria rubric in
+ * {@link reviewSystemPrompt} is unchanged; this text is appended to it, so the
+ * tool-less path stays byte-for-byte identical.
+ */
+export const planReviewInstructions =
+  "\n\nPlan-aware review: a `readPlan` tool is available for the change under review.\n" +
+  "You MUST call `readPlan` first, before scoring, to fetch the implementation plan.\n" +
+  "Call it with NO arguments — it already targets the change under review. Do NOT guess or " +
+  "pass a `changeId` (a wrong guess makes it report no plan).\n" +
+  "- If it returns `found: true`, compare the diff against the plan and put your " +
+  "implemented / missing / scope-drift (built beyond the plan) / out-of-plan observations in " +
+  "`summary`. Also emit `findings[]` entries — one per missing plan item and per out-of-plan " +
+  "change — with a severity matching its impact.\n" +
+  '- If it returns `found: false`, state "no plan found" in `summary` and review the diff only.\n' +
+  "The six-criteria 1–10 scoring rubric above is unchanged; plan alignment informs your " +
+  "rationale and findings but does not add or remove criteria.";
+
+/**
  * Build the user prompt that wraps the code for review. An optional `language`
  * hint is prepended and optional `context` is included; with no options the
  * output is byte-identical to the original context-only prompt.
