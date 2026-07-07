@@ -1,10 +1,10 @@
 ---
 change_id: m5l3-agent-read-plan-tool
 title: Add read-only readPlan capability to the code-reviewer (first tool-loop agent)
-status: impl_reviewed
+status: archived
 created: 2026-07-06
-updated: 2026-07-06
-archived_at: null
+updated: 2026-07-07
+archived_at: 2026-07-07T12:42:39Z
 ---
 
 ## Notes
