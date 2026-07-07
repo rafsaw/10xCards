@@ -532,27 +532,27 @@ every path (`reviewCode`, `ci.ts`, evals, `check`) behaves exactly as before.
 
 #### Automated
 
-- [x] 3.1 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
-- [x] 3.2 Lint passes: `npm run lint` (repo root)
-- [x] 3.3 Build passes: `npm run build` (repo root)
-- [x] 3.4 Existing unit tests still pass: `npm test` (repo root)
+- [x] 3.1 Typecheck passes: `cd packages/code-reviewer && npm run typecheck` — 0fb67fc
+- [x] 3.2 Lint passes: `npm run lint` (repo root) — 0fb67fc
+- [x] 3.3 Build passes: `npm run build` (repo root) — 0fb67fc
+- [x] 3.4 Existing unit tests still pass: `npm test` (repo root) — 0fb67fc
 
 #### Manual
 
-- [x] 3.5 `changeId` unset → behavior unchanged (`npm run check` / no-changeId `npm run ci`)
-- [x] 3.6 `CHANGE_ID=m5l3-agent-read-plan-tool` → stderr shows `plan tool calls: ≥1` and summary references the plan
+- [x] 3.5 `changeId` unset → behavior unchanged (`npm run check` / no-changeId `npm run ci`) — 0fb67fc
+- [x] 3.6 `CHANGE_ID=m5l3-agent-read-plan-tool` → stderr shows `plan tool calls: ≥1` and summary references the plan — 0fb67fc
 
 ### Phase 4: Verification / Self-Review Against This Plan
 
 #### Automated
 
-- [ ] 4.1 All unit tests pass incl. guardrails + negative path: `npm test` (repo root)
-- [ ] 4.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
-- [ ] 4.3 Lint passes: `npm run lint` (repo root)
-- [ ] 4.4 Build passes: `npm run build` (repo root)
+- [x] 4.1 All unit tests pass incl. guardrails + negative path: `npm test` (repo root)
+- [x] 4.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
+- [x] 4.3 Lint passes: `npm run lint` (repo root)
+- [x] 4.4 Build passes: `npm run build` (repo root)
 
 #### Manual
 
-- [ ] 4.5 `npm run verify:plan` prints ≥1 `readPlan` call + diff↔plan comparison, exit 0
-- [ ] 4.6 Bogus `changeId` → "no plan found", exit 0 (graceful degradation)
-- [ ] 4.7 Audit: no new external side effects; `reviewSchema` output shape unchanged
+- [x] 4.5 `npm run verify:plan` prints ≥1 `readPlan` call + diff↔plan comparison, exit 0
+- [x] 4.6 Bogus `changeId` → "no plan found", exit 0 (graceful degradation)
+- [x] 4.7 Audit: no new external side effects; `reviewSchema` output shape unchanged
