@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 
-import { reviewCode } from "./agent.js";
+import { createReviewAgent } from "./agent.js";
+import type { PlanContext } from "./agent.js";
+import { buildReviewPrompt } from "./prompts.js";
 import { loadEnv } from "./provider.js";
 import { computeVerdict } from "./verdict.js";
 
@@ -41,8 +43,28 @@ async function main(): Promise<void> {
   const changeIdRaw = process.env.CHANGE_ID?.trim();
   const changeId = changeIdRaw === "" ? undefined : changeIdRaw;
 
-  const review = await reviewCode(diff, { language: "typescript", context, changeId });
+  // Build the agent directly (rather than via `reviewCode`) so we can read the
+  // tool-call trace: the plan-aware path attaches `readPlan` and we observe
+  // whether it fired. `contextRoot` defaults to `<cwd>/../../context`.
+  const planContext: PlanContext | undefined = changeId ? { changeId } : undefined;
+  const agent = createReviewAgent(undefined, planContext);
+  const result = await agent.generate({
+    prompt: buildReviewPrompt(diff, { language: "typescript", context }),
+  });
+  const review = result.output;
   const { pass, overall } = computeVerdict(review.criteria);
+
+  // stdout carries the single review JSON (contract unchanged). The tool-call
+  // trace goes to stderr only, so the composite action's stdout parse is untouched.
+  // Count across ALL steps: `result.toolCalls` reflects only the last step, which
+  // is the structured-output generation (no tool call), so `readPlan` — fired in an
+  // earlier step — would falsely read as 0. `result.steps` aggregates every step.
+  if (changeId) {
+    const planToolCalls = result.steps
+      .flatMap((step) => step.toolCalls)
+      .filter((call) => call.toolName === "readPlan").length;
+    console.error(`plan tool calls: ${planToolCalls} (readPlan)`);
+  }
 
   console.log(JSON.stringify({ ...review, overall, pass }, null, 2));
 }

@@ -517,30 +517,30 @@ every path (`reviewCode`, `ci.ts`, evals, `check`) behaves exactly as before.
 
 #### Automated
 
-- [x] 2.1 Guardrail unit tests pass: `npm test` (repo root)
-- [x] 2.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
-- [x] 2.3 Lint passes: `npm run lint` (repo root)
-- [x] 2.4 Build passes: `npm run build` (repo root)
+- [x] 2.1 Guardrail unit tests pass: `npm test` (repo root) — 1471575
+- [x] 2.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck` — 1471575
+- [x] 2.3 Lint passes: `npm run lint` (repo root) — 1471575
+- [x] 2.4 Build passes: `npm run build` (repo root) — 1471575
 
 #### Manual
 
-- [x] 2.5 Reject/accept matrix confirmed by reading the tests
-- [x] 2.6 No absolute paths appear in any `readPlan` failure reason
-- [x] 2.7 Symlinked `plan.md` escaping `allowedRoot` is rejected (F4 realpath re-check)
+- [x] 2.5 Reject/accept matrix confirmed by reading the tests — 1471575
+- [x] 2.6 No absolute paths appear in any `readPlan` failure reason — 1471575
+- [x] 2.7 Symlinked `plan.md` escaping `allowedRoot` is rejected (F4 realpath re-check) — 1471575
 
 ### Phase 3: Agent Wiring — Bounded Tool Loop + Plan-Aware Instructions
 
 #### Automated
 
-- [ ] 3.1 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
-- [ ] 3.2 Lint passes: `npm run lint` (repo root)
-- [ ] 3.3 Build passes: `npm run build` (repo root)
-- [ ] 3.4 Existing unit tests still pass: `npm test` (repo root)
+- [x] 3.1 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
+- [x] 3.2 Lint passes: `npm run lint` (repo root)
+- [x] 3.3 Build passes: `npm run build` (repo root)
+- [x] 3.4 Existing unit tests still pass: `npm test` (repo root)
 
 #### Manual
 
-- [ ] 3.5 `changeId` unset → behavior unchanged (`npm run check` / no-changeId `npm run ci`)
-- [ ] 3.6 `CHANGE_ID=m5l3-agent-read-plan-tool` → stderr shows `plan tool calls: ≥1` and summary references the plan
+- [x] 3.5 `changeId` unset → behavior unchanged (`npm run check` / no-changeId `npm run ci`)
+- [x] 3.6 `CHANGE_ID=m5l3-agent-read-plan-tool` → stderr shows `plan tool calls: ≥1` and summary references the plan
 
 ### Phase 4: Verification / Self-Review Against This Plan
 

@@ -20,7 +20,7 @@ export { createModel, loadEnv, FALLBACK_MODEL } from "./provider.js";
 export type { ReviewerConfig } from "./provider.js";
 
 export { createReviewAgent, createReviewer, reviewCode } from "./agent.js";
-export type { ReviewOptions } from "./agent.js";
+export type { ReviewOptions, PlanContext } from "./agent.js";
 
 export {
   readPlan,
