@@ -546,13 +546,13 @@ every path (`reviewCode`, `ci.ts`, evals, `check`) behaves exactly as before.
 
 #### Automated
 
-- [x] 4.1 All unit tests pass incl. guardrails + negative path: `npm test` (repo root)
-- [x] 4.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck`
-- [x] 4.3 Lint passes: `npm run lint` (repo root)
-- [x] 4.4 Build passes: `npm run build` (repo root)
+- [x] 4.1 All unit tests pass incl. guardrails + negative path: `npm test` (repo root) — ff97651
+- [x] 4.2 Typecheck passes: `cd packages/code-reviewer && npm run typecheck` — ff97651
+- [x] 4.3 Lint passes: `npm run lint` (repo root) — ff97651
+- [x] 4.4 Build passes: `npm run build` (repo root) — ff97651
 
 #### Manual
 
-- [x] 4.5 `npm run verify:plan` prints ≥1 `readPlan` call + diff↔plan comparison, exit 0
-- [x] 4.6 Bogus `changeId` → "no plan found", exit 0 (graceful degradation)
-- [x] 4.7 Audit: no new external side effects; `reviewSchema` output shape unchanged
+- [x] 4.5 `npm run verify:plan` prints ≥1 `readPlan` call + diff↔plan comparison, exit 0 — ff97651
+- [x] 4.6 Bogus `changeId` → "no plan found", exit 0 (graceful degradation) — ff97651
+- [x] 4.7 Audit: no new external side effects; `reviewSchema` output shape unchanged — ff97651
