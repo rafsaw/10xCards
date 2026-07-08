@@ -1,7 +1,7 @@
 {
   "package": "@rafsaw/rafsaw-ai-toolkit",
-  "version": "0.1.6",
-  "installedAt": "2026-07-08T18:05:59.615Z",
+  "version": "0.1.7",
+  "installedAt": "2026-07-08T18:13:27.237Z",
   "files": [
     ".claude\\skills\\rafsaw-code-review\\SKILL.md",
     ".claude\\prompts\\rafsaw-code-review.md",

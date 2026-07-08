@@ -1,5 +1,10 @@
 description: Shared starter evals for AI code review prompts
 
+# This is a synthetic seed fixture.
+# It is not intended to represent a real PR review gate.
+# The goal is to verify that the shared prompt consumes {{input}}
+# and can identify obvious correctness/security issues from a concrete diff.
+
 prompts:
   - ../.claude/prompts/rafsaw-code-review.md
 
