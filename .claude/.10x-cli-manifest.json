@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.9.0",
   "manifestVersion": 3,
-  "lastApplied": "2026-07-08T21:25:41.976Z",
-  "lessonId": "m5l4",
+  "lastApplied": "2026-07-08T21:32:00.051Z",
+  "lessonId": "m5l5",
   "course": "10xdevs3",
   "tool": "claude-code",
   "files": {
@@ -290,6 +290,14 @@
         ],
         "contentHashes": {
           "SKILL.md": "7d9a05f1efb4780b5dd3d4e6a34d7eb529d385c8e1f2c2c66c2e53e2f07abceb"
+        }
+      },
+      "10x-goal-implement": {
+        "files": [
+          "SKILL.md"
+        ],
+        "contentHashes": {
+          "SKILL.md": "436470382fd1594bc4815ea297fcad64eb53670af2ca98fca512dcd825629ef9"
         }
       }
     },
@@ -1715,6 +1723,18 @@
         "m5l4-github-packages-uninstall.js.template",
         "m5l4-github-packages-publish-ai-toolkit.yml.template"
       ]
+    },
+    "m5l5": {
+      "appliedAt": "2026-07-08T21:32:00.050Z",
+      "skills": {
+        "10x-goal-implement": {
+          "files": [
+            "SKILL.md"
+          ]
+        }
+      },
+      "prompts": [],
+      "configs": []
     }
   }
 }
