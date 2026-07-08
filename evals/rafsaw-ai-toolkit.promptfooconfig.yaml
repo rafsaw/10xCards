@@ -9,7 +9,32 @@ providers:
 tests:
   - vars:
       input: |
-        A pull request changes authentication logic and removes a null check around the user lookup.
+        ```diff
+        diff --git a/src/auth/login.ts b/src/auth/login.ts
+        index 1111111..2222222 100644
+        --- a/src/auth/login.ts
+        +++ b/src/auth/login.ts
+        @@ -1,13 +1,11 @@
+         export async function login(db, username, password) {
+        -  const rows = await db.query(
+        -    "SELECT id, password_hash FROM users WHERE username = ?",
+        -    [username],
+        -  );
+        +  const rows = await db.query(
+        +    `SELECT id, password_hash FROM users WHERE username = '${username}'`,
+        +  );
+           const user = rows[0];
+
+        -  if (!user) {
+        -    return { ok: false };
+        -  }
+        -
+        -  const validPassword = await verifyPassword(password, user.password_hash);
+        +  const validPassword = password == user.password_hash;
+           if (!validPassword) {
+             return { ok: false };
+           }
+        ```
     assert:
       - type: contains
         value: "correctness"

@@ -21,6 +21,15 @@ Group findings by severity:
 
 If the change looks acceptable, say so clearly and mention what you checked.
 
+For each finding, include a `Dimension:` line using one of these exact labels when relevant:
+
+- correctness
+- security
+- test coverage
+- maintainability
+- operational risk
+- scope control
+
 ## Change to review
 
 {{input}}
