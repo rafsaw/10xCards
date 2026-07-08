@@ -1,0 +1,16 @@
+{
+  "package": "@rafsaw/rafsaw-ai-toolkit",
+  "version": "0.1.4",
+  "installedAt": "2026-07-08T17:16:32.347Z",
+  "files": [
+    ".claude\\skills\\rafsaw-code-review\\SKILL.md",
+    ".claude\\prompts\\rafsaw-code-review.md",
+    "evals\\rafsaw-ai-toolkit.promptfooconfig.yaml",
+    "CLAUDE.md"
+  ],
+  "rules": {
+    "file": "CLAUDE.md",
+    "begin": "<!-- BEGIN @rafsaw/rafsaw-ai-toolkit -->",
+    "end": "<!-- END @rafsaw/rafsaw-ai-toolkit -->"
+  }
+}

@@ -1,0 +1,17 @@
+description: Shared starter evals for AI code review prompts
+
+prompts:
+  - ../.claude/prompts/rafsaw-code-review.md
+
+providers:
+  - id: openai:gpt-4.1-mini
+
+tests:
+  - vars:
+      input: |
+        A pull request changes authentication logic and removes a null check around the user lookup.
+    assert:
+      - type: contains
+        value: "correctness"
+      - type: contains
+        value: "security"
