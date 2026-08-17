@@ -59,3 +59,8 @@ pnpm-debug.log*
 /blob-report/
 /tests/e2e/.auth/
 .playwright-cli/
+
+# om agent pipeline: per-run QA artifacts and local test-env state (.ai/scripts/ stays committed)
+.ai/qa/artifacts_*/
+.ai/qa/test-env.json
+.ai/qa/test-env.env
