@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Open Mercato Skills — Capability Map</title>
+<style>
+:root{
+  --bg:#0b0f14; --panel:#111821; --panel2:#0f151d; --text:#e8edf3; --muted:#8e9bab;
+  --line:#263343; --accent:#d8e2ef; --good:#8bd49c; --doc:#8fc7ff; --park:#d6ad68;
+  --unknown:#8895a7; --chip:#182230;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  line-height:1.45;
+}
+.wrap{max-width:1180px;margin:auto;padding:38px 24px 72px}
+header{padding:12px 0 24px;border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+h1{font-size:38px;line-height:1.08;margin:8px 0 10px}
+.subtitle{color:var(--muted);max-width:760px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted)}
+.dot{font-weight:800}
+.obs{color:var(--good)} .doc{color:var(--doc)} .park{color:var(--park)} .unk{color:var(--unknown)}
+.section{margin-top:38px}
+.section h2{font-size:24px;margin:0 0 8px}
+.section-intro{color:var(--muted);margin:0 0 18px}
+.zone-title{margin:36px 0 14px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{
+  background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+  border-radius:14px;padding:17px 18px;min-height:154px
+}
+.card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.num{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.08em}
+.card h3{margin:2px 0 8px;font-size:17px}
+.status{font-size:11px;border:1px solid var(--line);padding:5px 8px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+.skills{margin:10px 0 8px;padding:0;list-style:none}
+.skills li{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;margin:3px 0}
+.purpose{color:var(--muted);font-size:13px;margin-top:10px}
+.evidence{font-size:12px;margin-top:10px;color:#b9c3cf}
+.flowbox{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;
+  overflow-x:auto
+}
+.flow{
+  display:flex;align-items:center;gap:8px;min-width:max-content
+}
+.node{
+  min-width:128px;text-align:center;padding:10px 12px;border:1px solid #344456;
+  border-radius:10px;background:#0e151d;font-size:13px
+}
+.arrow{color:#647589;font-size:20px}
+.cross{
+  margin-top:12px;display:flex;gap:8px;flex-wrap:wrap
+}
+.cross span{padding:7px 10px;border:1px dashed #3a4a5c;border-radius:9px;color:#b8c3cf;font-size:12px}
+.seq{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;overflow-x:auto
+}
+.seq-grid{
+  display:grid;grid-template-columns:150px repeat(4, 1fr);min-width:780px
+}
+.seq-head,.seq-label,.seq-cell{padding:9px 10px;border-bottom:1px solid #1e2a37}
+.seq-head{font-size:12px;color:#b8c3cf;text-align:center;font-weight:700}
+.seq-label{font-size:12px;color:var(--muted)}
+.seq-cell{font-size:12px;text-align:center;position:relative;color:#d7dfe8}
+.seq-cell::before{
+  content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed #314155;z-index:0
+}
+.seq-cell span{
+  position:relative;z-index:1;background:#101821;border:1px solid #334457;border-radius:8px;padding:5px 7px;display:inline-block
+}
+.seq-note{margin-top:12px;color:var(--muted);font-size:12px}
+.next{
+  display:grid;grid-template-columns:1.4fr 1fr;gap:14px
+}
+.next .hero{border-color:#41556d}
+.star{font-size:20px}
+.footer{margin-top:40px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:13px}
+.small{font-size:12px;color:var(--muted)}
+@media(max-width:800px){
+  .grid,.next{grid-template-columns:1fr}
+  h1{font-size:31px}
+}
+
+.seq-svg-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;overflow-x:auto}
+.seq-svg{width:100%;height:auto;min-width:860px;display:block}
+.seq-svg .participant{fill:#121c27;stroke:#3a4c61;stroke-width:1.2}
+.seq-svg .participant-human{fill:#183022;stroke:#5f9d72}
+.seq-svg .ptitle{fill:#edf3f9;font-size:14px;font-family:Inter,system-ui,sans-serif;font-weight:700;text-anchor:middle}
+.seq-svg .psub{fill:#9eabba;font-size:11px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;text-anchor:middle}
+.seq-svg .life{stroke:#405164;stroke-width:1;stroke-dasharray:5 6}.seq-svg .human-life{stroke:#699477}
+.seq-svg .msg{stroke:#d3dde8;stroke-width:1.4;fill:none}.seq-svg .delegate{stroke:#8fc7ff}.seq-svg .artifact{stroke:#8bd49c}
+.seq-svg .label{fill:#dce4ed;font-size:12px;font-family:Inter,system-ui,sans-serif;text-anchor:middle}.seq-svg .label-delegate{fill:#8fc7ff;font-weight:700}.seq-svg .label-artifact{fill:#8bd49c;font-weight:700}
+.seq-svg .human-note{fill:#15261d;stroke:#486b55}.seq-svg .human-note-text{fill:#cfe8d6;font-size:12px;font-family:Inter,system-ui,sans-serif;text-anchor:middle}
+.seq-svg .gate{fill:#2a2114;stroke:#8a6e3e;stroke-width:1.1}.seq-svg .gate-title{fill:#e4bd78;font-size:12px;font-weight:800;font-family:Inter,system-ui,sans-serif}.seq-svg .gate-text{fill:#e8edf3;font-size:12px;font-family:Inter,system-ui,sans-serif}.seq-svg .stop{stroke:#e4bd78;stroke-width:2}.seq-svg .tiny{fill:#8e9bab;font-size:11px;font-family:Inter,system-ui,sans-serif}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Open Mercato Skills Learning Lab</div>
+  <h1>Capability Map</h1>
+  <div class="subtitle">Version 8 · A lightweight orientation map for the Open Mercato skill landscape: 36 skills grouped into 17 capabilities. Use this page to remember the architecture fast; keep detailed evidence in the Learning Map, FINDINGS.md and EXPERIMENTS.md.</div>
+  <div class="legend">
+    <span class="chip"><span class="dot obs">●</span> Observed</span>
+    <span class="chip"><span class="dot doc">○</span> Documented</span>
+    <span class="chip"><span class="dot park">◌</span> Parked</span>
+    <span class="chip"><span class="dot unk">?</span> Unexplored</span>
+  </div>
+</header>
+
+<section class="section">
+  <h2>Quick Map — 30-second memory refresh</h2>
+  <p class="section-intro">The core lifecycle first. Cross-cutting capabilities sit above or around this flow rather than forming additional linear steps.</p>
+  <div class="flowbox">
+    <div class="flow">
+      <div class="node">IDEA</div><div class="arrow">→</div>
+      <div class="node">BRAINSTORM<br><span class="small">shape + route</span></div><div class="arrow">→</div>
+      <div class="node">✕ HUMAN GATE</div><div class="arrow">→</div>
+      <div class="node">INTAKE / SPEC / IMPLEMENT</div><div class="arrow">→</div>
+      <div class="node">SPEC</div><div class="arrow">→</div>
+      <div class="node">IMPLEMENT</div><div class="arrow">→</div>
+      <div class="node">REVIEW</div><div class="arrow">→</div>
+      <div class="node">RUNTIME QA</div><div class="arrow">→</div>
+      <div class="node">STABILIZE</div><div class="arrow">→</div>
+      <div class="node">MERGE</div><div class="arrow">→</div>
+      <div class="node">POST-MERGE<br><span class="small">release docs + tracker reconcile</span></div>
+    </div>
+    <div class="cross">
+      <span>Brainstorm may route to Issue / Spec / direct PR — or build nothing</span><span>Post-merge branches into release narrative + tracker reconciliation</span><span>PR Portfolio Triage / Merge Buddy</span><span>PR Autopilot</span><span>Pipeline Retro</span><span>UX / Product Design</span><span>Skill Authoring</span><span>Pipeline Foundation</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Sequence diagrams — Human ↔ Skills ↔ Artifacts</h2>
+  <p class="section-intro">Read every diagram the same way: <strong>what you do → what you invoke → what delegates autonomously → what artifact returns → where automation stops for you.</strong></p>
+  <div class="flowbox" style="margin-bottom:14px"><div class="eyebrow">Interaction legend</div><div class="cross">
+    <span><strong>HUMAN ACTION</strong> — you write, choose, review or approve</span><span><strong>INVOKE</strong> — you explicitly start a skill</span><span><strong style="color:#8fc7ff">DELEGATES</strong> — autonomous skill → skill handoff</span><span><strong style="color:#8bd49c">ARTIFACT</strong> — durable result returns</span><span><strong style="color:#e4bd78">✕ HUMAN GATE</strong> — automation stops for your decision</span>
+  </div></div>
+
+
+  <div class="seq-svg-wrap" style="margin-bottom:14px"><div class="eyebrow">Sequence 0 · Idea shaping / routing → downstream delivery</div>
+  <svg class="seq-svg" viewBox="0 0 1180 900" role="img" aria-label="Idea shaping and routing with human-controlled downstream PR creation"><defs>
+    <marker id="a0" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker>
+    <marker id="b0" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8fc7ff"/></marker>
+    <marker id="c0" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+
+    <rect class="participant participant-human" x="25" y="28" width="155" height="58" rx="10"/>
+    <text class="ptitle" x="102" y="51">Human</text><text class="psub" x="102" y="70">idea + authority</text>
+
+    <rect class="participant" x="255" y="28" width="180" height="58" rx="10"/>
+    <text class="ptitle" x="345" y="51">om-brainstorm</text><text class="psub" x="345" y="70">shape + route</text>
+
+    <rect class="participant" x="515" y="28" width="170" height="58" rx="10"/>
+    <text class="ptitle" x="600" y="51">challenger</text><text class="psub" x="600" y="70">subagent</text>
+
+    <rect class="participant" x="765" y="28" width="190" height="58" rx="10"/>
+    <text class="ptitle" x="860" y="51">handoff brief</text><text class="psub" x="860" y="70">durable artifact</text>
+
+    <rect class="participant" x="995" y="28" width="165" height="58" rx="10"/>
+    <text class="ptitle" x="1077" y="51">om-auto-create-pr</text><text class="psub" x="1077" y="70">downstream skill</text>
+
+    <line class="life human-life" x1="102" y1="86" x2="102" y2="860"/>
+    <line class="life" x1="345" y1="86" x2="345" y2="860"/>
+    <line class="life" x1="600" y1="86" x2="600" y2="860"/>
+    <line class="life" x1="860" y1="86" x2="860" y2="860"/>
+    <line class="life" x1="1077" y1="86" x2="1077" y2="860"/>
+
+    <rect class="human-note" x="32" y="112" width="140" height="56" rx="8"/>
+    <text class="human-note-text" x="102" y="135">HUMAN ACTION</text>
+    <text class="human-note-text" x="102" y="153">bring rough idea</text>
+
+    <line class="msg" x1="102" y1="205" x2="345" y2="205" marker-end="url(#a0)"/>
+    <text class="label" x="223" y="191">INVOKE · om-brainstorm</text>
+
+    <rect x="260" y="235" width="170" height="105" rx="8" fill="#142334" stroke="#31557b"/>
+    <text class="tiny" x="345" y="257" text-anchor="middle">repo / tracker reality</text>
+    <text class="tiny" x="345" y="278" text-anchor="middle">clarification</text>
+    <text class="tiny" x="345" y="299" text-anchor="middle">alternatives</text>
+    <text class="tiny" x="345" y="320" text-anchor="middle">incl. build nothing</text>
+
+    <line class="msg delegate" x1="345" y1="385" x2="600" y2="385" marker-end="url(#b0)"/>
+    <text class="label label-delegate" x="472" y="371">DELEGATES · challenger</text>
+
+    <line class="msg" x1="600" y1="435" x2="345" y2="435" marker-end="url(#a0)"/>
+    <text class="label" x="472" y="421">critique / counter-evidence</text>
+
+    <rect x="260" y="465" width="170" height="58" rx="8" fill="#142334" stroke="#31557b"/>
+    <text class="tiny" x="345" y="488" text-anchor="middle">routing recommendation</text>
+    <text class="tiny" x="345" y="509" text-anchor="middle">+ proposed Next:</text>
+
+    <line class="stop" x1="74" y1="563" x2="130" y2="563"/>
+    <rect class="gate" x="145" y="542" width="495" height="52" rx="9"/>
+    <text class="gate-title" x="164" y="563">✕ HUMAN GATE #1</text>
+    <text class="gate-text" x="164" y="582">Confirm direction and allow brainstorm to write the handoff brief?</text>
+
+    <line class="msg" x1="102" y1="635" x2="345" y2="635" marker-end="url(#a0)"/>
+    <text class="label" x="223" y="621">CONFIRM ROUTING</text>
+
+    <line class="msg artifact" x1="345" y1="685" x2="860" y2="685" marker-end="url(#c0)"/>
+    <text class="label label-artifact" x="602" y="671">ARTIFACT · brief file</text>
+
+    <line class="msg artifact" x1="345" y1="725" x2="102" y2="725" marker-end="url(#c0)"/>
+    <text class="label label-artifact" x="223" y="711">REPORT · Next: + Brief:</text>
+
+    <rect class="gate" x="145" y="755" width="570" height="58" rx="9"/>
+    <text class="gate-title" x="164" y="777">✕ HUMAN GATE #2</text>
+    <text class="gate-text" x="164" y="797">Accept the recommendation and actually start the downstream delivery skill?</text>
+
+    <line class="msg" x1="102" y1="840" x2="1077" y2="840" marker-end="url(#a0)"/>
+    <text class="label" x="590" y="826">HUMAN INVOKE · om-auto-create-pr "... — brief: &lt;path&gt;"</text>
+
+    <line class="msg artifact" x1="1077" y1="875" x2="102" y2="875" marker-end="url(#c0)"/>
+    <text class="label label-artifact" x="590" y="862">ARTIFACT · IMPLEMENTATION / DOCUMENTATION PR</text>
+  </svg>
+
+  <div class="seq-note">
+    <strong>Memory hook:</strong> <code>om-brainstorm</code> shapes and routes, but it does not execute the route.
+    After HUMAN GATE #1 it may write the brief and emit machine-readable <code>Next:</code> / <code>Brief:</code>.
+    Then control returns to the human. HUMAN GATE #2 decides whether to actually invoke the recommended downstream skill.
+    In Lesson 14 the observed recommendation was:
+    <code>Next: om-auto-create-pr "Fix stale skill-coverage facts in AGENTS.md and README and make the v16 learning map the lab's orientation surface — brief: .ai/specs/briefs/2026-08-17-lab-orientation-doc-fixes.md"</code>
+    with
+    <code>Brief: .ai/specs/briefs/2026-08-17-lab-orientation-doc-fixes.md</code>.
+    The PR creation step shown after Gate #2 is the <strong>next lifecycle</strong>; it was not executed in Lesson 14.
+  </div>
+  </div>
+
+  <div class="seq-svg-wrap"><div class="eyebrow">Sequence 1 · Feature path</div>
+  <svg class="seq-svg" viewBox="0 0 1120 690" role="img" aria-label="Feature path sequence diagram"><defs>
+    <marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker>
+    <marker id="b1" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8fc7ff"/></marker>
+    <marker id="c1" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+    <rect class="participant participant-human" x="35" y="28" width="155" height="58" rx="10"/><text class="ptitle" x="112" y="51">Human</text><text class="psub" x="112" y="70">you / operator</text>
+    <rect class="participant" x="245" y="28" width="180" height="58" rx="10"/><text class="ptitle" x="335" y="51">om-auto-write-spec</text><text class="psub" x="335" y="70">skill</text>
+    <rect class="participant" x="470" y="28" width="165" height="58" rx="10"/><text class="ptitle" x="552" y="51">om-spec-writing</text><text class="psub" x="552" y="70">skill</text>
+    <rect class="participant" x="680" y="28" width="190" height="58" rx="10"/><text class="ptitle" x="775" y="51">om-auto-implement-spec</text><text class="psub" x="775" y="70">skill</text>
+    <rect class="participant" x="915" y="28" width="170" height="58" rx="10"/><text class="ptitle" x="1000" y="51">om-auto-create-pr</text><text class="psub" x="1000" y="70">skill</text>
+    <line class="life human-life" x1="112" y1="86" x2="112" y2="650"/><line class="life" x1="335" y1="86" x2="335" y2="650"/><line class="life" x1="552" y1="86" x2="552" y2="650"/><line class="life" x1="775" y1="86" x2="775" y2="650"/><line class="life" x1="1000" y1="86" x2="1000" y2="650"/>
+    <rect class="human-note" x="42" y="112" width="140" height="56" rx="8"/><text class="human-note-text" x="112" y="135">HUMAN ACTION</text><text class="human-note-text" x="112" y="153">write feature brief</text>
+    <line class="msg" x1="112" y1="205" x2="335" y2="205" marker-end="url(#a1)"/><text class="label" x="223" y="192">INVOKE · om-auto-write-spec</text>
+    <line class="msg delegate" x1="335" y1="275" x2="552" y2="275" marker-end="url(#b1)"/><text class="label label-delegate" x="444" y="261">DELEGATES</text>
+    <line class="msg artifact" x1="552" y1="325" x2="335" y2="325" marker-end="url(#c1)"/><text class="label label-artifact" x="444" y="311">ARTIFACT · SPEC DOCUMENT</text>
+    <rect x="255" y="350" width="160" height="44" rx="8" fill="#142334" stroke="#31557b"/><text class="tiny" x="335" y="369" text-anchor="middle">om-auto-write-spec</text><text class="tiny" x="335" y="385" text-anchor="middle">continues autonomously</text>
+    <line class="msg artifact" x1="335" y1="425" x2="112" y2="425" marker-end="url(#c1)"/><text class="label label-artifact" x="223" y="411">ARTIFACT · SPEC PR</text>
+    <line class="stop" x1="84" y1="461" x2="140" y2="461"/><rect class="gate" x="155" y="442" width="470" height="52" rx="9"/><text class="gate-title" x="174" y="463">✕ HUMAN GATE</text><text class="gate-text" x="174" y="482">Review / approve the SPEC PR. Autonomous spec chain stops here.</text>
+    <line class="msg" x1="112" y1="535" x2="775" y2="535" marker-end="url(#a1)"/><text class="label" x="444" y="521">INVOKE · om-auto-implement-spec</text>
+    <line class="msg delegate" x1="775" y1="585" x2="1000" y2="585" marker-end="url(#b1)"/><text class="label label-delegate" x="888" y="571">DELEGATES</text>
+    <line class="msg artifact" x1="1000" y1="625" x2="112" y2="625" marker-end="url(#c1)"/><text class="label label-artifact" x="556" y="611">ARTIFACT · IMPLEMENTATION PR</text>
+    <line class="stop" x1="84" y1="652" x2="140" y2="652"/><text class="tiny" x="155" y="656">✕ HUMAN GATE · review / QA / merge decision</text>
+  </svg><div class="seq-note"><strong>Memory hook:</strong> human brief → invoke <code>om-auto-write-spec</code> → <code>om-spec-writing</code> creates the <strong>SPEC DOCUMENT</strong> → <code>om-auto-write-spec</code> continues autonomously and publishes the <strong>SPEC PR</strong> → <strong>HUMAN GATE</strong> → implementation chain.</div></div>
+
+  <div class="seq-svg-wrap" style="margin-top:14px"><div class="eyebrow">Sequence 2 · Issue / defect path</div>
+  <svg class="seq-svg" viewBox="0 0 1120 665" role="img" aria-label="Issue defect path"><defs><marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker><marker id="b2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8fc7ff"/></marker><marker id="c2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+    <rect class="participant participant-human" x="25" y="28" width="145" height="58" rx="10"/><text class="ptitle" x="97" y="51">Human</text><text class="psub" x="97" y="70">you / operator</text>
+    <rect class="participant" x="195" y="28" width="160" height="58" rx="10"/><text class="ptitle" x="275" y="51">om-prepare-issue</text><text class="psub" x="275" y="70">skill</text>
+    <rect class="participant" x="390" y="28" width="165" height="58" rx="10"/><text class="ptitle" x="472" y="51">om-auto-fix-issue</text><text class="psub" x="472" y="70">skill</text>
+    <rect class="participant" x="590" y="28" width="170" height="58" rx="10"/><text class="ptitle" x="675" y="51">om-verify-in-repo</text><text class="psub" x="675" y="70">skill</text>
+    <rect class="participant" x="795" y="28" width="145" height="58" rx="10"/><text class="ptitle" x="867" y="51">om-root-cause</text><text class="psub" x="867" y="70">skill</text>
+    <rect class="participant" x="975" y="28" width="120" height="58" rx="10"/><text class="ptitle" x="1035" y="51">om-fix</text><text class="psub" x="1035" y="70">skill</text>
+    <line class="life human-life" x1="97" y1="86" x2="97" y2="630"/><line class="life" x1="275" y1="86" x2="275" y2="630"/><line class="life" x1="472" y1="86" x2="472" y2="630"/><line class="life" x1="675" y1="86" x2="675" y2="630"/><line class="life" x1="867" y1="86" x2="867" y2="630"/><line class="life" x1="1035" y1="86" x2="1035" y2="630"/>
+    <rect class="human-note" x="28" y="112" width="138" height="56" rx="8"/><text class="human-note-text" x="97" y="135">HUMAN ACTION</text><text class="human-note-text" x="97" y="153">write issue brief</text>
+    <line class="msg" x1="97" y1="205" x2="275" y2="205" marker-end="url(#a2)"/><text class="label" x="186" y="192">INVOKE</text><text class="tiny" x="186" y="224" text-anchor="middle">om-prepare-issue</text>
+    <line class="msg artifact" x1="275" y1="270" x2="97" y2="270" marker-end="url(#c2)"/><text class="label label-artifact" x="186" y="256">ARTIFACT · ISSUE</text>
+    <line class="stop" x1="69" y1="310" x2="125" y2="310"/><rect class="gate" x="143" y="292" width="350" height="48" rx="9"/><text class="gate-title" x="160" y="313">✕ HUMAN GATE</text><text class="gate-text" x="160" y="331">Decide to execute the Issue.</text>
+    <line class="msg" x1="97" y1="390" x2="472" y2="390" marker-end="url(#a2)"/><text class="label" x="284" y="376">INVOKE · om-auto-fix-issue</text>
+    <line class="msg delegate" x1="472" y1="445" x2="675" y2="445" marker-end="url(#b2)"/><text class="label label-delegate" x="573" y="431">DELEGATES</text>
+    <line class="msg delegate" x1="675" y1="495" x2="867" y2="495" marker-end="url(#b2)"/><text class="label label-delegate" x="771" y="481">DELEGATES</text>
+    <line class="msg delegate" x1="867" y1="545" x2="1035" y2="545" marker-end="url(#b2)"/><text class="label label-delegate" x="951" y="531">DELEGATES</text>
+    <line class="msg artifact" x1="1035" y1="595" x2="97" y2="595" marker-end="url(#c2)"/><text class="label label-artifact" x="566" y="581">ARTIFACT · IMPLEMENTATION PR</text><text class="tiny" x="145" y="627">✕ HUMAN GATE · review / decide next action</text>
+  </svg><div class="seq-note"><strong>Memory hook:</strong> <code>om-prepare-issue</code> prepares durable work. <code>om-auto-fix-issue</code> starts the autonomous bug chain: verify → root cause → fix.</div></div>
+
+  <div class="seq-svg-wrap" style="margin-top:14px"><div class="eyebrow">Sequence 3 · PR review → runtime QA → stabilization → merge</div>
+  <svg class="seq-svg" viewBox="0 0 1120 780" role="img" aria-label="PR to merge"><defs><marker id="a3" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker><marker id="b3" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8fc7ff"/></marker><marker id="c3" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+    <rect class="participant participant-human" x="20" y="28" width="135" height="58" rx="10"/><text class="ptitle" x="87" y="51">Human</text><text class="psub" x="87" y="70">you / operator</text>
+    <rect class="participant" x="175" y="28" width="170" height="58" rx="10"/><text class="ptitle" x="260" y="51">om-auto-review-pr</text><text class="psub" x="260" y="70">skill</text>
+    <rect class="participant" x="365" y="28" width="145" height="58" rx="10"/><text class="ptitle" x="437" y="51">om-code-review</text><text class="psub" x="437" y="70">skill</text>
+    <rect class="participant" x="530" y="28" width="145" height="58" rx="10"/><text class="ptitle" x="602" y="51">om-auto-qa-pr</text><text class="psub" x="602" y="70">skill</text>
+    <rect class="participant" x="695" y="28" width="145" height="58" rx="10"/><text class="ptitle" x="767" y="51">om-auto-fix-pr</text><text class="psub" x="767" y="70">skill</text>
+    <rect class="participant" x="860" y="28" width="225" height="58" rx="10"/><text class="ptitle" x="972" y="51">om-approve-merge-pr</text><text class="psub" x="972" y="70">skill</text>
+    <line class="life human-life" x1="87" y1="86" x2="87" y2="745"/><line class="life" x1="260" y1="86" x2="260" y2="745"/><line class="life" x1="437" y1="86" x2="437" y2="745"/><line class="life" x1="602" y1="86" x2="602" y2="745"/><line class="life" x1="767" y1="86" x2="767" y2="745"/><line class="life" x1="972" y1="86" x2="972" y2="745"/>
+    <rect class="human-note" x="20" y="112" width="135" height="56" rx="8"/><text class="human-note-text" x="87" y="135">HUMAN ACTION</text><text class="human-note-text" x="87" y="153">choose PR</text>
+    <line class="msg" x1="87" y1="205" x2="260" y2="205" marker-end="url(#a3)"/><text class="label" x="173" y="192">INVOKE</text>
+    <line class="msg delegate" x1="260" y1="260" x2="437" y2="260" marker-end="url(#b3)"/><text class="label label-delegate" x="348" y="246">DELEGATES</text>
+    <line class="msg artifact" x1="437" y1="315" x2="260" y2="315" marker-end="url(#c3)"/><text class="label label-artifact" x="348" y="301">review result</text>
+    <line class="msg artifact" x1="260" y1="365" x2="87" y2="365" marker-end="url(#c3)"/><text class="label label-artifact" x="173" y="351">ARTIFACT · REVIEW VERDICT</text>
+    <rect class="gate" x="135" y="398" width="455" height="48" rx="9"/><text class="gate-title" x="153" y="419">HUMAN ACTION</text><text class="gate-text" x="273" y="419">Decide whether runtime QA is needed.</text>
+    <line class="msg" x1="87" y1="490" x2="602" y2="490" marker-end="url(#a3)"/><text class="label" x="345" y="476">INVOKE · om-auto-qa-pr</text>
+    <line class="msg artifact" x1="602" y1="540" x2="87" y2="540" marker-end="url(#c3)"/><text class="label label-artifact" x="345" y="526">ARTIFACT · QA EVIDENCE</text>
+    <line class="msg" x1="87" y1="590" x2="767" y2="590" marker-end="url(#a3)"/><text class="label" x="427" y="576">INVOKE · om-auto-fix-pr</text>
+    <rect x="688" y="608" width="158" height="48" rx="8" fill="#142334" stroke="#31557b"/><text class="tiny" x="767" y="627" text-anchor="middle">autonomous inside:</text><text class="tiny" x="767" y="645" text-anchor="middle">review · CI · QA</text>
+    <line class="msg artifact" x1="767" y1="680" x2="87" y2="680" marker-end="url(#c3)"/><text class="label label-artifact" x="427" y="666">ARTIFACT · MERGE-READY PR</text>
+    <line class="stop" x1="59" y1="714" x2="115" y2="714"/><rect class="gate" x="132" y="695" width="330" height="48" rx="9"/><text class="gate-title" x="150" y="716">✕ HUMAN GATE</text><text class="gate-text" x="268" y="716">Ship this PR?</text>
+    <line class="msg" x1="462" y1="719" x2="972" y2="719" marker-end="url(#a3)"/><text class="tiny" x="717" y="706" text-anchor="middle">INVOKE · om-approve-merge-pr</text>
+  </svg><div class="seq-note"><strong>Memory hook:</strong> review → optional runtime QA → merge-readiness automation → <strong>human ship decision</strong> → actual merge.</div></div>
+
+  <div class="seq-svg-wrap" style="margin-top:14px"><div class="eyebrow">Sequence 4 · Runtime QA stack — shared capability</div>
+  <svg class="seq-svg" viewBox="0 0 980 610" role="img" aria-label="Runtime QA shared capability"><defs><marker id="a4" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker><marker id="b4" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8fc7ff"/></marker><marker id="c4" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+    <rect class="participant participant-human" x="35" y="28" width="150" height="58" rx="10"/><text class="ptitle" x="110" y="51">Human</text><text class="psub" x="110" y="70">you / operator</text>
+    <rect class="participant" x="245" y="28" width="160" height="58" rx="10"/><text class="ptitle" x="325" y="51">om-auto-qa-pr</text><text class="psub" x="325" y="70">QA evidence</text>
+    <rect class="participant" x="465" y="28" width="180" height="58" rx="10"/><text class="ptitle" x="555" y="51">om-prepare-test-env</text><text class="psub" x="555" y="70">shared runtime</text>
+    <rect class="participant" x="705" y="28" width="205" height="58" rx="10"/><text class="ptitle" x="807" y="51">om-integration-tests</text><text class="psub" x="807" y="70">durable tests</text>
+    <line class="life human-life" x1="110" y1="86" x2="110" y2="575"/><line class="life" x1="325" y1="86" x2="325" y2="575"/><line class="life" x1="555" y1="86" x2="555" y2="575"/><line class="life" x1="807" y1="86" x2="807" y2="575"/>
+    <line class="msg" x1="110" y1="155" x2="325" y2="155" marker-end="url(#a4)"/><text class="label" x="217" y="141">INVOKE · QA</text>
+    <line class="msg delegate" x1="325" y1="215" x2="555" y2="215" marker-end="url(#b4)"/><text class="label label-delegate" x="440" y="201">DELEGATES</text>
+    <line class="msg artifact" x1="555" y1="270" x2="325" y2="270" marker-end="url(#c4)"/><text class="label label-artifact" x="440" y="256">running app + test-env.json</text>
+    <line class="msg artifact" x1="325" y1="325" x2="110" y2="325" marker-end="url(#c4)"/><text class="label label-artifact" x="217" y="311">QA EVIDENCE</text>
+    <rect class="gate" x="150" y="365" width="480" height="50" rx="9"/><text class="gate-title" x="170" y="386">HUMAN ACTION</text><text class="gate-text" x="293" y="386">Optionally choose durable E2E coverage.</text>
+    <line class="msg" x1="110" y1="465" x2="807" y2="465" marker-end="url(#a4)"/><text class="label" x="458" y="451">INVOKE · om-integration-tests</text>
+    <line class="msg delegate" x1="807" y1="520" x2="555" y2="520" marker-end="url(#b4)"/><text class="label label-delegate" x="681" y="506">REUSES SHARED TEST ENV</text>
+    <line class="msg artifact" x1="807" y1="560" x2="110" y2="560" marker-end="url(#c4)"/><text class="label label-artifact" x="458" y="546">ARTIFACT · EXECUTABLE TESTS / RESULTS</text>
+  </svg><div class="seq-note"><strong>Important:</strong> <code>om-auto-qa-pr</code> and <code>om-integration-tests</code> are sibling capabilities. Both use <code>om-prepare-test-env</code>.</div></div>
+
+
+  <div class="seq-svg-wrap" style="margin-top:14px"><div class="eyebrow">Sequence 5 · Post-merge lifecycle — sibling capabilities</div>
+  <svg class="seq-svg" viewBox="0 0 1120 760" role="img" aria-label="Post-merge lifecycle branching into release documentation and tracker reconciliation"><defs>
+    <marker id="a5pm" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker>
+    <marker id="b5pm" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8fc7ff"/></marker>
+    <marker id="c5pm" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+
+    <rect class="participant participant-human" x="25" y="28" width="145" height="58" rx="10"/>
+    <text class="ptitle" x="97" y="51">Human</text><text class="psub" x="97" y="70">you / operator</text>
+
+    <rect class="participant" x="215" y="28" width="150" height="58" rx="10"/>
+    <text class="ptitle" x="290" y="51">Merged PRs</text><text class="psub" x="290" y="70">shared history</text>
+
+    <rect class="participant" x="430" y="28" width="205" height="58" rx="10"/>
+    <text class="ptitle" x="532" y="51">om-auto-update-changelog</text><text class="psub" x="532" y="70">release documentation</text>
+
+    <rect class="participant" x="705" y="28" width="195" height="58" rx="10"/>
+    <text class="ptitle" x="802" y="51">om-close-fixed-issues</text><text class="psub" x="802" y="70">tracker reconciliation</text>
+
+    <rect class="participant" x="945" y="28" width="150" height="58" rx="10"/>
+    <text class="ptitle" x="1020" y="51">om-auto-create-pr</text><text class="psub" x="1020" y="70">docs delivery</text>
+
+    <line class="life human-life" x1="97" y1="86" x2="97" y2="720"/>
+    <line class="life" x1="290" y1="86" x2="290" y2="720"/>
+    <line class="life" x1="532" y1="86" x2="532" y2="720"/>
+    <line class="life" x1="802" y1="86" x2="802" y2="720"/>
+    <line class="life" x1="1020" y1="86" x2="1020" y2="720"/>
+
+    <rect class="human-note" x="28" y="112" width="138" height="56" rx="8"/>
+    <text class="human-note-text" x="97" y="135">HUMAN ACTION</text>
+    <text class="human-note-text" x="97" y="153">choose post-merge check</text>
+
+    <line class="msg" x1="97" y1="205" x2="532" y2="205" marker-end="url(#a5pm)"/>
+    <text class="label" x="315" y="191">INVOKE · om-auto-update-changelog --dry-run</text>
+
+    <line class="msg" x1="290" y1="260" x2="532" y2="260" marker-end="url(#a5pm)"/>
+    <text class="label" x="411" y="246">consume merged PR window</text>
+
+    <rect x="445" y="292" width="175" height="88" rx="8" fill="#142334" stroke="#31557b"/>
+    <text class="tiny" x="532" y="314" text-anchor="middle">categorize PRs</text>
+    <text class="tiny" x="532" y="335" text-anchor="middle">verify attribution</text>
+    <text class="tiny" x="532" y="356" text-anchor="middle">build release narrative</text>
+
+    <line class="msg artifact" x1="532" y1="415" x2="97" y2="415" marker-end="url(#c5pm)"/>
+    <text class="label label-artifact" x="314" y="401">ARTIFACT · draft CHANGELOG entry</text>
+
+    <rect class="gate" x="150" y="444" width="515" height="52" rx="9"/>
+    <text class="gate-title" x="169" y="465">✕ HUMAN BOUNDARY</text>
+    <text class="gate-text" x="314" y="465">Highlights remain human-authored; dry-run stops before file/PR mutation.</text>
+
+    <line class="msg" x1="97" y1="545" x2="802" y2="545" marker-end="url(#a5pm)"/>
+    <text class="label" x="449" y="531">INVOKE · om-close-fixed-issues --dry-run</text>
+
+    <line class="msg" x1="290" y1="595" x2="802" y2="595" marker-end="url(#a5pm)"/>
+    <text class="label" x="546" y="581">consume same merged PR history</text>
+
+    <rect x="715" y="615" width="175" height="74" rx="8" fill="#142334" stroke="#31557b"/>
+    <text class="tiny" x="802" y="638" text-anchor="middle">resolve PR → Issue links</text>
+    <text class="tiny" x="802" y="659" text-anchor="middle">verify tracker state</text>
+    <text class="tiny" x="802" y="680" text-anchor="middle">repair only if inconsistent</text>
+
+    <line class="msg artifact" x1="802" y1="715" x2="97" y2="715" marker-end="url(#c5pm)"/>
+    <text class="label label-artifact" x="449" y="701">ARTIFACT · reconciliation report</text>
+
+    <line class="msg delegate" x1="532" y1="515" x2="1020" y2="515" marker-end="url(#b5pm)" stroke-dasharray="6 6"/>
+    <text class="label label-delegate" x="776" y="501">NORMAL RUN ONLY · DELEGATES to om-auto-create-pr</text>
+  </svg>
+  <div class="seq-note">
+    <strong>Lesson 15 runtime:</strong> both skills consumed the same real merged history but answered different questions.
+    <code>om-auto-update-changelog</code> produced a release-level narrative from 10 merged PRs; <code>om-close-fixed-issues</code> reconciled authoritative PR→Issue links and found the tracker already clean.
+    They are <strong>siblings, not a sequence</strong>. The changelog skill delegates to <code>om-auto-create-pr</code> only in a real run; our dry-run intentionally stopped before mutation.
+  </div></div>
+
+  <div class="seq-svg-wrap" style="margin-top:14px"><div class="eyebrow">Sequence 6 · PR portfolio visibility → human-selected action</div>
+  <svg class="seq-svg" viewBox="0 0 1080 600" role="img" aria-label="Merge Buddy portfolio visibility and human-selected downstream action"><defs>
+    <marker id="a6mb" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker>
+    <marker id="c6mb" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+    <rect class="participant participant-human" x="30" y="28" width="150" height="58" rx="10"/><text class="ptitle" x="105" y="51">Human</text><text class="psub" x="105" y="70">you / operator</text>
+    <rect class="participant" x="245" y="28" width="175" height="58" rx="10"/><text class="ptitle" x="332" y="51">om-merge-buddy</text><text class="psub" x="332" y="70">read-only portfolio</text>
+    <rect class="participant" x="485" y="28" width="165" height="58" rx="10"/><text class="ptitle" x="567" y="51">Open PR Queue</text><text class="psub" x="567" y="70">tracker state</text>
+    <rect class="participant" x="715" y="28" width="330" height="58" rx="10"/><text class="ptitle" x="880" y="51">Individual PR skills</text><text class="psub" x="880" y="70">autopilot · fix · approve/merge</text>
+    <line class="life human-life" x1="105" y1="86" x2="105" y2="560"/><line class="life" x1="332" y1="86" x2="332" y2="560"/><line class="life" x1="567" y1="86" x2="567" y2="560"/><line class="life" x1="880" y1="86" x2="880" y2="560"/>
+    <line class="msg" x1="105" y1="165" x2="332" y2="165" marker-end="url(#a6mb)"/><text class="label" x="218" y="151">INVOKE · om-merge-buddy</text>
+    <line class="msg" x1="332" y1="225" x2="567" y2="225" marker-end="url(#a6mb)"/><text class="label" x="449" y="211">scan all open PRs</text>
+    <rect x="255" y="265" width="155" height="90" rx="8" fill="#142334" stroke="#31557b"/><text class="tiny" x="332" y="287" text-anchor="middle">review + CI</text><text class="tiny" x="332" y="308" text-anchor="middle">mergeability + labels</text><text class="tiny" x="332" y="329" text-anchor="middle">QA gate</text><text class="tiny" x="332" y="350" text-anchor="middle">classify portfolio</text>
+    <line class="msg artifact" x1="332" y1="395" x2="105" y2="395" marker-end="url(#c6mb)"/><text class="label label-artifact" x="218" y="381">REPORT · Ready / Almost / Blocked</text>
+    <line class="stop" x1="77" y1="440" x2="133" y2="440"/><rect class="gate" x="150" y="421" width="485" height="52" rx="9"/><text class="gate-title" x="169" y="442">✕ HUMAN GATE</text><text class="gate-text" x="285" y="442">Choose whether any individual PR should be acted on.</text>
+    <line class="msg" x1="105" y1="520" x2="880" y2="520" marker-end="url(#a6mb)"/><text class="label" x="492" y="506">OPTIONAL HUMAN INVOKE · one-PR action skill</text>
+  </svg>
+  <div class="seq-note"><strong>Lesson 16 runtime:</strong> the natural queue contained 0 open PRs, so the observed report returned Ready 0 / Almost Ready 0 / Blocked 0. The important boundary was still visible: <code>om-merge-buddy</code> scanned repository-wide PR state read-only, did not create or mutate work, treated local uncommitted skill-installation changes as out of scope, and only suggested possible downstream skills. The detailed three-way classification remains documented rather than runtime-observed.</div></div>
+
+  <div class="seq-svg-wrap" style="margin-top:14px"><div class="eyebrow">Sequence 7 · Pipeline learning loop</div>
+  <svg class="seq-svg" viewBox="0 0 920 610" role="img" aria-label="Pipeline retro feedback loop"><defs><marker id="a5" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d3dde8"/></marker><marker id="c5" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8bd49c"/></marker></defs>
+    <rect class="participant participant-human" x="35" y="28" width="150" height="58" rx="10"/><text class="ptitle" x="110" y="51">Human</text><text class="psub" x="110" y="70">you / operator</text>
+    <rect class="participant" x="245" y="28" width="175" height="58" rx="10"/><text class="ptitle" x="332" y="51">om-pipeline-retro</text><text class="psub" x="332" y="70">read-only analysis</text>
+    <rect class="participant" x="485" y="28" width="170" height="58" rx="10"/><text class="ptitle" x="570" y="51">om-prepare-issue</text><text class="psub" x="570" y="70">durable work</text>
+    <rect class="participant" x="720" y="28" width="165" height="58" rx="10"/><text class="ptitle" x="802" y="51">Delivery Pipeline</text><text class="psub" x="802" y="70">next cycle</text>
+    <line class="life human-life" x1="110" y1="86" x2="110" y2="575"/><line class="life" x1="332" y1="86" x2="332" y2="575"/><line class="life" x1="570" y1="86" x2="570" y2="575"/><line class="life" x1="802" y1="86" x2="802" y2="575"/>
+    <rect class="human-note" x="42" y="112" width="136" height="56" rx="8"/><text class="human-note-text" x="110" y="135">HUMAN ACTION</text><text class="human-note-text" x="110" y="153">choose retro window</text>
+    <line class="msg" x1="110" y1="210" x2="332" y2="210" marker-end="url(#a5)"/><text class="label" x="221" y="196">INVOKE</text>
+    <line class="msg artifact" x1="332" y1="275" x2="110" y2="275" marker-end="url(#c5)"/><text class="label label-artifact" x="221" y="261">ARTIFACT · ranked causes</text>
+    <line class="stop" x1="82" y1="320" x2="138" y2="320"/><rect class="gate" x="155" y="301" width="390" height="48" rx="9"/><text class="gate-title" x="173" y="322">✕ HUMAN GATE</text><text class="gate-text" x="291" y="322">Create an improvement Issue?</text>
+    <line class="msg" x1="110" y1="405" x2="570" y2="405" marker-end="url(#a5)"/><text class="label" x="340" y="391">INVOKE · om-prepare-issue</text>
+    <line class="msg artifact" x1="570" y1="465" x2="110" y2="465" marker-end="url(#c5)"/><text class="label label-artifact" x="340" y="451">ARTIFACT · IMPROVEMENT ISSUE</text>
+    <line class="stop" x1="82" y1="510" x2="138" y2="510"/><rect class="gate" x="155" y="491" width="315" height="48" rx="9"/><text class="gate-title" x="173" y="512">✕ HUMAN GATE</text><text class="gate-text" x="291" y="512">Execute improvement?</text>
+    <line class="msg" x1="470" y1="515" x2="802" y2="515" marker-end="url(#a5)"/><text class="tiny" x="636" y="501" text-anchor="middle">back into delivery</text>
+  </svg><div class="seq-note"><strong>Memory hook:</strong> retro reports evidence and stops. A human decides whether that evidence becomes an improvement Issue and whether to execute it. <strong>Lesson 13 runtime:</strong> 10 finished PRs examined, 9 classifiable, 7 clean single-pass, 2 unexplained second-pass, 0 hard recoveries; 0% declared-outcome coverage exposed a telemetry gap. Human-approved handoff created Issue #13, but implementation was intentionally stopped at the second human gate.</div></div>
+</section>
+
+<section class="section">
+  <h2>Capability Landscape</h2>
+  <p class="section-intro">Each card contains only five things: capability, status, skills, purpose, and evidence. Details belong elsewhere.</p>
+
+  <div class="zone-title">A · Foundation</div>
+  <div class="grid">
+    <div class="card"><div class="card-top"><div><div class="num">01</div><h3>Pipeline Foundation & Lifecycle</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-setup-agent-pipeline</li><li><span class="doc">○</span> om-apply-upgrade-notes</li></ul>
+      <div class="purpose">bootstrap → maintain the agentic pipeline</div><div class="evidence">Evidence: Lesson 1 + documentation review</div>
+    </div>
+  </div>
+
+  <div class="zone-title">B · Core Delivery</div>
+  <div class="grid">
+    <div class="card"><div class="card-top"><div><div class="num">02</div><h3>Idea Shaping / Routing</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-brainstorm</li></ul>
+      <div class="purpose">rough idea / question → clarify → compare alternatives → challenge → human-confirmed routing decision</div>
+      <div class="evidence">Evidence: Lesson 14 / Experiment 008 — repo-first clarification, real build-nothing outcome, challenger changed the preferred direction, handoff brief + machine-readable <code>Next:</code>, downstream skill not auto-invoked</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">03</div><h3>Issue Intake / Readiness</h3></div><span class="status">PARTIAL</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-prepare-issue</li><li><span class="doc">○</span> om-auto-manage-issues</li><li><span class="doc">○</span> om-followup-issue-from-pr</li></ul>
+      <div class="purpose">raw work → durable, implementation-ready Issue</div><div class="evidence">Evidence: Lesson 5</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">04</div><h3>Feature Design / Specification</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-auto-write-spec</li><li><span class="obs">●</span> om-spec-writing</li></ul>
+      <div class="purpose">feature brief → implementation-ready specification</div><div class="evidence">Evidence: Lesson 6</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">05</div><h3>Delivery / Implementation Execution</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills">
+        <li><span class="obs">●</span> om-auto-implement-spec</li><li><span class="obs">●</span> om-auto-create-pr</li><li><span class="obs">●</span> om-auto-create-pr-loop</li>
+        <li><span class="doc">○</span> om-auto-continue-pr</li><li><span class="doc">○</span> om-auto-continue-pr-loop</li><li><span class="obs">●</span>/<span class="doc">○</span> om-auto-fix-issue</li>
+        <li><span class="obs">●</span> om-check-and-commit</li><li><span class="obs">●</span> om-open-pr</li>
+      </ul>
+      <div class="purpose">approved work → implementation PR</div><div class="evidence">Evidence: Lessons 4, 5, 7, 8, 10</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">06</div><h3>Defect Diagnosis / Repair</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-verify-in-repo</li><li><span class="obs">●</span> om-root-cause</li><li><span class="obs">●</span> om-fix</li></ul>
+      <div class="purpose">reported defect → verify → diagnose → repair</div><div class="evidence">Evidence: Lesson 5</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">07</div><h3>Code Review / Review Orchestration</h3></div><span class="status">PARTIAL</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-code-review</li><li><span class="obs">●</span> om-auto-review-pr</li><li><span class="doc">○</span> om-review-prs</li></ul>
+      <div class="purpose">change → validation → findings → review verdict</div><div class="evidence">Evidence: Lesson 4+</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">08</div><h3>PR State Orchestration / Autopilot</h3></div><span class="status">CROSS-CUTTING</span></div>
+      <ul class="skills"><li><span class="doc">○</span> om-pr-autopilot</li></ul>
+      <div class="purpose">unknown PR state → diagnose → route the capability chain</div><div class="evidence">Evidence: Lesson 9 discovery</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">09</div><h3>Runtime QA & Test Infrastructure</h3></div><span class="status">PARTIAL</span></div>
+      <ul class="skills"><li><span class="doc">○</span> om-auto-qa-pr</li><li><span class="obs">●</span>/<span class="doc">○</span> om-prepare-test-env</li><li><span class="doc">○</span> om-integration-tests</li></ul>
+      <div class="purpose">running application → runtime evidence + durable tests</div><div class="evidence">Evidence: Lesson 11</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">10</div><h3>PR Stabilization / Merge-Readiness</h3></div><span class="status">PARKED</span></div>
+      <ul class="skills"><li><span class="doc">○</span> om-auto-fix-pr</li></ul>
+      <div class="purpose">existing PR → review + CI + QA → merge-ready</div><div class="evidence">Includes CI stabilization</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">11</div><h3>Merge Readiness Visibility / PR Portfolio Triage</h3></div><span class="status">EXPLORED · LIMITED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-merge-buddy</li></ul>
+      <div class="purpose">all open PRs → evaluate review + CI + mergeability + labels + QA gate → Ready / Almost Ready / Blocked portfolio view</div>
+      <div class="evidence">Evidence: Lesson 16 — runtime-tested on the natural empty queue (0 open PRs). Observed read-only repository-wide scan, gate-aware report, zero mutation, and local uncommitted work correctly treated as outside merge-queue scope. READY / ALMOST READY / BLOCKED classification rules are documented but were not exercised against real open PRs.</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">12</div><h3>Merge Execution</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-approve-merge-pr</li></ul>
+      <div class="purpose">merge-ready PR → final gates → squash merge</div><div class="evidence">Evidence: Lessons 9–10</div>
+    </div>
+  </div>
+
+  <div class="zone-title">C · Post-Delivery / Operations</div>
+  <div class="grid">
+    <div class="card"><div class="card-top"><div><div class="num">13</div><h3>Release Documentation / Release Narrative</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-auto-update-changelog</li></ul>
+      <div class="purpose">merged PR window → categorize shipped work → verify attribution → draft release narrative → CHANGELOG PR</div>
+      <div class="evidence">Evidence: Lesson 15 runtime dry-run — 10 real merged PRs, degraded no-tag window handling, contributor verification, draft 0.1.0 entry, no file/PR mutation</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">14</div><h3>Post-Merge Tracker Reconciliation</h3></div><span class="status">EXPLORED</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-close-fixed-issues</li></ul>
+      <div class="purpose">merged PR history → authoritative PR→Issue evidence → verify tracker state → repair only when inconsistent</div>
+      <div class="evidence">Evidence: Lesson 15 runtime dry-run — 10 merged PRs, 2 authoritative close links already satisfied, 0 actionable mutations, bare #N mentions safely ignored</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">15</div><h3>Pipeline Observability / Continuous Improvement</h3></div><span class="status">FEEDBACK LOOP</span></div>
+      <ul class="skills"><li><span class="obs">●</span> om-pipeline-retro</li></ul><div class="purpose">finished runs → quantify rework → expose telemetry gaps → rank pipeline improvements</div><div class="evidence">Evidence: Lesson 13 runtime retro + handoff to Issue #13</div>
+    </div>
+  </div>
+
+  <div class="zone-title">D · Cross-Cutting / Meta</div>
+  <div class="grid">
+    <div class="card"><div class="card-top"><div><div class="num">16</div><h3>UX / Product Design</h3></div><span class="status">PARKED</span></div>
+      <ul class="skills"><li><span class="doc">○</span> om-ux-setup</li><li><span class="doc">○</span> om-ux-shape</li><li><span class="doc">○</span> om-ux-review-pr</li></ul>
+      <div class="purpose">design contract → product shaping → running UI review</div>
+    </div>
+    <div class="card"><div class="card-top"><div><div class="num">17</div><h3>Skill Authoring / Extensibility</h3></div><span class="status">META</span></div>
+      <ul class="skills"><li><span class="doc">○</span> om-create-skill</li></ul><div class="purpose">brief / existing skill → validated OM capability</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <h2>Where next?</h2>
+  <div class="next">
+    <div class="card hero">
+      <div class="star">★</div>
+      <h3>Choose a New Capability Family</h3>
+      <div class="purpose">Lesson 16 closed the merge-queue visibility gap at the level useful for this lab. Prefer the next lesson to discover genuinely new architecture rather than manufacture PR volume just to exercise Merge Buddy classification.</div>
+      <div class="evidence">Merge Buddy stays learned but shallow: useful portfolio visibility exists, while deeper READY / ALMOST READY / BLOCKED runtime testing is intentionally deferred until a natural multi-PR queue exists.</div>
+    </div>
+    <div class="card">
+      <h3>Alternatives</h3>
+      <ul class="skills"><li><span class="doc">○</span> om-pr-autopilot</li><li><span class="doc">○</span> om-auto-fix-pr</li><li><span class="doc">○</span> om-create-skill</li></ul>
+      <div class="purpose">Deepen PR-state orchestration, merge-readiness stabilization, or inspect the meta-level skill-authoring capability.</div>
+      <div class="small" style="margin-top:12px">Deferred until naturally useful: deeper om-merge-buddy queue classification · CI-heavy stabilization · UX stack · full browser-driven QA · implementation of Issue #13 · execution of Lesson 14 handoff brief</div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <strong>Document role:</strong> quick orientation only. Detailed mental models stay in the Learning Map; durable discoveries in FINDINGS.md; runtime evidence in EXPERIMENTS.md.
+</div>
+</div>
+</body>
+</html>
