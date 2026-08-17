@@ -1,0 +1,47 @@
+description: Shared starter evals for AI code review prompts
+
+# This is a synthetic seed fixture.
+# It is not intended to represent a real PR review gate.
+# The goal is to verify that the shared prompt consumes {{input}}
+# and can identify obvious correctness/security issues from a concrete diff.
+
+prompts:
+  - ../.claude/prompts/rafsaw-code-review.md
+
+providers:
+  - id: openrouter:openai/gpt-4.1-mini
+
+tests:
+  - vars:
+      input: |
+        ```diff
+        diff --git a/src/auth/login.ts b/src/auth/login.ts
+        index 1111111..2222222 100644
+        --- a/src/auth/login.ts
+        +++ b/src/auth/login.ts
+        @@ -1,13 +1,11 @@
+         export async function login(db, username, password) {
+        -  const rows = await db.query(
+        -    "SELECT id, password_hash FROM users WHERE username = ?",
+        -    [username],
+        -  );
+        +  const rows = await db.query(
+        +    `SELECT id, password_hash FROM users WHERE username = '${username}'`,
+        +  );
+           const user = rows[0];
+
+        -  if (!user) {
+        -    return { ok: false };
+        -  }
+        -
+        -  const validPassword = await verifyPassword(password, user.password_hash);
+        +  const validPassword = password == user.password_hash;
+           if (!validPassword) {
+             return { ok: false };
+           }
+        ```
+    assert:
+      - type: contains
+        value: "correctness"
+      - type: contains
+        value: "security"

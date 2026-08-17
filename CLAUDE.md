@@ -39,3 +39,23 @@ Two boundaries to keep straight:
   masks the bug; that failing-test-to-fix case is Lesson 5.
 
 <!-- END @przeprogramowani/10x-cli -->
+
+<!-- BEGIN @rafsaw/rafsaw-ai-toolkit -->
+# Shared AI Rules for 10xCards
+
+## General rules
+
+- Prefer evidence-based reasoning.
+- Do not invent repo facts. Inspect files before making claims.
+- Separate facts, assumptions, and recommendations.
+- Keep changes small and scoped.
+- When reviewing code, prioritize correctness, security, and data isolation over formatting.
+
+## Code review rules
+
+- Do not approve changes only because tests pass.
+- Check whether tests cover the actual risk.
+- For security-sensitive changes, identify the trust boundary.
+- For database or RLS changes, verify cross-user isolation assumptions.
+- For CI/CD changes, verify secrets, permissions, and failure behavior.
+<!-- END @rafsaw/rafsaw-ai-toolkit -->
