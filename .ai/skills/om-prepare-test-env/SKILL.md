@@ -48,6 +48,17 @@ too.
   the process tree via `Win32_Process` / `ParentProcessId`.
 - **The `$PID` name is reserved.** It is a read-only automatic variable in
   PowerShell; the app's process id is held in `$appPid`.
+- **The requested port is a preference, not a fact.** Astro prints
+  `Port 4321 is in use, trying another one...` and binds the next free one, so the
+  script reads the bound port back from the app's own output (`Wait-BoundPort`).
+  A pre-flight bind check is not a substitute: binding `127.0.0.1` succeeds while a
+  dev server answers over `::1`, which once reported a busy port as free and left
+  the health probe watching a port nothing served for 120 s.
+- **Answering is not being usable.** Every env var is `optional: true` and
+  `src/lib/supabase.ts` returns `null` without credentials, so an app with no `.env`
+  serves HTTP 200 and only renders the `src/lib/config-status.ts` banner. The boot
+  asserts that banner is absent and fails loudly instead of handing QA an app with
+  authentication switched off.
 
 ## Environment state vs. committed state
 

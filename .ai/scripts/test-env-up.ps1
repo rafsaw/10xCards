@@ -7,6 +7,15 @@
 #   2026-08-18 repair: write JSON without a BOM (PS 5.1 Set-Content -Encoding utf8
 #              emits one; JS consumers' JSON.parse fails on it), and record the
 #              generation-time browser command/version instead of an empty stub.
+#   2026-08-18 repair: require HTTP 200 and assert the app is configured before
+#              declaring the env ready (a missing .env boots and serves 200 with
+#              only the config-status banner, which QA would then report instead
+#              of the change under test); reuse now probes baseUrl+healthPath.
+#   2026-08-18 repair: resolve the port the app actually bound instead of trusting
+#              the requested one. Astro increments when the port is taken, and an
+#              IPv4-only pre-flight bind check called a port free while a server
+#              answered over ::1 — together they made the boot watch a dead port
+#              for 120 s and then report a healthy app as failed.
 param([switch]$Force, [switch]$ForceRebuild)
 
 Set-StrictMode -Version Latest
@@ -62,22 +71,41 @@ function Write-Utf8NoBom([string]$Path, [string]$Text) {
   [System.IO.File]::WriteAllText($Path, $Text, (New-Object System.Text.UTF8Encoding($false)))
 }
 
-function Get-FreePort {
-  $l = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
-  $l.Start(); $port = $l.LocalEndpoint.Port; $l.Stop(); $port
-}
-
-function Test-PortFree([int]$Port) {
-  try {
-    $l = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Port)
-    $l.Start(); $l.Stop(); $true
-  } catch { $false }
+# Never trust the port we asked for. Astro auto-increments when the requested port
+# is taken ("Port 4321 is in use, trying another one...") and prints the real one,
+# and a pre-flight bind check cannot be trusted either: binding 127.0.0.1 succeeds
+# while a dev server is reachable over ::1, so the check reported a busy port free
+# and the health probe then watched a port nothing served. Read the bound port from
+# the app's own output instead.
+function Wait-BoundPort([string]$LogPath, [int]$TimeoutSeconds) {
+  $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+  while ((Get-Date) -lt $deadline) {
+    if (Test-Path $LogPath) {
+      $m = Select-String -LiteralPath $LogPath -Pattern 'http://localhost:(\d+)' -ErrorAction SilentlyContinue |
+             Select-Object -First 1
+      if ($m) { return [int]$m.Matches[0].Groups[1].Value }
+    }
+    Start-Sleep -Milliseconds 500
+  }
+  return 0
 }
 
 function Test-Health([string]$Url) {
   try {
     $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 5 -Uri $Url
-    return ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500)
+    return ($r.StatusCode -eq 200)
+  } catch { return $false }
+}
+
+# Answering is not the same as being usable. Every env var is `optional: true` in
+# astro.config.mjs and src/lib/supabase.ts returns $null without SUPABASE_URL/KEY,
+# so an app started with no .env boots, serves 200, and merely renders the
+# src/lib/config-status.ts banner. QA driven against that app reports the missing
+# configuration instead of the change under test, so treat it as a failed boot.
+function Test-Configured([string]$Url) {
+  try {
+    $body = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 -Uri $Url).Content
+    return (-not ($body -match 'nie jest skonfigurowany'))
   } catch { return $false }
 }
 
@@ -168,7 +196,10 @@ try {
     $d = Read-Descriptor
     if ($d -and $d.status -eq 'running' -and $d.app.pid) {
       $pidAlive = [bool](Get-Process -Id $d.app.pid -ErrorAction SilentlyContinue)
-      $healthy  = $pidAlive -and (Test-Health $d.baseUrl)
+      # Probe the same URL a fresh boot probes, composed from the descriptor, so
+      # reuse and boot cannot drift apart if healthPath ever stops being '/'.
+      $probeUrl = $d.baseUrl + $d.app.healthPath
+      $healthy  = $pidAlive -and (Test-Health $probeUrl) -and (Test-Configured $probeUrl)
       $fresh    = $false
       if ($healthy) {
         $age = ((Get-Date).ToUniversalTime() - [datetime]::Parse($d.startedAt).ToUniversalTime()).TotalSeconds
@@ -231,15 +262,24 @@ try {
   #    and is neither provisioned nor torn down here.
   # 6. App start + health wait
   # -------------------------------------------------------------------------
-  $port = $PreferredPort
-  if (-not (Test-PortFree $port)) { $port = Get-FreePort }
-  $baseUrl = "http://localhost:$port"
-
   Remove-Item -LiteralPath $AppOutLog, $AppErrLog -Force -ErrorAction SilentlyContinue
-  $proc = Start-Process -FilePath $LaunchExe -ArgumentList ($LaunchArgs + @("$port")) `
+  $proc = Start-Process -FilePath $LaunchExe -ArgumentList ($LaunchArgs + @("$PreferredPort")) `
     -WorkingDirectory $RepoRoot -PassThru -WindowStyle Hidden `
     -RedirectStandardOutput $AppOutLog -RedirectStandardError $AppErrLog
   $appPid = $proc.Id
+
+  # The requested port is a preference, not a fact — resolve the one actually bound.
+  $port = Wait-BoundPort $AppOutLog 60
+  if ($port -eq 0) {
+    if (Get-Process -Id $appPid -ErrorAction SilentlyContinue) { Stop-Tree $appPid }
+    $tail = ''
+    if (Test-Path $AppOutLog) { $tail = (Get-Content -Tail 20 -LiteralPath $AppOutLog) -join "`n" }
+    throw "app never reported a bound port within 60 s`n$tail"
+  }
+  if ($port -ne $PreferredPort) {
+    Write-Host "note: port $PreferredPort was taken; the app bound $port instead"
+  }
+  $baseUrl = "http://localhost:$port"
 
   $healthy = $false
   $healthDeadline = (Get-Date).AddSeconds($HealthTimeout)
@@ -253,6 +293,14 @@ try {
     $tail = ''
     if (Test-Path $AppErrLog) { $tail = (Get-Content -Tail 20 -LiteralPath $AppErrLog) -join "`n" }
     throw "app did not become healthy at $baseUrl$HealthPath within $HealthTimeout s`n$tail"
+  }
+
+  # Answering is not usable: refuse to hand QA an app that booted without its
+  # configuration (see Test-Configured). .env is gitignored, so a fresh checkout
+  # lands here rather than in an obvious crash.
+  if (-not (Test-Configured ($baseUrl + $HealthPath))) {
+    Stop-Tree $appPid
+    throw "app is running at $baseUrl but reports missing configuration (the src/lib/config-status.ts banner is present). Check .env for SUPABASE_URL / SUPABASE_KEY before using this environment for QA."
   }
 
   # -------------------------------------------------------------------------
