@@ -36,18 +36,22 @@ test.describe("review — rated card is rescheduled and stays so across a restar
 
   test("a card rated Right is no longer due after a session restart", async ({ page }) => {
     // Unique marker: no other worker (or a re-run) can see this card's front, so
-    // the due-state assertions below speak only about THIS card.
-    marker = `E2E review persistence ${Date.now()}`;
+    // the due-state assertions below speak only about THIS card. Held in a const
+    // as well as the describe-scoped `marker`: TypeScript drops the narrowing of
+    // a mutable `let` inside a callback (the toPass block below), so the locators
+    // in this test use the const, while afterEach keeps the nullable `marker`.
+    const front = `E2E review persistence ${Date.now()}`;
+    marker = front;
 
     // Setup — seed exactly one due card: a manually created card has
     // next_due_at=now (cards.ts), so it enters /review immediately. exact: true
     // because the library search box ("Search front or back…") also matches
     // "Front"/"Back" by accessible name.
     await page.goto("/library");
-    await page.getByRole("textbox", { name: "Front", exact: true }).fill(marker);
+    await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
     await page.getByRole("textbox", { name: "Back", exact: true }).fill("review persistence answer");
     await page.getByRole("button", { name: "Create card" }).click();
-    await expect(page.getByText(marker)).toBeVisible();
+    await expect(page.getByText(front)).toBeVisible();
 
     // Precondition — the new card is genuinely due (cards.ts sets next_due_at=now)
     // and shows up in /review. Each /review load re-runs the SSR due-cards query,
@@ -58,7 +62,7 @@ test.describe("review — rated card is rescheduled and stays so across a restar
     // strict below.
     await expect(async () => {
       await page.goto("/review");
-      await expect(page.getByText(marker)).toBeVisible({ timeout: 2000 });
+      await expect(page.getByText(front)).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 20000 });
 
     // Action — reveal, then rate the card "Right". Wait on the /api/reviews
@@ -92,6 +96,6 @@ test.describe("review — rated card is rescheduled and stays so across a restar
     // The review page finished its SSR load (its h1 always renders)...
     await expect(page.getByRole("heading", { name: "Review session" })).toBeVisible();
     // ...and this rated card is no longer among the due cards.
-    await expect(page.getByText(marker)).toHaveCount(0);
+    await expect(page.getByText(front)).toHaveCount(0);
   });
 });
