@@ -16,6 +16,10 @@
 #              IPv4-only pre-flight bind check called a port free while a server
 #              answered over ::1 — together they made the boot watch a dead port
 #              for 120 s and then report a healthy app as failed.
+#   2026-08-18 feature: mint an ephemeral QA user at boot (.ai/scripts/qa-user.mjs)
+#              so browser QA reaches the authenticated routes; swept on the next
+#              boot and deleted at teardown. Non-fatal on failure - the env still
+#              serves the public routes and the descriptor says QA is limited.
 param([switch]$Force, [switch]$ForceRebuild)
 
 Set-StrictMode -Version Latest
@@ -41,7 +45,10 @@ $AppErrLog      = Join-Path $QaDir 'test-env-app.err.log'
 $PreferredPort  = 4321                       # Astro dev default; playwright.config.ts expects it
 $HealthPath     = '/'
 $LaunchExe      = 'npm.cmd'
-$LaunchArgs     = @('run', 'dev', '--', '--port')   # port appended at launch
+# --host 127.0.0.1 is load-bearing, not cosmetic: left to itself the dev server
+# binds [::1] only, and the browser provider (which resolves to IPv4 first) then
+# cannot reach it at all - the env looks healthy to curl and is useless for QA.
+$LaunchArgs     = @('run', 'dev', '--', '--host', '127.0.0.1', '--port')   # port appended at launch
 $HealthTimeout  = 120                        # seconds to wait for the app to answer
 $LockWait       = 300                        # seconds to wait for another bootstrap
 
@@ -81,7 +88,7 @@ function Wait-BoundPort([string]$LogPath, [int]$TimeoutSeconds) {
   $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
   while ((Get-Date) -lt $deadline) {
     if (Test-Path $LogPath) {
-      $m = Select-String -LiteralPath $LogPath -Pattern 'http://localhost:(\d+)' -ErrorAction SilentlyContinue |
+      $m = Select-String -LiteralPath $LogPath -Pattern 'http://(?:localhost|127\.0\.0\.1):(\d+)' -ErrorAction SilentlyContinue |
              Select-Object -First 1
       if ($m) { return [int]$m.Matches[0].Groups[1].Value }
     }
@@ -279,7 +286,9 @@ try {
   if ($port -ne $PreferredPort) {
     Write-Host "note: port $PreferredPort was taken; the app bound $port instead"
   }
-  $baseUrl = "http://localhost:$port"
+  # 127.0.0.1, not localhost: the contract's descriptor shape uses it, and it is
+  # unambiguous for consumers that resolve IPv4 first.
+  $baseUrl = "http://127.0.0.1:$port"
 
   $healthy = $false
   $healthDeadline = (Get-Date).AddSeconds($HealthTimeout)
@@ -301,6 +310,37 @@ try {
   if (-not (Test-Configured ($baseUrl + $HealthPath))) {
     Stop-Tree $appPid
     throw "app is running at $baseUrl but reports missing configuration (the src/lib/config-status.ts banner is present). Check .env for SUPABASE_URL / SUPABASE_KEY before using this environment for QA."
+  }
+
+  # -------------------------------------------------------------------------
+  # 6b. Ephemeral QA login for agent-driven browser QA
+  # -------------------------------------------------------------------------
+  # Delegated to node so it can reuse @supabase/supabase-js and mirror
+  # tests/e2e/auth.setup.ts. The helper writes the password straight into the
+  # gitignored credentials file and prints only the (non-secret) email and id.
+  # A failure here is loud but not fatal: the environment is still usable for the
+  # unauthenticated routes, and the descriptor records that QA is limited.
+  $qaEmail = ''
+  $qaNote = ''
+  Push-Location $RepoRoot
+  try {
+    & node.exe '.ai/scripts/qa-user.mjs' sweep 2>&1 | Out-Null   # clear leftovers from crashed runs
+    $qaOut = & node.exe '.ai/scripts/qa-user.mjs' create 2>&1
+    if ($LASTEXITCODE -ne 0) {
+      $qaNote = 'QA user could not be minted; authenticated routes are not reachable from this environment'
+      Write-Host "warning: $qaNote"
+      Write-Host ($qaOut | Out-String).Trim()
+    } else {
+      $match = $qaOut | Select-String -Pattern '^QA_EMAIL=(.+)$' | Select-Object -First 1
+      if ($match) { $qaEmail = $match.Matches[0].Groups[1].Value }
+    }
+  } finally { Pop-Location }
+
+  $credentials = @()
+  $credentialsFile = ''
+  if ($qaEmail) {
+    $credentials = @(@{ role = 'qa'; username = $qaEmail; passwordEnv = 'TEST_QA_PASSWORD' })
+    $credentialsFile = '.ai/qa/test-env.env'
   }
 
   # -------------------------------------------------------------------------
@@ -335,13 +375,13 @@ try {
       pid          = $appPid
     }
     services          = @()
-    credentials       = @()
-    credentialsFile   = ''
+    credentials       = $credentials
+    credentialsFile   = $credentialsFile
     browser           = $browser
     testRunner        = [ordered]@{ name = 'playwright'; config = 'playwright.config.ts' }
     platform          = 'win32'
     startedAt         = (Now-Utc)
-    notes             = 'Supabase is REMOTE and shared - this script never starts, migrates, seeds or tears it down; credentials come from .env, which Astro loads itself. No local backing services and no Docker. No QA login is recorded: the committed Playwright suite mints its own ephemeral user in tests/e2e/auth.setup.ts and deletes it in global.teardown.ts, so browser QA driven by this descriptor reaches only unauthenticated routes (/, /auth/signin, /auth/signup) unless a user is provisioned separately. Teardown: .ai/scripts/test-env-down.ps1 (stops the npm/node process tree only).'
+    notes             = ('Supabase is REMOTE and shared - this script never starts, migrates, seeds or tears it down; app credentials come from .env, which Astro loads itself. No local backing services and no Docker. The QA login is an EPHEMERAL user minted at boot via the service_role admin API (.ai/scripts/qa-user.mjs, mirroring tests/e2e/auth.setup.ts) and deleted by test-env-down.ps1; its password lives only in the gitignored credentialsFile and is referenced by the passwordEnv name, never inline. Leftovers from a crashed run are swept on the next boot (accounts prefixed qa-agent- older than 6h). Teardown: .ai/scripts/test-env-down.ps1 (deletes the QA user, then stops the npm/node process tree). ' + $qaNote).Trim()
   }
   Write-Utf8NoBom $Descriptor ($desc | ConvertTo-Json -Depth 6)
 
