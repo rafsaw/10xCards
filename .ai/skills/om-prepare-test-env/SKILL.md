@@ -67,14 +67,63 @@ write is gitignored: `.ai/qa/test-env.json`, `.ai/qa/test-env.env`,
 `.ai/qa/test-env-build-cache.json`, `.ai/qa/test-env-app.*.log`,
 `.ai/qa/test-env.lock/`.
 
-## Known gap — authenticated QA
+## Browser provider — why this repo uses `playwright`, not `agent-browser`
 
-The descriptor records **no credentials**. The committed Playwright suite mints
-its own ephemeral user in `tests/e2e/auth.setup.ts` (service-role key from the
-environment) and deletes it in `tests/e2e/global.teardown.ts`, so it does not need
-one. Agent-driven browser QA reading this descriptor therefore reaches only the
-unauthenticated routes — `/`, `/auth/signin`, `/auth/signup`. Driving
-`/dashboard`, `/library`, `/generate`, `/review`, or `/settings` requires
-provisioning a QA user and recording it as a `credentials` entry plus a
-`credentialsFile`; that has not been done, deliberately, because it creates a real
-user in the shared remote Supabase project.
+`browser.provider` is `playwright`. Authenticated QA is verified end to end:
+`node .ai/scripts/qa-login-check.mjs` bounces off `/dashboard` while anonymous,
+signs in with the recorded credentials, asserts `/dashboard` renders **for that
+user** (the email is on the page, so "a page rendered" cannot pass for "the session
+is ours"), and captures a screenshot into `.ai/qa/artifacts_<runId>/`.
+
+`agent-browser` was the original choice and does not work on this machine. Kept
+here so nobody re-runs the same investigation:
+
+What was established, by testing rather than assumption:
+
+- `agent-browser doctor --json` passes completely (7 pass / 0 fail): Chrome
+  152.0.7977.42 installed, headless launch + `about:blank` in 0.61 s, CDN reachable.
+- `agent-browser --session <s> read https://example.com` **succeeds** and returns
+  page text, so the CLI, its session daemons and outbound networking all work.
+- `agent-browser --session <s> open http://127.0.0.1:4321/auth/signin` **hangs
+  indefinitely** (killed at 600 s) or fails with `os error 10060` (connect timeout).
+  The same URL returns HTTP 200 from `Invoke-WebRequest` and from `curl` in the
+  same second.
+- Not the cause, each checked and ruled out: the loopback family (the server now
+  binds `127.0.0.1`, verified with `netstat`), proxy environment variables (all
+  empty), and the Windows system proxy (`ProxyEnable=0`, no PAC URL).
+
+**Root cause unknown, and deliberately not pursued further** — the repository
+already drives Chromium against this exact server through Playwright, so switching
+providers cost minutes where debugging had already cost far more. If you ever want
+`agent-browser` back, start from the facts above rather than repeating them.
+
+One operational note: a session daemon left behind by a killed run makes every
+later command on that session id time out. `agent-browser doctor --json` lists
+live daemons under `Daemons`; stop stray `agent-browser-win32-x64` processes before
+retrying, and prefer a fresh session id per run.
+
+## Authenticated QA — the ephemeral user
+
+`.ai/scripts/qa-user.mjs` mints an **ephemeral** QA account when the environment
+comes up and deletes it at teardown — the same shape `tests/e2e/auth.setup.ts`
+uses, because this project is remote-only and GoTrue blocks public signup on test
+domains, so the `service_role` admin API is the only way to create one.
+
+It is a Node helper rather than PowerShell on purpose: it reuses
+`@supabase/supabase-js`, which the repository already depends on, and keeps the
+service-role key inside the Node process instead of a shell string.
+
+Secrets discipline, which the scripts enforce rather than merely document:
+
+- The password is **never printed**. The helper writes it straight into
+  `.ai/qa/test-env.env` (gitignored); only the email and user id reach stdout.
+- The descriptor carries a *reference* — `passwordEnv: TEST_QA_PASSWORD` — never a
+  value. Consumers load the file into their shell and pass `$env:TEST_QA_PASSWORD`
+  literally, so the value is expanded by the shell and never by an agent.
+- Accounts are prefixed `qa-agent-`. Every boot sweeps leftovers older than 6 h, so
+  a run killed between create and delete cannot silently accumulate accounts in the
+  shared project.
+
+Minting failure is loud but **not** fatal: the environment still serves the public
+routes, and the descriptor's `notes` says QA is limited rather than leaving the
+next reader to guess why login does not work.

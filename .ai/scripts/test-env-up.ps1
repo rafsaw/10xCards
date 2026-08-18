@@ -16,6 +16,14 @@
 #              IPv4-only pre-flight bind check called a port free while a server
 #              answered over ::1 — together they made the boot watch a dead port
 #              for 120 s and then report a healthy app as failed.
+#   2026-08-18 feature: mint an ephemeral QA user at boot (.ai/scripts/qa-user.mjs)
+#              so browser QA reaches the authenticated routes; swept on the next
+#              boot and deleted at teardown. Non-fatal on failure - the env still
+#              serves the public routes and the descriptor says QA is limited.
+#   2026-08-18 switch: browser provider agent-browser -> playwright. agent-browser
+#              passes doctor and fetches external pages but hangs opening the local
+#              dev server here; playwright already drives this app in tests/e2e/.
+#              Authenticated QA verified by .ai/scripts/qa-login-check.mjs.
 param([switch]$Force, [switch]$ForceRebuild)
 
 Set-StrictMode -Version Latest
@@ -41,7 +49,10 @@ $AppErrLog      = Join-Path $QaDir 'test-env-app.err.log'
 $PreferredPort  = 4321                       # Astro dev default; playwright.config.ts expects it
 $HealthPath     = '/'
 $LaunchExe      = 'npm.cmd'
-$LaunchArgs     = @('run', 'dev', '--', '--port')   # port appended at launch
+# --host 127.0.0.1 is load-bearing, not cosmetic: left to itself the dev server
+# binds [::1] only, and the browser provider (which resolves to IPv4 first) then
+# cannot reach it at all - the env looks healthy to curl and is useless for QA.
+$LaunchArgs     = @('run', 'dev', '--', '--host', '127.0.0.1', '--port')   # port appended at launch
 $HealthTimeout  = 120                        # seconds to wait for the app to answer
 $LockWait       = 300                        # seconds to wait for another bootstrap
 
@@ -53,12 +64,14 @@ $BuildArtifacts = @('node_modules', '.astro')
 $TtlSeconds = 600
 if ($env:TEST_ENV_CACHE_TTL_SECONDS) { $TtlSeconds = [int]$env:TEST_ENV_CACHE_TTL_SECONDS }
 
-# Browser provider, verified once at generation time via .ai/browsers/agent-browser.md
-# (pinned release, SHA-256 checked, `doctor` green). The warm path never reinstalls;
-# `installed` is re-derived from the binary actually being on disk.
-$BrowserProvider = 'agent-browser'
-$BrowserCommand  = Join-Path $env:LOCALAPPDATA 'agent-tools\agent-browser\v0.34.0\agent-browser-win32-x64.exe'
-$BrowserVersion  = 'agent-browser 0.34.0'
+# Browser provider: playwright (.ai/browsers/playwright.md). agent-browser was the
+# original choice but cannot reach this dev server on this machine (doctor green,
+# external fetches fine, `open` on the local URL hangs - see the repo-local skill).
+# Playwright already drives this exact app in tests/e2e/, so it is the provider
+# that demonstrably works. `installed` is derived from the dependency being present.
+$BrowserProvider = 'playwright'
+$BrowserCommand  = 'npx playwright'
+$BrowserVersion  = '1.60.0'
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -81,7 +94,7 @@ function Wait-BoundPort([string]$LogPath, [int]$TimeoutSeconds) {
   $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
   while ((Get-Date) -lt $deadline) {
     if (Test-Path $LogPath) {
-      $m = Select-String -LiteralPath $LogPath -Pattern 'http://localhost:(\d+)' -ErrorAction SilentlyContinue |
+      $m = Select-String -LiteralPath $LogPath -Pattern 'http://(?:localhost|127\.0\.0\.1):(\d+)' -ErrorAction SilentlyContinue |
              Select-Object -First 1
       if ($m) { return [int]$m.Matches[0].Groups[1].Value }
     }
@@ -279,7 +292,9 @@ try {
   if ($port -ne $PreferredPort) {
     Write-Host "note: port $PreferredPort was taken; the app bound $port instead"
   }
-  $baseUrl = "http://localhost:$port"
+  # 127.0.0.1, not localhost: the contract's descriptor shape uses it, and it is
+  # unambiguous for consumers that resolve IPv4 first.
+  $baseUrl = "http://127.0.0.1:$port"
 
   $healthy = $false
   $healthDeadline = (Get-Date).AddSeconds($HealthTimeout)
@@ -304,19 +319,54 @@ try {
   }
 
   # -------------------------------------------------------------------------
+  # 6b. Ephemeral QA login for agent-driven browser QA
+  # -------------------------------------------------------------------------
+  # Delegated to node so it can reuse @supabase/supabase-js and mirror
+  # tests/e2e/auth.setup.ts. The helper writes the password straight into the
+  # gitignored credentials file and prints only the (non-secret) email and id.
+  # A failure here is loud but not fatal: the environment is still usable for the
+  # unauthenticated routes, and the descriptor records that QA is limited.
+  $qaEmail = ''
+  $qaNote = ''
+  Push-Location $RepoRoot
+  try {
+    # Delete the previously recorded user first: `create` overwrites the credentials
+    # file, so minting without this would lose the old id and orphan that account
+    # in the shared project until the 6h sweep caught it. No-op when none exists.
+    & node.exe '.ai/scripts/qa-user.mjs' delete 2>&1 | Out-Null
+    & node.exe '.ai/scripts/qa-user.mjs' sweep 2>&1 | Out-Null   # clear leftovers from crashed runs
+    $qaOut = & node.exe '.ai/scripts/qa-user.mjs' create 2>&1
+    if ($LASTEXITCODE -ne 0) {
+      $qaNote = 'QA user could not be minted; authenticated routes are not reachable from this environment'
+      Write-Host "warning: $qaNote"
+      Write-Host ($qaOut | Out-String).Trim()
+    } else {
+      $match = $qaOut | Select-String -Pattern '^QA_EMAIL=(.+)$' | Select-Object -First 1
+      if ($match) { $qaEmail = $match.Matches[0].Groups[1].Value }
+    }
+  } finally { Pop-Location }
+
+  $credentials = @()
+  $credentialsFile = ''
+  if ($qaEmail) {
+    $credentials = @(@{ role = 'qa'; username = $qaEmail; passwordEnv = 'TEST_QA_PASSWORD' })
+    $credentialsFile = '.ai/qa/test-env.env'
+  }
+
+  # -------------------------------------------------------------------------
   # 7. Descriptor write + result lines
   # -------------------------------------------------------------------------
-  $browserPresent = Test-Path $BrowserCommand
+  $browserPresent = Test-Path (Join-Path $RepoRoot 'node_modules\@playwright\test')
   $browser = @{
     provider   = $BrowserProvider
     installed  = $browserPresent
     command    = $BrowserCommand
     version    = $BrowserVersion
-    descriptor = '.ai/browsers/agent-browser.md'
-    notes      = ''
+    descriptor = '.ai/browsers/playwright.md'
+    notes      = 'Authenticated QA is proven by .ai/scripts/qa-login-check.mjs, which signs in with the recorded credentials and asserts /dashboard renders for that user.'
   }
   if (-not $browserPresent) {
-    $browser.notes = 'binary missing from the generation-time cache path; re-run om-prepare-test-env --regenerate to reinstall the provider'
+    $browser.notes = '@playwright/test is not installed; run the dependency install (the up script does this on a cache miss) before driving the browser'
   }
 
   $desc = [ordered]@{
@@ -335,13 +385,13 @@ try {
       pid          = $appPid
     }
     services          = @()
-    credentials       = @()
-    credentialsFile   = ''
+    credentials       = $credentials
+    credentialsFile   = $credentialsFile
     browser           = $browser
     testRunner        = [ordered]@{ name = 'playwright'; config = 'playwright.config.ts' }
     platform          = 'win32'
     startedAt         = (Now-Utc)
-    notes             = 'Supabase is REMOTE and shared - this script never starts, migrates, seeds or tears it down; credentials come from .env, which Astro loads itself. No local backing services and no Docker. No QA login is recorded: the committed Playwright suite mints its own ephemeral user in tests/e2e/auth.setup.ts and deletes it in global.teardown.ts, so browser QA driven by this descriptor reaches only unauthenticated routes (/, /auth/signin, /auth/signup) unless a user is provisioned separately. Teardown: .ai/scripts/test-env-down.ps1 (stops the npm/node process tree only).'
+    notes             = ('Supabase is REMOTE and shared - this script never starts, migrates, seeds or tears it down; app credentials come from .env, which Astro loads itself. No local backing services and no Docker. The QA login is an EPHEMERAL user minted at boot via the service_role admin API (.ai/scripts/qa-user.mjs, mirroring tests/e2e/auth.setup.ts) and deleted by test-env-down.ps1; its password lives only in the gitignored credentialsFile and is referenced by the passwordEnv name, never inline. Leftovers from a crashed run are swept on the next boot (accounts prefixed qa-agent- older than 6h). Teardown: .ai/scripts/test-env-down.ps1 (deletes the QA user, then stops the npm/node process tree). ' + $qaNote).Trim()
   }
   Write-Utf8NoBom $Descriptor ($desc | ConvertTo-Json -Depth 6)
 
