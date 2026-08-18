@@ -80,7 +80,11 @@ export default tseslint.config(
   // packages/code-reviewer/.claude/**) are covered too.
   // .dependency-cruiser.cjs is a dotfile, which tsconfig's `**/*` include
   // does not match, so the type-aware parser can't find its project — ignore.
-  { ignores: ["**/.claude/**", ".dependency-cruiser.cjs"] },
+  // `.ai/**` holds agent-pipeline tooling (test-env scripts, QA helpers), not
+  // application source. The type-aware config cannot parse files outside the TS
+  // project, and pulling them into tsconfig would widen the app's project for
+  // scripts that never ship.
+  { ignores: ["**/.claude/**", "**/.ai/**", ".dependency-cruiser.cjs"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
