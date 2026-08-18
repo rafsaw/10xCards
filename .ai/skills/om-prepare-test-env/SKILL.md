@@ -67,11 +67,16 @@ write is gitignored: `.ai/qa/test-env.json`, `.ai/qa/test-env.env`,
 `.ai/qa/test-env-build-cache.json`, `.ai/qa/test-env-app.*.log`,
 `.ai/qa/test-env.lock/`.
 
-## ⛔ Blocker — `agent-browser` cannot drive the local app on this machine
+## Browser provider — why this repo uses `playwright`, not `agent-browser`
 
-The QA login below works, but the configured browser provider currently cannot
-reach the dev server. Recorded rather than worked around, per the provider rule
-"record the blocker instead of faking readiness".
+`browser.provider` is `playwright`. Authenticated QA is verified end to end:
+`node .ai/scripts/qa-login-check.mjs` bounces off `/dashboard` while anonymous,
+signs in with the recorded credentials, asserts `/dashboard` renders **for that
+user** (the email is on the page, so "a page rendered" cannot pass for "the session
+is ours"), and captures a screenshot into `.ai/qa/artifacts_<runId>/`.
+
+`agent-browser` was the original choice and does not work on this machine. Kept
+here so nobody re-runs the same investigation:
 
 What was established, by testing rather than assumption:
 
@@ -87,11 +92,10 @@ What was established, by testing rather than assumption:
   binds `127.0.0.1`, verified with `netstat`), proxy environment variables (all
   empty), and the Windows system proxy (`ProxyEnable=0`, no PAC URL).
 
-**Root cause unknown.** Do not spend more time on it before trying the cheaper
-route: the repository already drives Chromium against this exact server through
-Playwright (`tests/e2e/` passes), so switching `browser.provider` to `playwright`
-in `.ai/agentic.config.json` is the pragmatic fix and is the compatibility option
-the collection ships for precisely this situation.
+**Root cause unknown, and deliberately not pursued further** — the repository
+already drives Chromium against this exact server through Playwright, so switching
+providers cost minutes where debugging had already cost far more. If you ever want
+`agent-browser` back, start from the facts above rather than repeating them.
 
 One operational note: a session daemon left behind by a killed run makes every
 later command on that session id time out. `agent-browser doctor --json` lists

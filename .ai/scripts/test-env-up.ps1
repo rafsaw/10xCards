@@ -20,6 +20,10 @@
 #              so browser QA reaches the authenticated routes; swept on the next
 #              boot and deleted at teardown. Non-fatal on failure - the env still
 #              serves the public routes and the descriptor says QA is limited.
+#   2026-08-18 switch: browser provider agent-browser -> playwright. agent-browser
+#              passes doctor and fetches external pages but hangs opening the local
+#              dev server here; playwright already drives this app in tests/e2e/.
+#              Authenticated QA verified by .ai/scripts/qa-login-check.mjs.
 param([switch]$Force, [switch]$ForceRebuild)
 
 Set-StrictMode -Version Latest
@@ -60,12 +64,14 @@ $BuildArtifacts = @('node_modules', '.astro')
 $TtlSeconds = 600
 if ($env:TEST_ENV_CACHE_TTL_SECONDS) { $TtlSeconds = [int]$env:TEST_ENV_CACHE_TTL_SECONDS }
 
-# Browser provider, verified once at generation time via .ai/browsers/agent-browser.md
-# (pinned release, SHA-256 checked, `doctor` green). The warm path never reinstalls;
-# `installed` is re-derived from the binary actually being on disk.
-$BrowserProvider = 'agent-browser'
-$BrowserCommand  = Join-Path $env:LOCALAPPDATA 'agent-tools\agent-browser\v0.34.0\agent-browser-win32-x64.exe'
-$BrowserVersion  = 'agent-browser 0.34.0'
+# Browser provider: playwright (.ai/browsers/playwright.md). agent-browser was the
+# original choice but cannot reach this dev server on this machine (doctor green,
+# external fetches fine, `open` on the local URL hangs - see the repo-local skill).
+# Playwright already drives this exact app in tests/e2e/, so it is the provider
+# that demonstrably works. `installed` is derived from the dependency being present.
+$BrowserProvider = 'playwright'
+$BrowserCommand  = 'npx playwright'
+$BrowserVersion  = '1.60.0'
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -346,17 +352,17 @@ try {
   # -------------------------------------------------------------------------
   # 7. Descriptor write + result lines
   # -------------------------------------------------------------------------
-  $browserPresent = Test-Path $BrowserCommand
+  $browserPresent = Test-Path (Join-Path $RepoRoot 'node_modules\@playwright\test')
   $browser = @{
     provider   = $BrowserProvider
     installed  = $browserPresent
     command    = $BrowserCommand
     version    = $BrowserVersion
-    descriptor = '.ai/browsers/agent-browser.md'
-    notes      = ''
+    descriptor = '.ai/browsers/playwright.md'
+    notes      = 'Authenticated QA is proven by .ai/scripts/qa-login-check.mjs, which signs in with the recorded credentials and asserts /dashboard renders for that user.'
   }
   if (-not $browserPresent) {
-    $browser.notes = 'binary missing from the generation-time cache path; re-run om-prepare-test-env --regenerate to reinstall the provider'
+    $browser.notes = '@playwright/test is not installed; run the dependency install (the up script does this on a cache miss) before driving the browser'
   }
 
   $desc = [ordered]@{
