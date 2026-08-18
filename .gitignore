@@ -69,3 +69,8 @@ pnpm-debug.log*
 # om-auto-review-pr, om-auto-continue-pr). Each carries its own node_modules, and
 # cleanup can fail on Windows long paths — never let one reach `git add -A`.
 .ai/tmp/
+
+# om-prepare-test-env: per-run environment state (scripts in .ai/scripts/ stay committed)
+.ai/qa/test-env-build-cache.json
+.ai/qa/test-env-app.*.log
+.ai/qa/test-env.lock/
