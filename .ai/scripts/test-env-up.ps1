@@ -330,6 +330,10 @@ try {
   $qaNote = ''
   Push-Location $RepoRoot
   try {
+    # Delete the previously recorded user first: `create` overwrites the credentials
+    # file, so minting without this would lose the old id and orphan that account
+    # in the shared project until the 6h sweep caught it. No-op when none exists.
+    & node.exe '.ai/scripts/qa-user.mjs' delete 2>&1 | Out-Null
     & node.exe '.ai/scripts/qa-user.mjs' sweep 2>&1 | Out-Null   # clear leftovers from crashed runs
     $qaOut = & node.exe '.ai/scripts/qa-user.mjs' create 2>&1
     if ($LASTEXITCODE -ne 0) {
