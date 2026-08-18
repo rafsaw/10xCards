@@ -64,3 +64,8 @@ pnpm-debug.log*
 .ai/qa/artifacts_*/
 .ai/qa/test-env.json
 .ai/qa/test-env.env
+
+# om agent pipeline: per-run isolated worktrees (om-auto-fix-issue, om-auto-fix-pr,
+# om-auto-review-pr, om-auto-continue-pr). Each carries its own node_modules, and
+# cleanup can fail on Windows long paths — never let one reach `git add -A`.
+.ai/tmp/
