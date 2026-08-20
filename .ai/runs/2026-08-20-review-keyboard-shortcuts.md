@@ -113,8 +113,8 @@ In scope:
 
 ### Phase 2: Wire the shortcuts into the Review Session
 
-- [ ] 2.1 Attach the keydown effect and reuse the existing submission path
-- [ ] 2.2 Add the visible shortcut hint and `aria-keyshortcuts`
+- [x] 2.1 Attach the keydown effect and reuse the existing submission path — d1718ae
+- [x] 2.2 Add the visible shortcut hint and `aria-keyshortcuts` — d1718ae
 
 ### Phase 3: End-to-end coverage and the validation gate
 
