@@ -118,5 +118,5 @@ In scope:
 
 ### Phase 3: End-to-end coverage and the validation gate
 
-- [ ] 3.1 Add the Playwright keyboard-shortcuts E2E spec
+- [x] 3.1 Add the Playwright keyboard-shortcuts E2E spec — cac6387
 - [ ] 3.2 Run the full validation gate
