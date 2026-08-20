@@ -108,8 +108,8 @@ In scope:
 
 ### Phase 1: Shortcut resolution logic
 
-- [ ] 1.1 Add the pure `review-shortcuts` resolver module
-- [ ] 1.2 Add unit tests covering the acceptance criteria and guard cases
+- [x] 1.1 Add the pure `review-shortcuts` resolver module — 1cb3c6b
+- [x] 1.2 Add unit tests covering the acceptance criteria and guard cases — 1cb3c6b
 
 ### Phase 2: Wire the shortcuts into the Review Session
 
