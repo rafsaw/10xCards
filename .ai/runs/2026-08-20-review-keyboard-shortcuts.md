@@ -104,6 +104,8 @@ In scope:
 
 ## Progress
 
+PR: #30
+
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: Shortcut resolution logic
@@ -119,4 +121,4 @@ In scope:
 ### Phase 3: End-to-end coverage and the validation gate
 
 - [x] 3.1 Add the Playwright keyboard-shortcuts E2E spec — cac6387
-- [ ] 3.2 Run the full validation gate
+- [x] 3.2 Run the full validation gate — see the gate results in the PR summary comment
