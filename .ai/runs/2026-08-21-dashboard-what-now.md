@@ -150,6 +150,11 @@ Run `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` in order, a
   because reviews are time-sensitive and drafts are not. It lives in one pure function, so
   overturning it is a one-line change with a test.
 
+### Post-review fix
+
+- [x] Post-review fix: catch a transport-level throw from the count queries so the page renders
+  the designed error state instead of a 500 — see the review verdict on the PR.
+
 ### Phase 4 result — ✅ full validation gate green at `593bcd8`
 
 - `npm run typecheck` — 100 files, **0 errors**, 0 warnings, 5 pre-existing hints.
