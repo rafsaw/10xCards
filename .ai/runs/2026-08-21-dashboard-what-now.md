@@ -68,6 +68,48 @@ The brief's highest-consequence assumption is that RLS scopes the counts without
 verified from the repository before a single query is written; the evidence is recorded in
 Phase 1 below and reproduced in the PR summary comment.
 
+### Phase 1 result — ✅ RLS confirmed, counts are safe to write
+
+Verified in this repository on 2026-08-21, at commit `2c92a3d`. The chain, link by link:
+
+1. **RLS is on.** `supabase/migrations/20260527150510_cards_and_account_deletion.sql:36` —
+   `alter table public.cards enable row level security;`
+2. **The only SELECT policy is owner-scoped.** Same file, lines 38–40 —
+   `create policy cards_select_own on public.cards for select to authenticated using ((select auth.uid()) = user_id);`
+   There is no second, broader SELECT policy on the table anywhere.
+3. **Nothing later loosens it.** Grepping all four migrations for `disable row level`,
+   `using (true)`, `to public`, `to anon` returns nothing; the three later migrations add an
+   index, a check constraint, `finalize_drafts`, and the deletion sweep — no policy changes.
+4. **The app has exactly one client and it is the anon client.** `src/lib/supabase.ts:9` is the
+   single `createServerClient(SUPABASE_URL, SUPABASE_KEY, …)` in `src/**`; every page,
+   middleware and API route goes through it. `SUPABASE_KEY` is the **anon** key
+   (`README.md:105`, `:125`, `:129`), and the session travels as the user's cookie-borne JWT,
+   so PostgREST executes as role `authenticated` with `auth.uid()` set to that user. That role
+   does not own `public.cards`, so there is no owner RLS bypass.
+5. **The bypass cannot be introduced silently.** `test/no-service-role-in-src.test.ts` is a
+   static guard in the default `npm test` suite that fails if any `src/**` module so much as
+   mentions a service_role key; its allowlist is empty by design.
+6. **No SECURITY DEFINER path reads `cards`.** `finalize_drafts` is explicitly
+   `security invoker` (`…20260529162956_finalize_drafts_fn.sql:17`), and the one
+   `security definer` function, `sweep_expired_account_deletions`, touches `auth.users` only and
+   has EXECUTE revoked from `anon` and `authenticated` (`…20260602120000_account_deletion_sweep.sql:36-38`).
+7. **A count is not a way around a policy.** PostgREST's `count=exact` with `head: true` is an
+   aggregate over the same SELECT; Postgres applies the policy's `USING` qual to the table scan,
+   so the aggregate can only see rows the policy admits. There is no separate count path.
+
+**Explicitly not treated as evidence:** that `library.astro`, `review.astro` and `generate.astro`
+already query this way. That is a consistency observation, not a proof, and the brief's own
+assumption list flags it as the highest-consequence item — so it was verified from the schema and
+the client, above, instead.
+
+**Residual limitation, disclosed rather than glossed over:** the repository's real-database
+isolation tests (`test/integration/two-user-fixture.ts` with the `*.integration.test.ts` suite,
+which authenticate two real users with Bearer tokens so genuine RLS applies) assert on *rows
+read*, not on a *count*. The count conclusion therefore rests on point 7 — Postgres RLS
+semantics — rather than on an executed assertion in this repo. Adding a two-user count assertion
+to the integration suite would close that last gap; it is out of this brief's three-file scope
+and is recorded as a follow-up, not done here.
+
 ## Implementation Plan
 
 ### Phase 1 — Security gate: confirm RLS scopes `cards` counts
@@ -114,7 +156,7 @@ Run `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` in order, a
 
 ### Phase 1: Security gate
 
-- [ ] 1.1 Verify from migrations and app code that RLS scopes `cards` SELECT/count to the signed-in user
+- [x] 1.1 Verify from migrations and app code that RLS scopes `cards` SELECT/count to the signed-in user
 
 ### Phase 2: Resolver and tests
 
