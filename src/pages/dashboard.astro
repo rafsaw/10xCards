@@ -80,16 +80,36 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
 // decision and extracts no shared component, so that the eventual design-system
 // sweep restyles the dashboard alongside every other screen instead of finding a
 // second thing to migrate.
+//
+// Two tiers, and only two, after the UX review of PR #31 (findings 1 and 2). The
+// review measured every section rendering at an identical 20px/600 heading inside
+// an identical card, with a 30%-opacity gradient on one button as the sole cue that
+// anything outranked anything else — so "Next up" did not read as the answer to
+// "what now?". Now exactly one section per state is a card with the gradient
+// action; everything else is quiet text with an underlined link. "Your library" in
+// particular is context, not an action, which is what the brief asked for all along
+// ("one sentence of context plus a link. Not an action.").
 const headingClass = "bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent";
+
+// Tier 1 — the single primary surface. At most one of these renders per state.
 const sectionClass = "space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl";
 const sectionHeadingClass = "text-xl font-semibold";
 const bodyClass = "text-blue-100/80";
-const actionsClass = "flex flex-wrap items-center gap-3";
 const primaryLinkClass =
   "inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40";
-const secondaryLinkClass =
-  "inline-block rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20";
-const quietLinkClass = "text-sm text-blue-100/70 transition-colors hover:text-white";
+
+// Tier 2 — subordinate. No card, no filled control: a quieter heading, small body
+// text, and a text link. The underline is deliberate, so a link is identifiable
+// without relying on colour (WCAG 1.4.1).
+// px-6 matches the card's inner padding, so a subordinate section's text starts on the
+// same left edge as the primary card's text instead of hanging 20px outside it.
+const asideClass = "space-y-1 px-6";
+const asideHeadingClass = "text-base font-semibold text-white";
+const asideBodyClass = "text-sm text-blue-100/70";
+const textLinkClass =
+  "inline-block text-sm font-medium text-blue-100/80 underline underline-offset-4 transition-colors hover:text-white";
+
+const actionsClass = "flex flex-wrap items-center gap-3";
 const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300";
 ---
 
@@ -109,16 +129,18 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
       {
         state.kind === "error" && (
           <section class:list={sectionClass}>
-            {/* The message precedes the links so it is read before the choices it qualifies. */}
+            {/* The message precedes the links so it is read before the choices it qualifies.
+                Three plain links, as the brief specifies: no count survived the failure, so
+                nothing here outranks anything else and none of them is dressed as a primary. */}
             <p class:list={noticeClass}>We couldn't load your dashboard right now. Try refreshing the page.</p>
             <div class:list={actionsClass}>
-              <a href="/review" class:list={secondaryLinkClass}>
+              <a href="/review" class:list={textLinkClass}>
                 Start review session
               </a>
-              <a href="/generate" class:list={secondaryLinkClass}>
+              <a href="/generate" class:list={textLinkClass}>
                 Generate cards
               </a>
-              <a href="/library" class:list={secondaryLinkClass}>
+              <a href="/library" class:list={textLinkClass}>
                 Browse library
               </a>
             </div>
@@ -134,11 +156,11 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
               While deletion is pending you can browse your cards, but you can't review, generate, or edit them. Cancel
               the deletion in the banner above to continue.
             </p>
-            {/* Browsing is the one thing still available. When the library section below
+            {/* Browsing is the one thing still available. When the library aside below
                 renders it already carries this link, so it is not repeated here. */}
             {libraryText === null && (
               <div class:list={actionsClass}>
-                <a href="/library" class:list={secondaryLinkClass}>
+                <a href="/library" class:list={textLinkClass}>
                   Browse library
                 </a>
               </div>
@@ -160,15 +182,15 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
               </div>
             </section>
 
+            {/* Subordinate by construction: no card, no filled control. Drafts are the
+                reminder, never a second primary action competing with the review. */}
             {state.alsoWaitingDrafts !== null && (
-              <section class:list={sectionClass}>
-                <h2 class:list={sectionHeadingClass}>Also waiting</h2>
-                <p class:list={bodyClass}>{alsoWaitingSentence(state.alsoWaitingDrafts)}</p>
-                <div class:list={actionsClass}>
-                  <a href="/generate" class:list={secondaryLinkClass}>
-                    Review drafts
-                  </a>
-                </div>
+              <section class:list={asideClass}>
+                <h2 class:list={asideHeadingClass}>Also waiting</h2>
+                <p class:list={asideBodyClass}>{alsoWaitingSentence(state.alsoWaitingDrafts)}</p>
+                <a href="/generate" class:list={textLinkClass}>
+                  Check generated cards
+                </a>
               </section>
             )}
           </>
@@ -182,7 +204,7 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
             <p class:list={bodyClass}>{draftsWaitingSentence(state.draftCount)}</p>
             <div class:list={actionsClass}>
               <a href="/generate" class:list={primaryLinkClass}>
-                Review drafts
+                Check generated cards
               </a>
             </div>
           </section>
@@ -217,7 +239,7 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
               <a href="/generate" class:list={primaryLinkClass}>
                 Create your first cards
               </a>
-              <a href="/library" class:list={quietLinkClass}>
+              <a href="/library" class:list={textLinkClass}>
                 Or add a card by hand
               </a>
             </div>
@@ -226,15 +248,20 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
       }
 
       {
+        /* Context, not an action — the brief's words. One sentence and one plain link,
+          with no card and no button, so it cannot read as a peer of whatever the state
+          above is asking the user to do. */
+      }
+      {
         libraryText !== null && (
-          <section class:list={sectionClass}>
-            <h2 class:list={sectionHeadingClass}>Your library</h2>
-            <p class:list={bodyClass}>{libraryText}</p>
-            <div class:list={actionsClass}>
-              <a href="/library" class:list={secondaryLinkClass}>
+          <section class:list={asideClass}>
+            <h2 class:list={asideHeadingClass}>Your library</h2>
+            <p class:list={asideBodyClass}>
+              {libraryText}{" "}
+              <a href="/library" class:list={textLinkClass}>
                 Browse library
               </a>
-            </div>
+            </p>
           </section>
         )
       }
