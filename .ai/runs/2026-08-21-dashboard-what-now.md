@@ -150,23 +150,48 @@ Run `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` in order, a
   because reviews are time-sensitive and drafts are not. It lives in one pure function, so
   overturning it is a one-line change with a test.
 
+### Phase 4 result — ✅ full validation gate green at `593bcd8`
+
+- `npm run typecheck` — 100 files, **0 errors**, 0 warnings, 5 pre-existing hints.
+- `npm run lint` — **0 errors**, 28 warnings, every one of them pre-existing in
+  `packages/code-reviewer/**` (a separate Node CLI package, untouched by this change).
+  `src/pages/dashboard.astro` initially raised 44 `astro/prefer-class-list-directive`
+  warnings from `class={expr}`; they were resolved by switching to `class:list={expr}`,
+  the form `src/components/Topbar.astro:31` already uses. The change now contributes zero.
+- `npm run build` — Cloudflare build complete (client + server), no errors.
+- `npm test` — **120 passed, 1 skipped, 12 files**, including the 21 new
+  `dashboard-state` cases and the existing `test/no-service-role-in-src.test.ts` RLS guard.
+
+Worktree note, so nobody re-derives it: `packages/code-reviewer` is **not** an npm workspace
+of the root package, so a root `npm ci` alone leaves its dependencies absent and `typecheck`
+reports 10 spurious `Cannot find module 'ai'` / implicit-`any` errors in that package. Running
+`npm ci` inside `packages/code-reviewer` clears all ten. Nothing to do with this change.
+
+### Manual verification
+
+- AC10 verified statically: `src/pages/dashboard.astro` contains no `client:` directive (the
+  only textual match is the comment explaining why there is none) and no skeleton or spinner
+  markup.
+- Browser QA of the seven states against a real account is **not** done in this run; the PR
+  carries `needs-qa` and the QA gate is on, so it stays unmergeable until QA signs off.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: Security gate
 
-- [x] 1.1 Verify from migrations and app code that RLS scopes `cards` SELECT/count to the signed-in user
+- [x] 1.1 Verify from migrations and app code that RLS scopes `cards` SELECT/count to the signed-in user — 0068fa8
 
 ### Phase 2: Resolver and tests
 
-- [ ] 2.1 Add `src/lib/dashboard-state.ts` — priority rule and copy helpers
-- [ ] 2.2 Add `src/lib/dashboard-state.test.ts` — the state matrix and both singular boundaries
+- [x] 2.1 Add `src/lib/dashboard-state.ts` — priority rule and copy helpers — 785f76c
+- [x] 2.2 Add `src/lib/dashboard-state.test.ts` — the state matrix and both singular boundaries — 785f76c
 
 ### Phase 3: Page
 
-- [ ] 3.1 Rewrite `src/pages/dashboard.astro` — three counts, one resolver call, per-state markup
+- [x] 3.1 Rewrite `src/pages/dashboard.astro` — three counts, one resolver call, per-state markup — 593bcd8
 
 ### Phase 4: Validation
 
-- [ ] 4.1 Run the full validation gate (typecheck, lint, build, test)
+- [x] 4.1 Run the full validation gate (typecheck, lint, build, test) — 593bcd8
