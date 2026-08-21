@@ -182,6 +182,8 @@ reports 10 spurious `Cannot find module 'ai'` / implicit-`any` errors in that pa
 
 ## Progress
 
+PR: #31
+
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: Security gate
