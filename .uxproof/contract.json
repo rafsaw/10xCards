@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "generatedBy": "uxproof",
+  "framework": "react",
+  "workspace": true,
+  "styling": {
+    "system": "tailwind",
+    "tailwind": {
+      "version": "4",
+      "configFile": null
+    },
+    "tokenSources": [
+      {
+        "file": "src\\styles\\global.css",
+        "tokenCount": 98
+      }
+    ]
+  },
+  "libraries": {
+    "validation": ["zod"],
+    "icons": ["lucide-react"]
+  },
+  "componentRoots": [
+    {
+      "dir": "src/components",
+      "fileCount": 15
+    }
+  ],
+  "nativeEquivalents": [
+    {
+      "element": "button",
+      "component": "Button"
+    }
+  ],
+  "archetypes": [],
+  "warnings": [],
+  "counts": {
+    "tokens": 67,
+    "colorTokens": 62,
+    "components": 15,
+    "proposedColors": 0
+  }
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Button",
+    "file": "src\\components\\ui\\button.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "CancelDeletionButton",
+    "file": "src\\components\\settings\\CancelDeletionButton.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "CardList",
+    "file": "src\\components\\library\\CardList.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "CardRow",
+    "file": "src\\components\\library\\CardRow.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "CreateCardForm",
+    "file": "src\\components\\library\\CreateCardForm.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "DeleteAccountButton",
+    "file": "src\\components\\settings\\DeleteAccountButton.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "DraftReviewList",
+    "file": "src\\components\\generate\\DraftReviewList.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "FormField",
+    "file": "src\\components\\auth\\FormField.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "PasswordToggle",
+    "file": "src\\components\\auth\\PasswordToggle.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "PasteAndGenerateForm",
+    "file": "src\\components\\generate\\PasteAndGenerateForm.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "ReviewSession",
+    "file": "src\\components\\review\\ReviewSession.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "ServerError",
+    "file": "src\\components\\auth\\ServerError.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "SignInForm",
+    "file": "src\\components\\auth\\SignInForm.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "SignUpForm",
+    "file": "src\\components\\auth\\SignUpForm.tsx",
+    "root": "src/components"
+  },
+  {
+    "name": "SubmitButton",
+    "file": "src\\components\\auth\\SubmitButton.tsx",
+    "root": "src/components"
+  }
+]
