@@ -1,19 +1,234 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import {
+  alsoWaitingSentence,
+  draftsWaitingSentence,
+  dueSentence,
+  librarySentence,
+  resolveDashboardState,
+} from "@/lib/dashboard-state";
 
-const { user } = Astro.locals;
+// The dashboard answers "what should I do now?" from three counts the app already
+// gathers elsewhere. All three resolve on the server before the first byte reaches
+// the browser (`output: "server"`), so there is deliberately no loading state, no
+// skeleton and no `client:` island here — if a count ever feels slow, the fix is the
+// query, not a placeholder.
+//
+// No `user_id` filter on any query: row-level security scopes every read to the
+// signed-in user in the database. Verified for this change against
+// supabase/migrations/20260527150510_cards_and_account_deletion.sql:36-40 —
+// `enable row level security` plus `cards_select_own … using ((select auth.uid()) = user_id)`,
+// the only SELECT policy on the table — reached through the app's single anon-key
+// client (src/lib/supabase.ts), whose `authenticated` role does not own the table and
+// so cannot bypass the policy. `head: true` sends no rows over the wire, only the count.
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+const { isReadOnly } = Astro.locals;
+
+let dueCount = 0;
+let draftCount = 0;
+let libraryCount = 0;
+let loadError = false;
+
+if (supabase) {
+  const nowIso = new Date().toISOString();
+
+  // Same predicates as the pages that own each of these numbers: review.astro for
+  // due cards, generate.astro for drafts, library.astro for the saved deck.
+  const [due, drafts, library] = await Promise.all([
+    supabase
+      .from("cards")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "saved")
+      .lte("next_due_at", nowIso),
+    supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "draft"),
+    supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "saved"),
+  ]);
+
+  // Never render a zero that came from a failed query: "0 cards are due for review"
+  // after a failed count is a lie that stops someone from studying.
+  if (due.error || drafts.error || library.error) {
+    loadError = true;
+  } else {
+    dueCount = due.count ?? 0;
+    draftCount = drafts.count ?? 0;
+    libraryCount = library.count ?? 0;
+  }
+}
+
+const state = resolveDashboardState({
+  configured: supabase !== null,
+  loadError,
+  isReadOnly,
+  dueCount,
+  draftCount,
+  libraryCount,
+});
+
+const libraryText = "libraryCount" in state && state.libraryCount !== null ? librarySentence(state.libraryCount) : null;
+
+// Inherited from the sibling pages verbatim — this change introduces no new colour
+// decision and extracts no shared component, so that the eventual design-system
+// sweep restyles the dashboard alongside every other screen instead of finding a
+// second thing to migrate.
+const headingClass = "bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent";
+const sectionClass = "space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl";
+const sectionHeadingClass = "text-xl font-semibold";
+const bodyClass = "text-blue-100/80";
+const actionsClass = "flex flex-wrap items-center gap-3";
+const primaryLinkClass =
+  "inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40";
+const secondaryLinkClass =
+  "inline-block rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20";
+const quietLinkClass = "text-sm text-blue-100/70 transition-colors hover:text-white";
+const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300";
 ---
 
 <Layout title="Dashboard">
-  <div class="bg-cosmic flex min-h-screen items-center justify-center p-4">
-    <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl">
-      <h1 class="mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-        Dashboard
-      </h1>
-      <p class="text-blue-100/80">
-        Welcome, <span class="font-semibold text-white">{user?.email}</span>
-      </p>
-      <p class="mt-4 text-sm text-blue-100/60">Use the navigation above to generate, review, or browse your cards.</p>
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-3xl space-y-6 py-8">
+      <header>
+        <h1 class:list={headingClass}>Dashboard</h1>
+      </header>
+
+      {
+        state.kind === "not-configured" && (
+          <p class:list={noticeClass}>Supabase is not configured — your dashboard cannot be loaded.</p>
+        )
+      }
+
+      {
+        state.kind === "error" && (
+          <section class:list={sectionClass}>
+            {/* The message precedes the links so it is read before the choices it qualifies. */}
+            <p class:list={noticeClass}>We couldn't load your dashboard right now. Try refreshing the page.</p>
+            <div class:list={actionsClass}>
+              <a href="/review" class:list={secondaryLinkClass}>
+                Start review session
+              </a>
+              <a href="/generate" class:list={secondaryLinkClass}>
+                Generate cards
+              </a>
+              <a href="/library" class:list={secondaryLinkClass}>
+                Browse library
+              </a>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        state.kind === "read-only" && (
+          <section class:list={sectionClass}>
+            <h2 class:list={sectionHeadingClass}>Your account is read-only</h2>
+            <p class:list={bodyClass}>
+              While deletion is pending you can browse your cards, but you can't review, generate, or edit them. Cancel
+              the deletion in the banner above to continue.
+            </p>
+            {/* Browsing is the one thing still available. When the library section below
+                renders it already carries this link, so it is not repeated here. */}
+            {libraryText === null && (
+              <div class:list={actionsClass}>
+                <a href="/library" class:list={secondaryLinkClass}>
+                  Browse library
+                </a>
+              </div>
+            )}
+          </section>
+        )
+      }
+
+      {
+        state.kind === "review-waiting" && (
+          <>
+            <section class:list={sectionClass}>
+              <h2 class:list={sectionHeadingClass}>Next up</h2>
+              <p class:list={bodyClass}>{dueSentence(state.dueCount)}</p>
+              <div class:list={actionsClass}>
+                <a href="/review" class:list={primaryLinkClass}>
+                  Start review session
+                </a>
+              </div>
+            </section>
+
+            {state.alsoWaitingDrafts !== null && (
+              <section class:list={sectionClass}>
+                <h2 class:list={sectionHeadingClass}>Also waiting</h2>
+                <p class:list={bodyClass}>{alsoWaitingSentence(state.alsoWaitingDrafts)}</p>
+                <div class:list={actionsClass}>
+                  <a href="/generate" class:list={secondaryLinkClass}>
+                    Review drafts
+                  </a>
+                </div>
+              </section>
+            )}
+          </>
+        )
+      }
+
+      {
+        state.kind === "drafts-waiting" && (
+          <section class:list={sectionClass}>
+            <h2 class:list={sectionHeadingClass}>Next up</h2>
+            <p class:list={bodyClass}>{draftsWaitingSentence(state.draftCount)}</p>
+            <div class:list={actionsClass}>
+              <a href="/generate" class:list={primaryLinkClass}>
+                Review drafts
+              </a>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        state.kind === "caught-up" && (
+          <section class:list={sectionClass}>
+            <h2 class:list={sectionHeadingClass}>All caught up</h2>
+            <p class:list={bodyClass}>Nothing is due right now. Cards come back when their interval is up.</p>
+            {/* "Browse library" is the library section's link — this state always has a
+                library, so offering it twice would be one action too many. */}
+            <div class:list={actionsClass}>
+              <a href="/generate" class:list={primaryLinkClass}>
+                Generate more cards
+              </a>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        state.kind === "new-account" && (
+          <section class:list={sectionClass}>
+            <h2 class:list={sectionHeadingClass}>Start your first deck</h2>
+            <p class:list={bodyClass}>
+              You have no cards yet. Paste a passage and 10xCards drafts question-and-answer cards for you to review
+              before anything is saved.
+            </p>
+            <div class:list={actionsClass}>
+              <a href="/generate" class:list={primaryLinkClass}>
+                Create your first cards
+              </a>
+              <a href="/library" class:list={quietLinkClass}>
+                Or add a card by hand
+              </a>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        libraryText !== null && (
+          <section class:list={sectionClass}>
+            <h2 class:list={sectionHeadingClass}>Your library</h2>
+            <p class:list={bodyClass}>{libraryText}</p>
+            <div class:list={actionsClass}>
+              <a href="/library" class:list={secondaryLinkClass}>
+                Browse library
+              </a>
+            </div>
+          </section>
+        )
+      }
     </div>
   </div>
 </Layout>
