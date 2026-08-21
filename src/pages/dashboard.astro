@@ -33,26 +33,35 @@ let loadError = false;
 if (supabase) {
   const nowIso = new Date().toISOString();
 
-  // Same predicates as the pages that own each of these numbers: review.astro for
-  // due cards, generate.astro for drafts, library.astro for the saved deck.
-  const [due, drafts, library] = await Promise.all([
-    supabase
-      .from("cards")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "saved")
-      .lte("next_due_at", nowIso),
-    supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "draft"),
-    supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "saved"),
-  ]);
+  // The catch matters: PostgREST problems come back as `{ error }` and are handled
+  // below, but a transport-level failure (DNS, TLS, a dropped connection to
+  // Supabase) *throws*. Uncaught, that would turn the page every login lands on
+  // into a 500 — strictly worse than the error state this screen was designed to
+  // show, which keeps review, generate and library reachable.
+  try {
+    // Same predicates as the pages that own each of these numbers: review.astro for
+    // due cards, generate.astro for drafts, library.astro for the saved deck.
+    const [due, drafts, library] = await Promise.all([
+      supabase
+        .from("cards")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "saved")
+        .lte("next_due_at", nowIso),
+      supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "draft"),
+      supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "saved"),
+    ]);
 
-  // Never render a zero that came from a failed query: "0 cards are due for review"
-  // after a failed count is a lie that stops someone from studying.
-  if (due.error || drafts.error || library.error) {
+    // Never render a zero that came from a failed query: "0 cards are due for review"
+    // after a failed count is a lie that stops someone from studying.
+    if (due.error || drafts.error || library.error) {
+      loadError = true;
+    } else {
+      dueCount = due.count ?? 0;
+      draftCount = drafts.count ?? 0;
+      libraryCount = library.count ?? 0;
+    }
+  } catch {
     loadError = true;
-  } else {
-    dueCount = due.count ?? 0;
-    draftCount = drafts.count ?? 0;
-    libraryCount = library.count ?? 0;
   }
 }
 
