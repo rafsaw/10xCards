@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CircleAlert, Eye, Check, X, PartyPopper, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseErrorBody } from "@/lib/parse-error";
+import { resolveReviewShortcut, type ShortcutTarget } from "@/lib/review-shortcuts";
 import type { ReviewRating } from "@/lib/leitner";
 
 export interface DueCard {
@@ -63,6 +64,14 @@ function DoneCard({
   );
 }
 
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[0.7rem] text-blue-100/80">
+      {children}
+    </kbd>
+  );
+}
+
 export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCard[]; loadError: boolean }) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -73,6 +82,87 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   // disabled button doesn't block a same-frame double-click. This ref does,
   // preventing a second POST from advancing the card index twice (skipping a card).
   const lockRef = useRef(false);
+
+  // Derived BEFORE the early returns below so the shortcut effect stays an
+  // unconditional hook: `card` is null in the load-error / empty / finished
+  // states, and the effect simply doesn't subscribe then.
+  const card = !loadError && index < dueCards.length ? dueCards[index] : null;
+
+  // Declared here (above the early returns, memoized per card) because the
+  // shortcut effect below depends on it — the buttons in the render call this
+  // exact function, so keyboard and mouse share one submission path.
+  const handleRate = useCallback(
+    async (rating: ReviewRating) => {
+      if (!card) return;
+      if (lockRef.current) return; // drop a same-frame second click before it fires a duplicate POST
+      lockRef.current = true;
+      setSubmitting(true);
+      setPendingRating(rating);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cardId: card.id, rating, currentBox: card.repetition_count }),
+        });
+
+        if (response.ok) {
+          // Success includes applied:false (stale/replay) — advance regardless.
+          setIndex((prev) => prev + 1);
+          setRevealed(false);
+          return;
+        }
+
+        const { code, message } = await parseErrorBody(response);
+        setError({ code, message: message || FALLBACK_MESSAGES[code] });
+      } catch {
+        setError({ code: "network_error", message: FALLBACK_MESSAGES.network_error });
+      } finally {
+        setSubmitting(false);
+        setPendingRating(null);
+        lockRef.current = false;
+      }
+    },
+    [card],
+  );
+
+  // Keyboard shortcuts (Space reveals, 1/2 rate). The listener is on `document`
+  // because the session has no single focusable host to hang it off, and the
+  // shortcuts are meant to work without the user hunting for focus first. All of
+  // the "should this key do anything?" logic lives in the pure resolver, which is
+  // unit-tested; this effect only translates the decision into the SAME reveal
+  // and handleRate calls the buttons make — no second rating path.
+  useEffect(() => {
+    if (!card) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      const action = resolveReviewShortcut({
+        key: event.key,
+        repeat: event.repeat,
+        withModifier: event.ctrlKey || event.metaKey || event.altKey,
+        target: event.target as ShortcutTarget | null,
+        revealed,
+        submitting,
+      });
+      if (!action) return;
+
+      // Only once we've decided to handle the key: Space would otherwise scroll
+      // the page, and we don't want to swallow keystrokes we ignore.
+      event.preventDefault();
+
+      if (action === "reveal") {
+        setRevealed(true);
+        return;
+      }
+      void handleRate(action === "rate-wrong" ? "wrong" : "right");
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [card, revealed, submitting, handleRate]);
 
   if (loadError) {
     return (
@@ -105,39 +195,10 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
     );
   }
 
-  const card = dueCards[index];
-
-  async function handleRate(rating: ReviewRating) {
-    if (lockRef.current) return; // drop a same-frame second click before it fires a duplicate POST
-    lockRef.current = true;
-    setSubmitting(true);
-    setPendingRating(rating);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cardId: card.id, rating, currentBox: card.repetition_count }),
-      });
-
-      if (response.ok) {
-        // Success includes applied:false (stale/replay) — advance regardless.
-        setIndex((prev) => prev + 1);
-        setRevealed(false);
-        return;
-      }
-
-      const { code, message } = await parseErrorBody(response);
-      setError({ code, message: message || FALLBACK_MESSAGES[code] });
-    } catch {
-      setError({ code: "network_error", message: FALLBACK_MESSAGES.network_error });
-    } finally {
-      setSubmitting(false);
-      setPendingRating(null);
-      lockRef.current = false;
-    }
-  }
+  // Unreachable in practice — the three returns above cover every state in which
+  // `card` is null — but it is what narrows `DueCard | null` to `DueCard` for the
+  // render below.
+  if (!card) return null;
 
   // Re-walk the same dueCards from the top. Pure client-state reset: ratings
   // already POSTed stay persisted, so the schedule is untouched (no refetch).
@@ -187,6 +248,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
       {!revealed ? (
         <button
           type="button"
+          aria-keyshortcuts="Space"
           onClick={() => {
             setRevealed(true);
           }}
@@ -202,6 +264,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
             onClick={() => {
               void handleRate("wrong");
             }}
+            aria-keyshortcuts="1"
             disabled={submitting}
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
@@ -220,6 +283,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
             onClick={() => {
               void handleRate("right");
             }}
+            aria-keyshortcuts="2"
             disabled={submitting}
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
@@ -235,6 +299,21 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
           </button>
         </div>
       )}
+
+      {/* AC7: the shortcuts are discoverable without documentation. Both rows are
+          always rendered so the hint never reflows the card as the state flips;
+          the row that isn't active right now is dimmed rather than removed. */}
+      <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-blue-100/50">
+        <span className={cn("flex items-center gap-1.5", revealed && "opacity-40")}>
+          <Kbd>Space</Kbd> Reveal
+        </span>
+        <span className={cn("flex items-center gap-1.5", !revealed && "opacity-40")}>
+          <Kbd>1</Kbd> Wrong
+        </span>
+        <span className={cn("flex items-center gap-1.5", !revealed && "opacity-40")}>
+          <Kbd>2</Kbd> Right
+        </span>
+      </p>
     </section>
   );
 }
