@@ -153,7 +153,16 @@ Run `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` in order, a
 ### Post-review fix
 
 - [x] Post-review fix: catch a transport-level throw from the count queries so the page renders
-  the designed error state instead of a 500 — see the review verdict on the PR.
+  the designed error state instead of a 500 — see the review verdict on the PR. — e798182
+- [x] Post-UX-review fix: two visual tiers so `Next up` is the only primary surface, `Your library`
+  demoted to context with an inline link, and the draft-triage CTA renamed to
+  `Check generated cards` — `om-ux-review-pr` findings 1, 2 and 3 as decided by the author. — f045266
+- [x] Post-UX-review fix: manual QA instructions corrected in place — case P1-4 withdrawn as
+  unverifiable and AC6 recorded as unit-test-covered (`om-ux-review-pr` finding 4). Comment-only,
+  no source change.
+
+Findings 5 (count prominence) and 6 (legacy glass-card instance count) were reviewed and
+**accepted with no action** by the author; both were assumption- or bookkeeping-tier.
 
 ### Phase 4 result — ✅ full validation gate green at `593bcd8`
 
