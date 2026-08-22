@@ -59,7 +59,72 @@ The extractor does not understand Astro, so it reports the framework as `react` 
   `chart-1..5` (5). They are unused shadcn/ui defaults inherited from the starter. Do not treat them
   as house palette, and do not cite their absence from the code as a finding.
 
-### Light/dark drift — known, unresolved
+### Visual direction — decided 2026-08-22
+
+_Decided in `.ai/analysis/2026-08-22-ui-ux-visual-direction-phase4.md` (Phase 4), which carries the
+alternatives considered and the reasoning. This section is the operative summary — judge against it._
+
+**The direction is "paper": light-first, editorial, near-monochrome.** Warm paper background and ink
+foreground (not pure white / pure black), a humanist serif for card content and prose against a sans
+for chrome, hierarchy carried by type size and whitespace rather than by colour, weight or shadow.
+Separation is a hairline plus space. One muted accent, used only for focus rings and links.
+
+**The current dark look is not the house style and never was a decision.** The app renders dark
+because `body` carries the starter's `bg-cosmic`; the tokens it uses resolve to the light palette. Do
+not defend, extend, or reason from the cosmic palette as if it were brand identity.
+
+**Dark mode is a later increment, not MVP work.** What _is_ MVP work is the constraint set that keeps
+it possible: every colour through a role token, role names never value names, both `:root` and
+`.dark` derived from one lightness ramp. Entry condition for the dark-mode increment: zero hardcoded
+colours in `src/`.
+
+#### The eight principles
+
+Written as decidable rules, not taste. Each says what counts as a finding.
+
+1. **Ink on paper, not light on glass.** The page background is one flat surface token. Banned in
+   `src/`: `bg-cosmic`, any gradient as a background or fill, `backdrop-blur-*`, and `bg-white/N` /
+   `bg-black/N` used as a surface.
+2. **Every colour comes from a role token, and roles come from one ramp.** No raw hex, `rgb()` or
+   `oklch()` literals, and no Tailwind palette scales (`blue-500`, `white/10`, `red-900/30`) in
+   `src/`. Tokens are named by role, never by value. `:root` and `.dark` declare the **same set of
+   names** from one lightness ramp — a token present in only one block is a finding, even while
+   `.dark` is not applied.
+3. **Content is the hero; chrome recedes.** Card text, source text and draft text are the largest and
+   highest-contrast elements on their screen. If a heading, a button or the shell outweighs them, the
+   screen is wrong. **Gradient-filled text is banned product-wide.** Content measure is capped near
+   66ch and always breaks long strings.
+4. **Separation by hairline and whitespace — never by shadow.** One border token, one radius scale.
+   `shadow-*` is allowed **only** on genuinely floating layers: `Dialog`, `Popover`, `Tooltip`,
+   `Toast`. A shadow on a card, section, panel, button or input is a finding.
+5. **One primary action per screen.** Exactly one filled button per view; everything else is an
+   outline control or an underlined text link. A destructive action is never the primary — filled
+   `destructive` is reserved for the confirm step inside a dialog. Links must be identifiable without
+   colour (WCAG 1.4.1), i.e. underlined.
+6. **Semantic colour means state, not decoration.** The accent is for the primary action, the focus
+   ring and the active nav item — nothing else. `destructive` / `warning` / `success` appear only for
+   deletion, pending-or-read-only, and confirmation. Colour is **never** the sole carrier of meaning:
+   a word always accompanies it, and an icon where the system provides one. The two rating buttons in
+   `/review` must differ by label and shape, not by colour alone.
+7. **A draft is visibly provisional.** AI-generated, unsaved content never looks the same as a saved
+   card: a different surface treatment plus an explicit state label. A screen where a draft and a
+   library card are indistinguishable is a finding — the "AI proposes, the human decides" gate has to
+   be visible, not merely implemented.
+8. **One shell, one page skeleton.** Every screen composes registry primitives (`PageHeader`,
+   `Section`, `Card`, `Notice`, `EmptyState`, `Field`). A page that repeats the card, header, error or
+   empty-state recipe inline is a finding even when the result looks right. The shell fits one row at
+   390px, `scrollWidth` never exceeds the viewport on any screen with any content, and during a review
+   session the shell reduces to an exit control and a progress indicator.
+
+#### How to apply these to a review
+
+These principles govern **new and rewritten UI**. They do not retroactively turn the existing code
+into a backlog — the _do not extend_ rule below still holds, and a review that files one finding per
+legacy occurrence is a bad review. Raise the pattern once, where it matters for the change under
+review. Conversely: a change that adds a **new** violation of any principle above is a finding on its
+own merits, however consistent it is with the file around it.
+
+### Light/dark drift — direction decided, code not yet migrated
 
 `src/styles/global.css` declares every color twice: `:root` (light) and `.dark` (dark). Three facts
 that do not line up, recorded here so nobody re-derives them:
@@ -74,8 +139,14 @@ that do not line up, recorded here so nobody re-derives them:
 **Do not trust the values in `tokens.json` as a description of what renders.** The token _names_ are
 sound; the values are from the branch the app does not use.
 
-Which theme the product should target is deliberately **not decided here**. Treat it as an open
-question until the UX shaping pass resolves it; do not file findings that presuppose either answer.
+**The theme question is now answered: light-first** (see the section above). Two consequences for
+reviews: findings may presuppose a light target, and `.dark` is maintained in parallel — written from
+the same ramp — but is not applied and is not the target of this work.
+
+One trap worth recording before it fires: `ui/button.tsx` already ships `dark:` variants
+(`dark:bg-input/30`, `dark:hover:bg-accent/50`, `dark:bg-destructive/60`). They are dead while `.dark`
+is unapplied and will **come alive unreviewed** the moment a theme toggle lands. The dark-mode
+increment must inspect them deliberately rather than discover them.
 
 ### Legacy starter styling — do not extend
 
@@ -87,8 +158,9 @@ The dominant visual pattern in the code is inherited from `przeprogramowani/10x-
 - hardcoded `blue-*` / `purple-*` / `white/N` utilities throughout.
 
 **Frequency is not intent.** This pattern is widespread (247 hardcoded color utilities against 4
-token-based ones as of 2026-08-21) because it was copied forward from the starter, not because the
-team chose it. Accordingly:
+token-based ones as of 2026-08-21; **331 against 26 as of 2026-08-22**, the growth being `/dashboard`
+deliberately matching its siblings in PR #31) because it was copied forward from the starter, not
+because the team chose it. Accordingly:
 
 - It is **not** a house pattern. Never cite it as the example a new screen should follow.
 - New and rewritten UI uses the semantic tokens above; migrating toward them is the intended
