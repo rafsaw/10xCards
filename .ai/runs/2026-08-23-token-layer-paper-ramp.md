@@ -13,7 +13,9 @@ Replace the starter's inherited shadcn colour defaults in `src/styles/global.css
 decided "paper" system — one warm-neutral eleven-step ramp, every semantic role assigned to a
 step of it by `var()` reference, semantic/draft surfaces, and type/radius/shadow tokens — plus
 one colocated test that recomputes the palette's contrast from the stylesheet so the
-accessibility guarantee is measured rather than asserted. **Nothing on screen changes.**
+accessibility guarantee is measured rather than asserted. No screen is migrated and no component
+is edited — but, contrary to the brief's premise, this is **not** invisible to users: see the
+criterion-8 finding below for the five surfaces that do change.
 
 ## Scope
 
@@ -91,11 +93,13 @@ value the brief's own token table decides.
 
 ### Risks
 
-- **Low, by construction.** The tokens this increment ships are consumed by nothing: `body`
-  carries `@apply bg-background text-foreground` but `bg-cosmic` overrides it, and 331 hardcoded
-  colour classes still paint every screen. The visible-change risk is therefore confined to any
-  surface that already consumed a role token _and_ is not covered by `bg-cosmic` — checked in
-  Phase 3.
+- **Low, but not zero — and lower than the brief assumed for the reason it gave, not the way it
+  gave it.** No screen's text or background colour changes, because `body`'s
+  `@apply bg-background text-foreground` is overridden by `bg-cosmic` and 331 hardcoded colour
+  classes still paint every screen. That is what keeps the catastrophic failure mode (near-white
+  text on a paper background) off the table. It is **not** true that nothing consumes the tokens:
+  `button.tsx` and 58 `rounded-*` usages do, so five surfaces change appearance — measured and
+  enumerated in the criterion-8 finding above.
 - **Deleting `--chart-*` / `--sidebar*`** would break a consumer outside `global.css`; grep is
   re-run in Phase 3 rather than trusted from the brief's writing time.
 - **The `@theme` namespace assumptions** (`--text-*`, `--container-*`, `--shadow-*`) could
