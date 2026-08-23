@@ -166,6 +166,7 @@ right.
 
 - [x] 2.1 Add src/styles/tokens.test.ts with the parser and colour maths — 87c46dc
 - [x] 2.2 Assert acceptance criteria 1-4 — 87c46dc
+- [x] Post-review fix: close the dark-palette and hex-literal gaps in the guard test — b66e05c
 
 ### Phase 3: Verification
 
