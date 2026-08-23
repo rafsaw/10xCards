@@ -53,12 +53,12 @@ Two steps are placed by measurement, not by eye, and must not be nudged without 
 - **`--ink-50` sits at L 0.63, not at the L 0.665 an even ramp would give it.** At 0.665 it measures 2.92:1 against the page and fails the 3:1 an input boundary needs. At 0.63 it measures 3.35:1.
 - **`--ink-30` is the hairline, not `--ink-20`.** `--ink-20` measures 1.2:1 against the page, which is below the threshold where a 1px rule is reliably visible; `--ink-30` measures 1.42:1.
 
-Accent literals — one per theme, because a single hue cannot serve as readable text on both paper and ink:
+Blue literals — one per theme, because a single hue cannot serve as readable text on both paper and ink:
 
 | Token          | Value                  | Renders   | Used by                     |
 | -------------- | ---------------------- | --------- | --------------------------- |
-| `--accent-500` | `oklch(0.45 0.12 250)` | `#0e5794` | light theme links and focus |
-| `--accent-300` | `oklch(0.74 0.12 250)` | `#6db0f4` | dark theme links and focus  |
+| `--blue-500` | `oklch(0.45 0.12 250)` | `#0e5794` | light theme links and focus |
+| `--blue-300` | `oklch(0.74 0.12 250)` | `#6db0f4` | dark theme links and focus  |
 
 #### Layer 2 — role assignment
 
@@ -82,14 +82,16 @@ Read this table as the spec. The "measured" column is the WCAG 2.x contrast rati
 | `--accent-foreground`    | `--ink-90`     | `--ink-20`     | text on hover surface                    | —                       |
 | `--border`               | `--ink-30`     | `--ink-70`     | decorative hairline                      | 1.42 / 2.0 (visibility) |
 | `--input`                | `--ink-50`     | `--ink-60`     | a control's own boundary                 | **3.35 / 3.35**         |
-| `--ring`                 | `--accent-500` | `--accent-300` | focus indicator                          | **7.13 / 8.05**         |
-| `--link`                 | `--accent-500` | `--accent-300` | text links                               | **7.13 / 8.05**         |
+| `--ring`                 | `--blue-500` | `--blue-300` | focus indicator                          | **7.13 / 8.05**         |
+| `--link`                 | `--blue-500` | `--blue-300` | text links                               | **7.13 / 8.05**         |
 
 Four assignments carry a decision worth stating out loud, because a later reader will otherwise "fix" them:
 
 **`--card` equals `--background`, deliberately.** In this direction a card is not a box; it is a block of text separated by a hairline and space (principle 4). Giving `--card` its own value would quietly reintroduce the panel look the direction rejects. Dialogs and popovers still get their own lighter surface via `--popover`, which is the only place elevation exists.
 
-**`--accent` keeps shadcn's meaning, not the everyday English one.** In shadcn, `--accent` is the neutral hover surface consumed by `Button variant="ghost"` and `variant="outline"` (`hover:bg-accent hover:text-accent-foreground` in `src/components/ui/button.tsx`). Redefining it as the blue would turn every ghost hover blue. The blue is therefore `--ring` and `--link`, which are its two actual jobs.
+**`--accent` keeps shadcn's meaning, not the everyday English one.** In shadcn, `--accent` is the neutral hover surface consumed by `Button variant="ghost"` and `variant="outline"` (`hover:bg-accent hover:text-accent-foreground` in `src/components/ui/button.tsx`). Pointing it at the blue would turn every ghost hover blue. The blue is therefore `--ring` and `--link`, which are its two actual jobs.
+
+_(Renamed 2026-08-23.)_ The blue family is `--blue-*`, named for its hue like the three families beside it, and not `--accent-*` as first drafted. The original name put a layer-1 primitive one keystroke from the unrelated layer-2 role `--accent`, and that is a gap the two-layer test cannot close: `--accent: var(--accent-500)` is a structurally legal reference into layer 1 and a semantically wrong one, so it would have passed the invariant while turning every ghost hover blue. The contrast assertions do catch it as a backstop — `--accent-foreground` on a blue `--accent` measures well under 4.5:1 — but a name that cannot be mistyped is better than a test that catches the mistake afterwards. **No value moved; this is a rename only.**
 
 **`--border` and `--input` are separated on purpose,** where shadcn ships them near-identical. A hairline between sections is decoration and may be quiet. A field's boundary is what identifies the control, so it needs 3:1 — WCAG 2.2 §1.4.11 Non-text Contrast `[STANDARD]`. Two tokens, two thresholds, and the test enforces the second one only.
 
@@ -111,7 +113,7 @@ Each state gets a text/border colour and a matching surface tint, so `Notice` ca
 | `--warning-surface`     | `oklch(0.955 0.035 85)`  | `#fbefd6` | —            | —                       |
 | `--success`             | `oklch(0.45 0.09 155)`   | `#23643f` | **6.81**     | **6.30**                |
 | `--success-surface`     | `oklch(0.955 0.025 155)` | `#e4f5e9` | —            | —                       |
-| `--info`                | `var(--accent-500)`      | `#0e5794` | **7.13**     | **6.54**                |
+| `--info`                | `var(--blue-500)`      | `#0e5794` | **7.13**     | **6.54**                |
 | `--info-surface`        | `oklch(0.955 0.022 250)` | `#e5f2ff` | —            | —                       |
 
 **Dark**
@@ -124,7 +126,7 @@ Each state gets a text/border colour and a matching surface tint, so `Notice` ca
 | `--warning-surface`     | `oklch(0.28 0.05 80)`   | `#362607` | —            | —                       |
 | `--success`             | `oklch(0.74 0.11 155)`  | `#6ebf8c` | **8.38**     | **6.52**                |
 | `--success-surface`     | `oklch(0.28 0.04 155)`  | `#182f20` | —            | —                       |
-| `--info`                | `var(--accent-300)`     | `#6db0f4` | **8.05**     | **6.35**                |
+| `--info`                | `var(--blue-300)`     | `#6db0f4` | **8.05**     | **6.35**                |
 | `--info-surface`        | `oklch(0.28 0.045 250)` | `#172a3e` | —            | —                       |
 
 `--destructive-foreground` is `var(--white)` in light (7.14:1 on the destructive fill) and `var(--ink-90)` in dark. Today `button.tsx` hardcodes `text-white` for that case; the token exists so the primitives increment can stop doing that.
@@ -182,6 +184,8 @@ Card content and section headings share the 20px step and are told apart by fami
 ```
 
 Principle 4 says shadows are for `Dialog`, `Popover`, `Tooltip` and `Toast` and nowhere else. Shipping one shadow token whose name says "raised" makes that rule self-documenting: a reviewer seeing `shadow-md` on a card knows it came from Tailwind's defaults, not from this system.
+
+_(Guarded 2026-08-23.)_ That colour is `--ink-90`'s value written out, and it is the only raw colour literal outside layer 1 — sitting, awkwardly, in the one block the layer-2 sweep does not police. `color-mix(in oklab, var(--ink-90) 18%, transparent)` was tried first so the shadow would reference the ink rather than copy it, and was **rejected on build output**: Lightning CSS emits it behind an `@supports (color: color-mix(in lab, red, red))` guard whose fallback drops the alpha entirely — `0 8px 24px -8px var(--ink-90)`, an opaque near-black slab instead of an 18% shadow, on any engine without `color-mix`. The literal compiles to `oklch(19% .008 85/.18)` with its alpha intact and no fallback branch. So the copy stays, and `tokens.test.ts` asserts that both shadow layers still carry `--ink-90`'s exact L/C/H and an alpha under 0.5 — moving the ink now fails the build instead of silently leaving the system's one shadow made of a colour the system no longer uses.
 
 #### Tokens that are deleted
 
@@ -241,7 +245,16 @@ Not applicable. This increment proposes no AI behaviour, changes no model, promp
 
    **Corrected 2026-08-23, from measurement rather than reasoning.** This criterion originally read "they are visually identical". That was false: `bg-cosmic` overrides the page _background_ only, so it does not override a shadcn primitive's own colours. Verified by booting a control instance of `main` alongside the change and reading `getComputedStyle` from both, the real difference is limited to components that already consume semantic tokens — `src/components/ui/button.tsx` is the only one in `src/` today, giving a darker destructive fill (`oklch(0.577 0.245 27.325)` → `oklch(0.48 0.17 27)`), a warmer primary fill (`oklch(0.205 0 0)` → `--ink-90`), and the universal `border-border` hairline (`oklch(0.922 0 0)` → `--ink-30`). All five MUST NOTs above held on all six routes.
 
-   Two related notes from the same measurement. The `--radius` change was **deferred to the primitives increment**: it is the one token existing markup consumes at scale (`rounded-lg` ×49, `rounded-md` ×5, `rounded-xl` ×4), it would restyle ~58 elements, and it is not needed to establish the colour foundation. And the `--ring` change is **not** user-visible: `outline-style` is `none` and the `focus-visible:ring-*` shadows resolve transparent on both branches, so no focus indicator paints either way — a real pre-existing accessibility gap, tracked separately and explicitly out of scope here.
+   Two related notes from the same measurement. The `--radius` change was **deferred to the primitives increment**: it is the one token existing markup consumes at scale (`rounded-lg` ×49, `rounded-md` ×5, `rounded-xl` ×4), it would restyle ~58 elements, and it is not needed to establish the colour foundation.
+
+   **The `--ring` change, corrected 2026-08-23 from a keyboard-driven measurement.** This note previously said that `outline-style` is `none`, that the `focus-visible:ring-*` shadows resolve transparent on both branches, and therefore that no focus indicator paints either way. That is wrong for one of the three variants, and the error came from measuring with a programmatic `.focus()`, which does not make an element match `:focus-visible` in Chromium. Driving focus with `Tab` instead:
+
+   - **`Button variant="default"` does paint a focus-visible ring**, on both branches. `main` computes `box-shadow: … oklab(0.708 0 0 / 0.5) 0 0 0 3px`; this branch computes `… oklab(0.45 -0.041 -0.113 / 0.5) 0 0 0 3px`. In `src/` the only consumer on a reachable screen is `SubmitButton`, i.e. the `Sign in` / `Create account` buttons on `/auth/signin` and `/auth/signup`.
+   - **`variant="destructive"` and `variant="ghost"` have no equivalent visible indicator** on either branch: their `focus-visible:ring-destructive/20` resolves to `oklab(0 0 0 / 0) 0 0 0 0` — transparent *and* zero-width. `outline-style: none` holds everywhere, so the base layer's `outline-ring/50` paints nothing.
+   - **This increment does move `--ring`, and on the legacy cosmic page that makes the one live indicator harder to see**: composited over the sign-in card (`bg-white/10` over cosmic, rendering `#272c3e`), ring-to-surface contrast falls from **2.43:1 to 1.33:1**. Both sit under the 3:1 WCAG 2.2 §1.4.11 asks of a focus indicator, so the compliance verdict is unchanged — but the change is a degradation inside an already-failing state, and it is recorded here rather than left to be rediscovered.
+   - **The token is not the fault, and must not be re-tuned for cosmic.** `--ring` measures **7.13:1** against `--ink-05`, which is correct for the page it was designed for. The effective problem is downstream: `button.tsx` applies it as `ring-ring/50`, and at 50% alpha the ring measures only **2.38:1 even on the finished paper background**. So the fix is the alpha in `button.tsx`, not the value here, and it must be verified on a paper screen.
+
+   **The proper fix stays a follow-up for the primitives increment**, which owns `button.tsx`. It is deliberately not done here: `src/components/**` is an explicit non-goal of this increment, and the pre-existing gap predates it.
 
 **How criteria 1–4 are checked, given there is no visual-regression coverage.** Add one test — `src/styles/tokens.test.ts`, colocated per the repo's testing convention — that parses `global.css`, extracts the ramp and the role assignments, converts `oklch` to sRGB, and asserts the pairs above. It is roughly eighty lines and it is the only durable guard this system gets: it turns "the palette is accessible" from a claim in a document into a failing test when someone darkens a token by 0.05. Criteria 5–8 are shell commands and a browser walk.
 

@@ -55,15 +55,21 @@ const light = declarationsOf(":root");
 const dark = declarationsOf(".dark");
 
 /**
+ * The theme-invariant scales. `"@theme"` matches the plain block and not
+ * `@theme inline {`, which is a different string.
+ */
+const themeScales = declarationsOf("@theme");
+
+/**
  * Layer 1 — the value-named primitives: the neutral ramp plus the four semantic hue
  * families and the one pure white. Theme-invariant by design, so they are declared
  * once in `:root` and read from both ends rather than duplicated into `.dark`.
  */
-const LAYER_1 = /^--(ink-\d{2}|accent-\d{3}|red-\d{3}|amber-\d{3}|green-\d{3}|white)$/;
+const LAYER_1 = /^--(ink-\d{2}|blue-\d{3}|red-\d{3}|amber-\d{3}|green-\d{3}|white)$/;
 const isRampToken = (name: string) => LAYER_1.test(name);
 
 /** A legal layer-2 value: a bare `var()` reference into layer 1, and nothing else. */
-const LAYER_2_VALUE = /^var\(--(ink-\d{2}|accent-\d{3}|red-\d{3}|amber-\d{3}|green-\d{3}|white)\)$/;
+const LAYER_2_VALUE = /^var\(--(ink-\d{2}|blue-\d{3}|red-\d{3}|amber-\d{3}|green-\d{3}|white)\)$/;
 
 /** `--radius` is a length, not a colour role; it is the only non-colour token declared here. */
 const NON_COLOUR_TOKENS = new Set(["--radius"]);
@@ -224,6 +230,33 @@ describe("criterion 1 — role tokens are references into the ramp, never litera
     // not on the roster, so adding a ramp step needs no edit here.
     expect(literalBearing.filter((name) => !isRampToken(name))).toEqual([]);
     expect(literalBearing.length).toBeGreaterThan(0);
+  });
+
+  // --shadow-raised is the one colour literal outside layer 1. It has to be a
+  // literal: written as color-mix(in oklab, var(--ink-90) 18%, transparent),
+  // Lightning CSS emits an @supports fallback that drops the alpha and paints an
+  // opaque slab. So the value is copied — and this test is what stops the copy
+  // from drifting, since --shadow-raised lives in the @theme block that the
+  // layer-2 sweep above deliberately does not police.
+  it("--shadow-raised is still made of --ink-90", () => {
+    const shadow = themeScales.get("--shadow-raised") ?? "";
+    expect(shadow, "--shadow-raised is not declared in the @theme block").not.toBe("");
+
+    const ink90 = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)$/.exec(light.get("--ink-90") ?? "");
+    if (ink90 === null) throw new Error("--ink-90 is not a plain oklch() triple");
+    const [, inkL, inkC, inkH] = ink90;
+
+    const layers = [...shadow.matchAll(/oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\/\s*([\d.]+)\s*\)/g)];
+    expect(layers.length, "expected one oklch colour per shadow layer").toBe(2);
+
+    for (const layer of layers) {
+      const [whole, L, C, H, alpha] = layer;
+      expect([L, C, H], `shadow layer "${whole}" no longer matches --ink-90`).toEqual([inkL, inkC, inkH]);
+      // The alpha is the shadow's own decision and is intentionally not pinned to
+      // a value; it only has to stay a shadow rather than an opaque fill.
+      expect(Number(alpha)).toBeGreaterThan(0);
+      expect(Number(alpha)).toBeLessThan(0.5);
+    }
   });
 });
 

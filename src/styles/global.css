@@ -6,9 +6,11 @@
 /* ---------------------------------------------------------------------------
  * The "paper" token system — two layers.
  *
- * Layer 1 is one warm-neutral lightness ramp plus two accent literals. They are
- * value-named because they *are* values. Nothing in `src/` outside this file may
- * reference them directly.
+ * Layer 1 is one warm-neutral lightness ramp (`--ink-*`), four semantic hue
+ * families (`--blue-*`, `--red-*`, `--amber-*`, `--green-*`) and `--white`. They
+ * are value-named because they *are* values, and no layer-1 name shares a prefix
+ * with a layer-2 role, so `var(--blue-500)` can never be mistyped for the role
+ * `--accent`. Nothing in `src/` outside this file may reference them directly.
  *
  * Layer 2 assigns every semantic role to a step of layer 1 by `var()` reference.
  * A role token never holds a neutral colour literal, which is what turns "is this
@@ -62,11 +64,17 @@
    * Every value is unchanged from the measured palette — this is a relocation,
    * not a re-decision, and `tokens.test.ts` re-derives the same contrast pairs.
    * The slight hue drift inside the amber family (75 / 80 / 85) is deliberate
-   * and measured; do not "tidy" it to a single hue. */
-  --accent-050: oklch(0.955 0.022 250);
-  --accent-300: oklch(0.74 0.12 250); /* dark theme links and focus */
-  --accent-500: oklch(0.45 0.12 250); /* light theme links and focus */
-  --accent-900: oklch(0.28 0.045 250);
+   * and measured; do not "tidy" it to a single hue.
+   *
+   * The blue family is named for its hue, like the three beside it, and not for
+   * the role it happens to serve. It was briefly `--accent-*`, one keystroke from
+   * the unrelated layer-2 role `--accent` (the neutral hover surface) — a pair the
+   * two-layer test cannot tell apart, because `--accent: var(--accent-500)` is a
+   * legal reference into layer 1 and a wrong one. Renaming removed the trap. */
+  --blue-050: oklch(0.955 0.022 250);
+  --blue-300: oklch(0.74 0.12 250); /* dark theme links and focus */
+  --blue-500: oklch(0.45 0.12 250); /* light theme links and focus */
+  --blue-900: oklch(0.28 0.045 250);
 
   --red-050: oklch(0.955 0.022 27); /* chroma 0.022, not 0.025: 0.025 is out of sRGB gamut */
   --red-300: oklch(0.71 0.16 27);
@@ -115,7 +123,7 @@
 
   /* --accent keeps shadcn's meaning, not the everyday English one: it is the
    * neutral hover surface consumed by Button variant="ghost" and
-   * variant="outline". Redefining it as the blue would turn every ghost hover
+   * variant="outline". Pointing it at --blue-500 would turn every ghost hover
    * blue — the blue's two actual jobs are --ring and --link. */
   --accent: var(--ink-10);
   --accent-foreground: var(--ink-90);
@@ -126,8 +134,8 @@
    * (WCAG 2.2 1.4.11 Non-text Contrast). Two tokens, two thresholds. */
   --border: var(--ink-30);
   --input: var(--ink-50);
-  --ring: var(--accent-500);
-  --link: var(--accent-500);
+  --ring: var(--blue-500);
+  --link: var(--blue-500);
 
   /* -- Semantic roles, light -----------------------------------------------
    * Each state carries a text/border colour and the surface tint its own text
@@ -139,8 +147,8 @@
   --warning-surface: var(--amber-050);
   --success: var(--green-500);
   --success-surface: var(--green-050);
-  --info: var(--accent-500);
-  --info-surface: var(--accent-050);
+  --info: var(--blue-500);
+  --info-surface: var(--blue-050);
 
   /* -- The draft surface ---------------------------------------------------
    * Principle 7: AI-generated, unsaved content never looks like a saved card.
@@ -181,8 +189,8 @@
 
   --border: var(--ink-70);
   --input: var(--ink-60);
-  --ring: var(--accent-300);
-  --link: var(--accent-300);
+  --ring: var(--blue-300);
+  --link: var(--blue-300);
 
   --destructive: var(--red-300);
   --destructive-surface: var(--red-900);
@@ -191,8 +199,8 @@
   --warning-surface: var(--amber-900);
   --success: var(--green-300);
   --success-surface: var(--green-900);
-  --info: var(--accent-300);
-  --info-surface: var(--accent-900);
+  --info: var(--blue-300);
+  --info-surface: var(--blue-900);
 
   --surface-draft: var(--ink-80);
   --surface-draft-border: var(--ink-60);
@@ -233,7 +241,21 @@
   /* Exactly one shadow, named for the only place it is allowed. Shadows belong
    * to Dialog, Popover, Tooltip and Toast and nowhere else; a reviewer seeing
    * `shadow-md` on a card knows it came from Tailwind's defaults, not from this
-   * system. */
+   * system.
+   *
+   * The colour below is --ink-90's value written out, and it is the only raw
+   * colour literal outside layer 1. That is deliberate, and it is guarded rather
+   * than tolerated: `tokens.test.ts` asserts these two literals still equal
+   * --ink-90, so moving the ink fails the build instead of silently leaving the
+   * system's one shadow made of a colour the system no longer uses.
+   *
+   * `color-mix(in oklab, var(--ink-90) 18%, transparent)` was tried first and
+   * rejected on build output, not on taste. Lightning CSS emits it behind an
+   * `@supports (color: color-mix(in lab, red, red))` guard with a fallback that
+   * drops the alpha entirely — `0 8px 24px -8px var(--ink-90)`, an opaque
+   * near-black slab instead of an 18% shadow, on any engine without color-mix.
+   * The literal compiles to `oklch(19% .008 85/.18)` with its alpha intact and
+   * no fallback branch at all. Re-test the build output before changing this. */
   --shadow-raised: 0 8px 24px -8px oklch(0.19 0.008 85 / 0.18), 0 2px 6px -2px oklch(0.19 0.008 85 / 0.12);
 }
 

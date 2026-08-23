@@ -70,7 +70,7 @@ states and `--destructive-foreground` as colour literals in layer 2, and `tokens
 whitelisted them by name. That hollowed out the very invariant the split exists to create: with
 a whitelist, "is this colour legal?" goes back to being a judgment call, which is what the
 architecture was supposed to eliminate. The four hue families are now layer-1 primitives —
-`--red-*`, `--amber-*`, `--green-*`, `--accent-050/900`, plus `--white` — on one step
+`--red-*`, `--amber-*`, `--green-*`, `--blue-050/900`, plus `--white` — on one step
 convention (`-500` light text, `-300` dark text, `-050` light surface, `-900` dark surface), and
 every layer-2 role is a bare `var()`. The whitelist is deleted; the test now asserts the
 invariant over **everything declared**, in both themes, so a role added later is covered without
@@ -91,8 +91,11 @@ consumers of the semantic tokens may inherit the new Paper colours, and enumerat
 NOTs — no polarity change, no `bg-cosmic` removal, no unreadable text/background pair, no screen
 migration, no behavioural change. All five were verified against a control instance of `main`.
 
-The focus indicator stays out of scope: no visible keyboard focus ring paints on either branch,
-which is a genuine pre-existing accessibility gap tracked as a separate follow-up.
+The focus indicator stays out of scope, but the record of it was wrong and is corrected below
+under "Cleanup pass": a `focus-visible` ring **does** paint on `Button variant="default"` on both
+branches, and this change makes it harder to see on the legacy cosmic page. `destructive` and
+`ghost` have no equivalent indicator on either branch. The proper fix is the `/50` alpha in
+`button.tsx` and stays a follow-up for the primitives increment, which owns that file.
 
 ### ⚠️ Finding: acceptance criterion 8 does not hold, and cannot — the tokens are not inert
 
@@ -113,9 +116,12 @@ the design intends, but the claim must not be repeated, and QA screenshots will 
   (darker, less saturated). Visible on `/library` (Delete) and `/settings` (Delete account).
 - **The default filled button.** `bg-primary` moves from `oklch(0.205 0 0)` to `var(--ink-90)`
   `#151410` — darker and warmer. Visible on `/library` in edit mode (Save).
-- **Focus rings, on every button.** `focus-visible:ring-ring/50` and `focus-visible:border-ring`
-  consume `--ring`, which moves from a mid grey `oklch(0.708 0 0)` to `var(--accent-500)` `#0e5794`
-  blue. This is an accessibility improvement, and it is visible on keyboard focus everywhere.
+- **Focus rings, on the default variant only.** `focus-visible:ring-ring/50` and
+  `focus-visible:border-ring` consume `--ring`, which moves from a mid grey `oklch(0.708 0 0)` to
+  `var(--blue-500)` `#0e5794`. Corrected 2026-08-23: this is **not** an improvement on the current
+  page and it is **not** visible everywhere — `variant="destructive"` and `variant="ghost"` paint
+  no indicator at all on either branch, and on the one variant that does, ring-to-surface contrast
+  falls 2.43:1 → 1.33:1 over the cosmic page. See "Cleanup pass" below.
 - **Ghost hover** (`hover:bg-accent`, `/library` Edit/Cancel) shifts `#f7f7f7 → #f5f3ef`, and the
   base layer's universal `border-border` shifts `#e5e5e5 → #d7d4ce`. Both are subtle.
 
@@ -194,7 +200,7 @@ PR: #32
 
 ### Phase 1: The token layer in global.css
 
-- [x] 1.1 Add layer 1 — the eleven-step ink ramp and the two accent literals — 9431b07
+- [x] 1.1 Add layer 1 — the eleven-step ink ramp and the two blue literals — 9431b07
 - [x] 1.2 Rewrite :root role tokens as var() references and add the new roles — 9431b07
 - [x] 1.3 Mirror the identical token set in .dark — 9431b07
 - [x] 1.4 Delete chart/sidebar tokens and extend @theme inline — 9431b07
@@ -219,3 +225,56 @@ PR: #32
 - [x] 4.3 Restore --radius to 0.625rem and record the deferral — 26d00a5
 - [x] 4.4 Correct acceptance criterion 8 in the source brief — 26d00a5
 - [x] 4.5 Re-run the full gate, the deliberate-break checks, and the control-vs-PR comparison
+
+### Phase 5: Cleanup pass (post-UX-review)
+
+Three items from the `om-ux-review-pr` pass on `9c895a2`. All three are naming, guarding and
+record-keeping; **no colour value and no contrast figure moved**, and no file under
+`src/components/**` was touched.
+
+- [x] 5.1 Rename the layer-1 blue family `--accent-050/-300/-500/-900` → `--blue-*`
+- [x] 5.2 Guard `--shadow-raised` against drifting off `--ink-90`
+- [x] 5.3 Correct the focus-indicator record in the brief, this plan and the PR body
+- [x] 5.4 Re-run the full gate, the deliberate-break checks and a resolved-value diff
+
+**5.1 — why rename.** The layer-1 blue was one keystroke from the unrelated layer-2 role
+`--accent` (shadcn's neutral hover surface). That is a gap the two-layer invariant cannot close:
+`--accent: var(--accent-500)` is a structurally legal reference into layer 1 and a semantically
+wrong one, so it would pass the "no literals in layer 2" test while turning every ghost hover
+blue. The contrast assertions catch it as a backstop — verified as deliberate break 8 below — but
+a name that cannot be mistyped beats a test that catches the mistake afterwards. `--blue-*` also
+matches the three families beside it, which were already hue-named. Rename only: `--ring`,
+`--link`, `--info` and `--info-surface` follow it in both themes.
+
+**5.2 — why the shadow stays a literal.** `color-mix(in oklab, var(--ink-90) 18%, transparent)`
+was implemented first, so the shadow would reference the ink rather than copy it, and was rejected
+on build output rather than on taste. Lightning CSS emits it behind an
+`@supports (color: color-mix(in lab, red, red))` guard whose fallback **drops the alpha**:
+`--shadow-raised: 0 8px 24px -8px var(--ink-90)` — an opaque near-black slab instead of an 18%
+shadow, on any engine without `color-mix`. The literal compiles to `oklch(19% .008 85/.18)` with
+its alpha intact and no fallback branch at all. So the copy stays and is now guarded: a new test
+asserts both shadow layers carry `--ink-90`'s exact L/C/H and an alpha under 0.5. That closes the
+one blind spot the layer-2 sweep had, since `--shadow-raised` lives in the plain `@theme` block
+which the sweep deliberately does not police.
+
+**5.3 — the focus-indicator correction.** The earlier claim that no focus indicator paints on
+either branch was measured with a programmatic `.focus()`, which does not make an element match
+`:focus-visible` in Chromium. Driving focus with `Tab`: `variant="default"` **does** paint a 3px
+ring on both branches (`main` `oklab(0.708 0 0 / 0.5)`, this branch `oklab(0.45 -0.041 -0.113 /
+0.5)`), reachable in `src/` through `SubmitButton` on `/auth/signin` and `/auth/signup`;
+`destructive` and `ghost` resolve to `oklab(0 0 0 / 0) 0 0 0 0` — transparent and zero-width — on
+both. Over the cosmic page the live ring's contrast against its surface falls **2.43:1 → 1.33:1**,
+both under the 3:1 of WCAG 2.2 §1.4.11, so the verdict is unchanged but the state is worse. The
+token is not at fault and must not be re-tuned for cosmic: `--ring` measures **7.13:1** on
+`--ink-05`, and it is `button.tsx`'s `ring-ring/50` that drops it to **2.38:1 even on paper**. The
+fix is that alpha, it belongs to the primitives increment which owns `button.tsx`, and it must be
+verified on a paper screen.
+
+**5.4 — verification.** `tokens.test.ts` is 42 tests (41 + the shadow guard), all green. Nine
+deliberate breaks each fail as intended and the restored file returns to 42/42: shadow colour moved
+to `--ink-80`; shadow chroma drifted; shadow alpha raised to 1; a stale `--accent-500` reference
+left behind by the rename; a colour literal back in a layer-2 role; a token dropped from `.dark`;
+`--ink-50` evened out to 0.665; `--accent` pointed at `--blue-500`; the dark body pair raised to
+17.69:1. A resolved-value diff of `9c895a2` against this state — every layer-2 role followed
+through its `var()` chain to a final `oklch` triple, in both themes — reports **59 roles compared,
+0 changed**, and **13 `@theme` scales compared, 0 changed**.
