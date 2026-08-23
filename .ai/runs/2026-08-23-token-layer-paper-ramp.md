@@ -61,7 +61,7 @@ rendering. Recorded here rather than silently "fixed" so a later reader knows it
 - **Low, by construction.** The tokens this increment ships are consumed by nothing: `body`
   carries `@apply bg-background text-foreground` but `bg-cosmic` overrides it, and 331 hardcoded
   colour classes still paint every screen. The visible-change risk is therefore confined to any
-  surface that already consumed a role token *and* is not covered by `bg-cosmic` — checked in
+  surface that already consumed a role token _and_ is not covered by `bg-cosmic` — checked in
   Phase 3.
 - **Deleting `--chart-*` / `--sidebar*`** would break a consumer outside `global.css`; grep is
   re-run in Phase 3 rather than trusted from the brief's writing time.
