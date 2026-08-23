@@ -58,6 +58,40 @@ and the CSS Color 4 chroma-reduction a browser actually performs gives `#865900`
 5.86:1 against the page and 5.36:1 on `--warning-surface`, so every threshold holds under either
 rendering. Recorded here rather than silently "fixed" so a later reader knows it was examined.
 
+### 🔁 Correction pass (2026-08-23, after implementation review) — `26d00a5`
+
+Three corrections landed after the first implementation was reviewed. They supersede parts of
+the sections below, which are kept as the record of what was found rather than rewritten.
+
+**1. The two-layer invariant was restored.** The first implementation left the four semantic
+states and `--destructive-foreground` as colour literals in layer 2, and `tokens.test.ts`
+whitelisted them by name. That hollowed out the very invariant the split exists to create: with
+a whitelist, "is this colour legal?" goes back to being a judgment call, which is what the
+architecture was supposed to eliminate. The four hue families are now layer-1 primitives —
+`--red-*`, `--amber-*`, `--green-*`, `--accent-050/900`, plus `--white` — on one step
+convention (`-500` light text, `-300` dark text, `-050` light surface, `-900` dark surface), and
+every layer-2 role is a bare `var()`. The whitelist is deleted; the test now asserts the
+invariant over **everything declared**, in both themes, so a role added later is covered without
+anyone remembering to extend a list. **No contrast target moved** — this relocated values, it
+did not re-decide them, and all 41 assertions pass on the same numbers.
+
+**2. The `--radius` change is deferred to the primitives increment.** `--radius` returns to
+`0.625rem`. The `0.375rem` decision stands as design direction, but `--radius` is the one token
+existing markup already consumes at scale (`rounded-lg` ×49, `rounded-md` ×5, `rounded-xl` ×4),
+so shipping it here restyles ~58 elements — a screen-wide restyle that is not needed to
+establish the colour foundation, and that belongs with the increment which owns those elements.
+Confirmed by measurement: button radius is now **8px on both** `main` and this branch, where the
+first implementation made it 4px. This removes the single largest visual difference the PR had.
+
+**3. Acceptance criterion 8 was corrected in the source brief itself**, rather than only
+contradicted in this plan. It no longer claims pixel-identity; it now states that existing
+consumers of the semantic tokens may inherit the new Paper colours, and enumerates five MUST
+NOTs — no polarity change, no `bg-cosmic` removal, no unreadable text/background pair, no screen
+migration, no behavioural change. All five were verified against a control instance of `main`.
+
+The focus indicator stays out of scope: no visible keyboard focus ring paints on either branch,
+which is a genuine pre-existing accessibility gap tracked as a separate follow-up.
+
 ### ⚠️ Finding: acceptance criterion 8 does not hold, and cannot — the tokens are not inert
 
 The brief's central safety claim is that this increment "ships tokens that nothing yet consumes",
@@ -162,7 +196,7 @@ PR: #32
 - [x] 1.2 Rewrite :root role tokens as var() references and add the new roles — 9431b07
 - [x] 1.3 Mirror the identical token set in .dark — 9431b07
 - [x] 1.4 Delete chart/sidebar tokens and extend @theme inline — 9431b07
-- [x] 1.5 Add the theme-invariant @theme block and lower --radius — 9431b07
+- [x] 1.5 Add the theme-invariant @theme block — 9431b07 (--radius change reverted, deferred to the primitives increment — 26d00a5)
 
 ### Phase 2: The contrast guard test
 
@@ -175,3 +209,11 @@ PR: #32
 - [x] 3.1 Re-run the chart/sidebar deletion and bg-cosmic preservation greps
 - [x] 3.2 Confirm the @theme namespace assumptions against a real build
 - [x] 3.3 Run the full validation gate
+
+### Phase 4: Correction pass (post-review)
+
+- [x] 4.1 Promote the semantic hue families into layer 1 and make every layer-2 role a var() — 26d00a5
+- [x] 4.2 Delete the test's literal whitelist; assert the invariant over all declared tokens — 26d00a5
+- [x] 4.3 Restore --radius to 0.625rem and record the deferral — 26d00a5
+- [x] 4.4 Correct acceptance criterion 8 in the source brief — 26d00a5
+- [x] 4.5 Re-run the full gate, the deliberate-break checks, and the control-vs-PR comparison
