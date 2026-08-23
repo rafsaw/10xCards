@@ -3,73 +3,204 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ---------------------------------------------------------------------------
+ * The "paper" token system — two layers.
+ *
+ * Layer 1 is one warm-neutral lightness ramp plus two accent literals. They are
+ * value-named because they *are* values. Nothing in `src/` outside this file may
+ * reference them directly.
+ *
+ * Layer 2 assigns every semantic role to a step of layer 1 by `var()` reference.
+ * A role token never holds a neutral colour literal, which is what turns "is this
+ * colour legal?" into a question a reviewer or a script can answer without
+ * judgment — and what makes dark mode a re-assignment rather than a second
+ * palette: the same ramp, read from the other end.
+ *
+ * Contrast is guaranteed by `src/styles/tokens.test.ts`, which re-parses this file
+ * and recomputes every pair. Do not nudge a value without re-running it.
+ * Source: .ai/specs/briefs/2026-08-22-token-layer-paper-ramp.md
+ * ------------------------------------------------------------------------- */
+
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* -- Layer 1: the ramp ---------------------------------------------------
+   * Hue 85 puts a trace of warmth in both ends, so the page reads as paper
+   * rather than as a white screen and the text as ink rather than as black.
+   * Chroma peaks mid-ramp and tapers at both ends, because a fully neutral
+   * mid-grey between warm extremes reads green.
+   *
+   * Two steps are placed by measurement and must not be evened out:
+   *   --ink-50 sits at L 0.63, not the 0.665 an even ramp would give it. At
+   *   0.665 it measures 2.92:1 against the page and fails the 3:1 an input
+   *   boundary needs (WCAG 2.2 1.4.11); at 0.63 it measures 3.35:1.
+   *
+   *   --ink-30 is the hairline, not --ink-20. --ink-20 measures 1.2:1 against
+   *   the page, below the threshold where a 1px rule is reliably visible;
+   *   --ink-30 measures 1.42:1.
+   */
+  --ink-00: oklch(0.995 0.002 85);
+  --ink-05: oklch(0.985 0.004 85);
+  --ink-10: oklch(0.965 0.006 85);
+  --ink-20: oklch(0.925 0.008 85);
+  --ink-30: oklch(0.87 0.009 85);
+  --ink-40: oklch(0.78 0.01 85);
+  --ink-50: oklch(0.63 0.012 85);
+  --ink-60: oklch(0.52 0.012 85);
+  --ink-70: oklch(0.4 0.012 85);
+  --ink-80: oklch(0.29 0.011 85);
+  --ink-90: oklch(0.19 0.008 85);
+
+  /* One accent per theme: a single hue cannot serve as readable text on both
+   * paper and ink. These are the only non-neutral literals in layer 1. */
+  --accent-500: oklch(0.45 0.12 250); /* light theme links and focus */
+  --accent-300: oklch(0.74 0.12 250); /* dark theme links and focus */
+
+  /* -- Layer 2: role assignment, light ------------------------------------- */
+  --radius: 0.375rem;
+
+  --background: var(--ink-05);
+  --foreground: var(--ink-90);
+
+  /* --card deliberately equals --background. In this direction a card is not a
+   * box; it is a block of text separated by a hairline and space. Giving --card
+   * its own value would quietly reintroduce the panel look the direction
+   * rejects. Elevation exists only on --popover. */
+  --card: var(--ink-05);
+  --card-foreground: var(--ink-90);
+  --popover: var(--ink-00);
+  --popover-foreground: var(--ink-90);
+
+  --primary: var(--ink-90);
+  --primary-foreground: var(--ink-05);
+  --secondary: var(--ink-10);
+  --secondary-foreground: var(--ink-90);
+  --muted: var(--ink-10);
+  --muted-foreground: var(--ink-60);
+
+  /* --accent keeps shadcn's meaning, not the everyday English one: it is the
+   * neutral hover surface consumed by Button variant="ghost" and
+   * variant="outline". Redefining it as the blue would turn every ghost hover
+   * blue — the blue's two actual jobs are --ring and --link. */
+  --accent: var(--ink-10);
+  --accent-foreground: var(--ink-90);
+
+  /* --border and --input are separated on purpose, where shadcn ships them
+   * near-identical. A hairline between sections is decoration and may be quiet;
+   * a field's boundary is what identifies the control, so it needs 3:1
+   * (WCAG 2.2 1.4.11 Non-text Contrast). Two tokens, two thresholds. */
+  --border: var(--ink-30);
+  --input: var(--ink-50);
+  --ring: var(--accent-500);
+  --link: var(--accent-500);
+
+  /* -- Semantic roles, light -----------------------------------------------
+   * Each state carries a text/border colour and the surface tint its own text
+   * sits on, so Notice can be built later without inventing values.
+   *
+   * --destructive-surface is at chroma 0.022, not the 0.025 it was drafted at:
+   * 0.025 falls outside the sRGB gamut, which browsers resolve silently. */
+  --destructive: oklch(0.48 0.17 27);
+  --destructive-surface: oklch(0.955 0.022 27);
+  --destructive-foreground: #ffffff;
+  --warning: oklch(0.5 0.11 75);
+  --warning-surface: oklch(0.955 0.035 85);
+  --success: oklch(0.45 0.09 155);
+  --success-surface: oklch(0.955 0.025 155);
+  --info: var(--accent-500);
+  --info-surface: oklch(0.955 0.022 250);
+
+  /* -- The draft surface ---------------------------------------------------
+   * Principle 7: AI-generated, unsaved content never looks like a saved card.
+   * The treatment is built in the primitives increment; the values live here so
+   * that increment does not invent them. The distinction is surface and rule,
+   * never colour alone — the state label stays required. */
+  --surface-draft: var(--ink-10);
+  --surface-draft-border: var(--ink-40);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* The same ramp, read from the other end. Every token name declared in :root
+   * is declared here — a token in one block and not the other is a defect
+   * (principle 2), and `src/styles/tokens.test.ts` fails the build on it.
+   *
+   * The body pair is --ink-20 on --ink-90 (14.8:1), not --ink-05 on --ink-90
+   * (17.69:1). Maximum contrast on a dark background produces halation for
+   * readers with astigmatism, which is a reading product's worst failure mode.
+   * Dark is not applied yet; the value is decided now so the later increment
+   * inherits it rather than re-deciding it. */
+  --background: var(--ink-90);
+  --foreground: var(--ink-20);
+
+  --card: var(--ink-90);
+  --card-foreground: var(--ink-20);
+  --popover: var(--ink-80);
+  --popover-foreground: var(--ink-20);
+
+  --primary: var(--ink-20);
+  --primary-foreground: var(--ink-90);
+  --secondary: var(--ink-80);
+  --secondary-foreground: var(--ink-20);
+  --muted: var(--ink-80);
+  --muted-foreground: var(--ink-40);
+
+  --accent: var(--ink-80);
+  --accent-foreground: var(--ink-20);
+
+  --border: var(--ink-70);
+  --input: var(--ink-60);
+  --ring: var(--accent-300);
+  --link: var(--accent-300);
+
+  --destructive: oklch(0.71 0.16 27);
+  --destructive-surface: oklch(0.28 0.055 27);
+  --destructive-foreground: var(--ink-90);
+  --warning: oklch(0.79 0.12 80);
+  --warning-surface: oklch(0.28 0.05 80);
+  --success: oklch(0.74 0.11 155);
+  --success-surface: oklch(0.28 0.04 155);
+  --info: var(--accent-300);
+  --info-surface: oklch(0.28 0.045 250);
+
+  --surface-draft: var(--ink-80);
+  --surface-draft-border: var(--ink-60);
+}
+
+/* Theme-invariant scales. These do not change between light and dark, so they
+ * go in a plain `@theme` block rather than `@theme inline`. */
+@theme {
+  /* Two families, with the split doing the work: --font-serif carries card
+   * content and prose, --font-sans carries all chrome, --font-mono exists only
+   * for the <kbd> hints in ReviewSession.tsx.
+   *
+   * Honest limitation: this stack resolves to Iowan or Charter on Apple
+   * platforms, Sitka Text on Windows, Georgia where those are absent, and the
+   * platform's default serif on Android — so content typography varies by
+   * device. That is the accepted cost of shipping no self-hosted font here; a
+   * single variable serif is the deferred item that removes it. */
+  --font-serif: "Iowan Old Style", Charter, "Bitstream Charter", "Sitka Text", Georgia, serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Four sizes, and that is the whole scale. Card content and section headings
+   * share the 20px step and are told apart by family and weight, not by size.
+   * Content never goes below --text-title: a serif at 16px loses the legibility
+   * that justified choosing one. */
+  --text-display: 2rem;
+  --text-display--line-height: 1.15; /* page h1 */
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.4; /* section h2, and card content in serif */
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.45; /* labels, counters, FRONT/BACK */
+
+  /* The reading column as a token rather than a max-w-3xl repeated on six pages. */
+  --container-content: 66ch;
+
+  /* Exactly one shadow, named for the only place it is allowed. Shadows belong
+   * to Dialog, Popover, Tooltip and Toast and nowhere else; a reviewer seeing
+   * `shadow-md` on a card knows it came from Tailwind's defaults, not from this
+   * system. */
+  --shadow-raised: 0 8px 24px -8px oklch(0.19 0.008 85 / 0.18), 0 2px 6px -2px oklch(0.19 0.008 85 / 0.12);
 }
 
 @theme inline {
@@ -91,25 +222,30 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-link: var(--link);
+  --color-destructive: var(--destructive);
+  --color-destructive-surface: var(--destructive-surface);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-surface: var(--warning-surface);
+  --color-success: var(--success);
+  --color-success-surface: var(--success-surface);
+  --color-info: var(--info);
+  --color-info-surface: var(--info-surface);
+  --color-surface-draft: var(--surface-draft);
+  --color-surface-draft-border: var(--surface-draft-border);
 }
 
+/* Do not delete this utility, and do not remove `class="bg-cosmic"` from the ten
+ * files that apply it, until the last screen-migration increment removes it in
+ * the same commit that removes the last `text-white`. `body` already carries
+ * `@apply bg-background text-foreground`, overridden by this utility; deleting it
+ * while 331 hardcoded colour classes remain renders near-white text on a paper
+ * background across every screen. The tokens above ship consumed by nothing, and
+ * that inertness is the feature. */
 @utility bg-cosmic {
   background-image: linear-gradient(to bottom, #0a0e1a, #0f1529, #0a0e1a);
 }
