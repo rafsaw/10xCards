@@ -56,6 +56,39 @@ and the CSS Color 4 chroma-reduction a browser actually performs gives `#865900`
 5.86:1 against the page and 5.36:1 on `--warning-surface`, so every threshold holds under either
 rendering. Recorded here rather than silently "fixed" so a later reader knows it was examined.
 
+### ⚠️ Finding: acceptance criterion 8 does not hold, and cannot — the tokens are not inert
+
+The brief's central safety claim is that this increment "ships tokens that nothing yet consumes",
+so "after this increment, every screen looks exactly as it did before" (criterion 8), and that
+"a visual difference of any kind … is a defect in this increment". **Measured against a real
+build, that claim is false**, and the shipped values are what make it false. `bg-cosmic` overrides
+the page _background_ only — it does not override a shadcn primitive's own colours, nor any
+radius. The increment was implemented as specified and the differences are all in the direction
+the design intends, but the claim must not be repeated, and QA screenshots will show them:
+
+- **Border radius, the largest one.** `--radius` drops `0.625rem → 0.375rem`, and `@theme inline`
+  derives `rounded-sm/md/lg/xl` from it. `src/` uses `rounded-lg` 49 times, `rounded-md` 5 and
+  `rounded-xl` 4, so **58 elements tighten from 10px to 6px** (and buttons from 8px to 4px).
+  `rounded-2xl` (13 uses) and `rounded-full` (5) are unaffected — they do not derive from `--radius`.
+- **Destructive buttons.** `src/components/ui/button.tsx` `variant="destructive"` is `bg-destructive`,
+  which moves from `oklch(0.577 0.245 27.325)` (bright red) to `oklch(0.48 0.17 27)` = `#a92321`
+  (darker, less saturated). Visible on `/library` (Delete) and `/settings` (Delete account).
+- **The default filled button.** `bg-primary` moves from `oklch(0.205 0 0)` to `var(--ink-90)`
+  `#151410` — darker and warmer. Visible on `/library` in edit mode (Save).
+- **Focus rings, on every button.** `focus-visible:ring-ring/50` and `focus-visible:border-ring`
+  consume `--ring`, which moves from a mid grey `oklch(0.708 0 0)` to `var(--accent-500)` `#0e5794`
+  blue. This is an accessibility improvement, and it is visible on keyboard focus everywhere.
+- **Ghost hover** (`hover:bg-accent`, `/library` Edit/Cancel) shifts `#f7f7f7 → #f5f3ef`, and the
+  base layer's universal `border-border` shifts `#e5e5e5 → #d7d4ce`. Both are subtle.
+
+None of these is the failure mode the brief actually guards against — nothing becomes unreadable,
+because no screen's text or background colour changes. The increment is still safe to land first.
+What is wrong is only criterion 8's premise, and it is wrong because the brief treats "no screen is
+migrated" as equivalent to "no token is consumed"; `button.tsx` and 58 `rounded-*` usages consume
+them today. Flagged for the human reviewer rather than resolved by narrowing the spec's scope:
+dropping the `--radius` change would preserve criterion 8, but it would also silently discard a
+value the brief's own token table decides.
+
 ### Risks
 
 - **Low, by construction.** The tokens this increment ships are consumed by nothing: `body`
@@ -132,6 +165,6 @@ right.
 
 ### Phase 3: Verification
 
-- [ ] 3.1 Re-run the chart/sidebar deletion and bg-cosmic preservation greps
-- [ ] 3.2 Confirm the @theme namespace assumptions against a real build
-- [ ] 3.3 Run the full validation gate
+- [x] 3.1 Re-run the chart/sidebar deletion and bg-cosmic preservation greps
+- [x] 3.2 Confirm the @theme namespace assumptions against a real build
+- [x] 3.3 Run the full validation gate
