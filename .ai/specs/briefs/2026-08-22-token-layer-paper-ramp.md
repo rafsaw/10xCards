@@ -8,11 +8,11 @@
 
 ## 📝 Token layer — handoff
 
-**Intent**: `src/styles/global.css` stops carrying the starter's inherited shadcn defaults and starts carrying the decided "paper" system — one warm-neutral lightness ramp, every semantic role assigned to a step of it, and a contrast guarantee that is measured rather than asserted. Nothing on screen changes.
+**Intent**: `src/styles/global.css` stops carrying the starter's inherited shadcn defaults and starts carrying the decided "paper" system — one warm-neutral lightness ramp, every semantic role assigned to a step of it, and a contrast guarantee that is measured rather than asserted. No screen is migrated and no UI behaviour changes; existing consumers of the semantic tokens do inherit their new Paper values (see acceptance criterion 8, corrected 2026-08-23).
 
 **Non-goals**: No screen is migrated. No component is edited. No primitive (`Card`, `PageHeader`, `Notice`, `EmptyState`, `Field`) is created. The shell is untouched. `bg-cosmic` is **not** removed — see "The one thing that must not happen". No theme toggle, no `.dark` application, no PR against `src/components/**`.
 
-**Actor and trigger**: The developer (or implementing skill) starting strategy C. There is no user-facing trigger — this increment is deliberately invisible to users, and that is the property that makes it safe to land first.
+**Actor and trigger**: The developer (or implementing skill) starting strategy C. There is no user-facing trigger. This increment is deliberately _low-impact_ rather than literally invisible — it migrates no screen and changes no behaviour, which is the property that makes it safe to land first; the bounded colour inheritance it does cause is enumerated in acceptance criterion 8.
 
 **Reader assumption**: written for someone who was not in the conversation and does not know the design system. Every value below is the value to type.
 
@@ -22,11 +22,13 @@
 
 This increment replaces the colour section of `src/styles/global.css` with a two-layer system and adds type, radius and shadow tokens. The two layers are the whole idea, so they come first.
 
-**Layer 1 — the raw ramp.** Eleven steps of one warm neutral (`oklch`, hue 85, chroma tapering with lightness), plus two accent literals. Value-named, because they _are_ values. Nothing in `src/` outside `global.css` may reference these directly.
+**Layer 1 — the raw primitives.** Eleven steps of one warm neutral (`oklch`, hue 85, chroma tapering with lightness); the four semantic hue families that cannot be expressed as steps of that ramp — `--accent-*` (blue), `--red-*`, `--amber-*`, `--green-*`, each with a light-theme text step (`-500`), a dark-theme text step (`-300`), a light surface tint (`-050`) and a dark surface tint (`-900`); and `--white`. Value-named, because they _are_ values. Nothing in `src/` outside `global.css` may reference these directly.
 
-**Layer 2 — the roles.** Every semantic token (`--background`, `--foreground`, `--border`, …) is a `var()` reference into layer 1. Role tokens never contain a colour literal.
+**Layer 2 — the roles.** Every semantic token (`--background`, `--foreground`, `--border`, `--destructive`, `--warning-surface`, …) is a bare `var()` reference into layer 1. **No layer-2 role contains a colour literal — with no exceptions and no whitelist.**
 
-That split is what makes the rules checkable. "Is this colour legal?" becomes "is it a `var(--ink-*)` / `var(--accent-*)` reference?" — a question a reviewer or a script can answer without judgment. It is also what makes dark mode later a re-assignment rather than a second palette: the ramp is read from the other end.
+That split is what makes the rules checkable. "Is this colour legal?" becomes "is it a bare `var()` into layer 1?" — a question a reviewer or a script can answer without judgment. It is also what makes dark mode later a re-assignment rather than a second palette: the same primitives, read from the other end.
+
+_(Corrected 2026-08-23. The first implementation left the semantic states as literals in layer 2 and whitelisted them in the test, which quietly hollowed the invariant out — the exact "is this legal?" judgment call the split exists to remove. The values did not change; they moved into layer 1 where they belong, and the whitelist is gone.)_
 
 #### Layer 1 — the ramp
 
@@ -97,6 +99,8 @@ Four assignments carry a decision worth stating out loud, because a later reader
 
 Each state gets a text/border colour and a matching surface tint, so `Notice` can be built later without inventing values. Every pair was measured; the surface tints are not decoration but the background the role's own text sits on.
 
+**How to read the two tables below (corrected 2026-08-23).** The values are the **layer-1 primitives**; the layer-2 role is the `var()` that points at one. So `--destructive: var(--red-500)` in light and `var(--red-300)` in dark, `--warning-surface: var(--amber-050)` in light and `var(--amber-900)` in dark, and so on — light text steps are `-500`, dark text steps `-300`, light surfaces `-050`, dark surfaces `-900`. The measured columns are unchanged: promoting these into layer 1 moved where a value is written, never what it is.
+
 **Light**
 
 | Role                    | Value                    | Renders   | Text on page | Text on its own surface |
@@ -123,7 +127,7 @@ Each state gets a text/border colour and a matching surface tint, so `Notice` ca
 | `--info`                | `var(--accent-300)`     | `#6db0f4` | **8.05**     | **6.35**                |
 | `--info-surface`        | `oklch(0.28 0.045 250)` | `#172a3e` | —            | —                       |
 
-`--destructive-foreground` is `#ffffff` in light (7.14:1 on the destructive fill) and `--ink-90` in dark. Today `button.tsx` hardcodes `text-white` for that case; the token exists so the primitives increment can stop doing that.
+`--destructive-foreground` is `var(--white)` in light (7.14:1 on the destructive fill) and `var(--ink-90)` in dark. Today `button.tsx` hardcodes `text-white` for that case; the token exists so the primitives increment can stop doing that.
 
 One value was moved by measurement: the light `--destructive-surface` was drafted at chroma 0.025 and falls outside the sRGB gamut, which browsers clamp silently. At 0.022 it is in gamut and the text on it still measures 6.22:1.
 
@@ -169,7 +173,7 @@ Card content and section headings share the 20px step and are told apart by fami
 
 **Measure.** `--container-content: 66ch`, so the reading column is a token rather than a `max-w-3xl` repeated on six pages.
 
-**Radius.** `--radius: 0.375rem` (6px), down from the starter's `0.625rem`. The existing `@theme inline` block already derives `--radius-sm/md/lg/xl` from it; that derivation stays as is.
+**Radius. Deferred to the primitives increment (decided 2026-08-23).** The direction still wants `--radius: 0.375rem` (6px) in place of the starter's `0.625rem`, and the existing `@theme inline` derivation of `--radius-sm/md/lg/xl` stays as is. It does not ship here: `--radius` is the one token existing markup already consumes at scale (`rounded-lg` ×49, `rounded-md` ×5, `rounded-xl` ×4), so lowering it restyles roughly 58 elements — a screen-wide restyle that this increment neither needs nor is scoped for, since the colour-token foundation stands without it. The primitives increment owns both the value and the elements it touches.
 
 **Shadow — exactly one, named for the only place it is allowed:**
 
@@ -197,7 +201,9 @@ The failure is not cosmetic. `body` already carries `@apply bg-background text-f
 
 The states table from the handoff template does not apply: this increment renders no UI and has no empty, loading, error or permission state. It is recorded here rather than dropped so the omission reads as a decision. The user-visible state matrix arrives with the primitives increment, which is where `Notice`, `EmptyState` and `Field` get built from the tokens above.
 
-The one observable behaviour worth naming: **after this increment, every screen looks exactly as it did before.** A visual difference of any kind means something consumed a token it should not have yet, and is a defect in this increment.
+The one observable behaviour worth naming: **after this increment, every screen behaves exactly as it did before, and no screen changes polarity.** Colour differences are possible and expected wherever a component already consumes a semantic token — `button.tsx` is the only such component in `src/` today. What would be a defect is any of the five MUST NOTs in acceptance criterion 8: a change of page polarity, a removal of `bg-cosmic`, an unreadable text/background pair, a migrated screen, or any behavioural change.
+
+_(Corrected 2026-08-23. This paragraph originally claimed every screen "looks exactly as it did before" and that any visual difference was a defect. Measured against a control instance of `main`, that was wrong — see criterion 8.)_
 
 ---
 
@@ -219,14 +225,23 @@ Not applicable. This increment proposes no AI behaviour, changes no model, promp
 
 ### ✅ Acceptance criteria
 
-1. **Given** `src/styles/global.css` after the change, **when** its colour declarations are read, **then** every role token's value is a `var(--ink-*)` or `var(--accent-*)` reference, and no role token contains a colour literal.
+1. **Given** `src/styles/global.css` after the change, **when** its colour declarations are read, **then** every layer-2 role token's value is a bare `var()` reference into layer 1 — `--ink-*`, `--accent-*`, `--red-*`, `--amber-*`, `--green-*` or `--white` — and **no** layer-2 role contains a colour literal, with no exceptions and no whitelist. The semantic states are part of this: their hues cannot be steps of the neutral ramp, so they are promoted into layer 1 as named palette primitives rather than written inline as literals in layer 2.
 2. **Given** the light palette, **when** contrast is computed for `--foreground`, `--muted-foreground`, `--primary-foreground` on `--primary`, `--destructive`, `--warning`, `--success` and `--info` against their stated backgrounds, **then** each meets 4.5:1, and `--input` and `--ring` each meet 3:1.
 3. **Given** the dark palette, **when** the same computation runs, **then** the same thresholds hold, **and** `--foreground` on `--background` measures below 16:1 — the halation ceiling, which an over-eager "improvement" to the contrast would break.
 4. **Given** `:root` and `.dark`, **when** their declared token names are compared, **then** the two sets are identical. A token in one block and not the other fails (principle 2).
 5. **Given** the repository after the change, **when** `grep -rn "chart-\|sidebar" src/` runs, **then** it returns nothing.
 6. **Given** the repository after the change, **when** `grep -rln "bg-cosmic" src/` runs, **then** it still returns the same eleven files it returns today (`global.css`, `Layout.astro`, `Welcome.astro`, and the eight pages). Removing it here is a failure, not progress.
 7. **Given** `npm run lint`, `npm run build` and `npm test`, **when** each runs, **then** each passes.
-8. **Given** the running app at `/dashboard`, `/generate`, `/library`, `/review`, `/settings` and `/auth/signin`, **when** each is opened before and after the change, **then** they are visually identical.
+8. **Given** the running app at `/dashboard`, `/generate`, `/library`, `/review`, `/settings` and `/auth/signin`, **when** each is opened before and after the change, **then** the screens are **structurally and behaviourally unchanged**, and any colour difference is confined to existing consumers of the semantic tokens inheriting their new Paper values. Specifically, this increment MUST NOT:
+   - **change page polarity** — every screen stays dark-on-cosmic; no route may render paper-light,
+   - **remove or stop applying `bg-cosmic`** — the utility and all ten `class="bg-cosmic"` usages stay,
+   - **create an unreadable text/background combination** anywhere,
+   - **migrate an entire screen** to the new system,
+   - **change any UI behaviour** — no route, control, state or interaction may differ.
+
+   **Corrected 2026-08-23, from measurement rather than reasoning.** This criterion originally read "they are visually identical". That was false: `bg-cosmic` overrides the page _background_ only, so it does not override a shadcn primitive's own colours. Verified by booting a control instance of `main` alongside the change and reading `getComputedStyle` from both, the real difference is limited to components that already consume semantic tokens — `src/components/ui/button.tsx` is the only one in `src/` today, giving a darker destructive fill (`oklch(0.577 0.245 27.325)` → `oklch(0.48 0.17 27)`), a warmer primary fill (`oklch(0.205 0 0)` → `--ink-90`), and the universal `border-border` hairline (`oklch(0.922 0 0)` → `--ink-30`). All five MUST NOTs above held on all six routes.
+
+   Two related notes from the same measurement. The `--radius` change was **deferred to the primitives increment**: it is the one token existing markup consumes at scale (`rounded-lg` ×49, `rounded-md` ×5, `rounded-xl` ×4), it would restyle ~58 elements, and it is not needed to establish the colour foundation. And the `--ring` change is **not** user-visible: `outline-style` is `none` and the `focus-visible:ring-*` shadows resolve transparent on both branches, so no focus indicator paints either way — a real pre-existing accessibility gap, tracked separately and explicitly out of scope here.
 
 **How criteria 1–4 are checked, given there is no visual-regression coverage.** Add one test — `src/styles/tokens.test.ts`, colocated per the repo's testing convention — that parses `global.css`, extracts the ramp and the role assignments, converts `oklch` to sRGB, and asserts the pairs above. It is roughly eighty lines and it is the only durable guard this system gets: it turns "the palette is accessible" from a claim in a document into a failing test when someone darkens a token by 0.05. Criteria 5–8 are shell commands and a browser walk.
 
@@ -242,4 +257,4 @@ Not applicable. This increment proposes no AI behaviour, changes no model, promp
 
 ### 📋 Applied
 
-AI necessity gate: not applicable — no AI behaviour in scope. Human-AI checklist: not applicable for the same reason; principle 7's tokens reserved for the increment that will need them. Value metrics: not applicable — this increment is deliberately invisible to users and is measured by contrast thresholds and unchanged screens, not by behaviour. Design contract: loaded (`.uxproof/contract.json`, `conventions.md` including the manual section and its eight principles); 15 registered components, 0 archetypes, both limitations already recorded in the contract. Evidence tiers: one `[STANDARD]` (WCAG 2.2 §1.4.11), four `[ASSUMPTION]` and two `[FACT]` labels, all in place. Contrast figures: computed, 40 pairs, zero failures at the stated thresholds. Quality rubric: passed, with the states section explicitly marked not-applicable rather than omitted.
+AI necessity gate: not applicable — no AI behaviour in scope. Human-AI checklist: not applicable for the same reason; principle 7's tokens reserved for the increment that will need them. Value metrics: not applicable — this increment ships no user-facing behaviour and is measured by contrast thresholds and by acceptance criterion 8's five MUST NOTs, not by behaviour. Design contract: loaded (`.uxproof/contract.json`, `conventions.md` including the manual section and its eight principles); 15 registered components, 0 archetypes, both limitations already recorded in the contract. Evidence tiers: one `[STANDARD]` (WCAG 2.2 §1.4.11), four `[ASSUMPTION]` and two `[FACT]` labels, all in place. Contrast figures: computed, 40 pairs, zero failures at the stated thresholds. Quality rubric: passed, with the states section explicitly marked not-applicable rather than omitted.

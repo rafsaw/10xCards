@@ -54,8 +54,19 @@ function declarationsOf(selector: string): Map<string, string> {
 const light = declarationsOf(":root");
 const dark = declarationsOf(".dark");
 
-/** Layer 1 — value-named tokens. Theme-invariant by design: one ramp, read from both ends. */
-const isRampToken = (name: string) => /^--ink-\d{2}$/.test(name) || /^--accent-\d{3}$/.test(name);
+/**
+ * Layer 1 — the value-named primitives: the neutral ramp plus the four semantic hue
+ * families and the one pure white. Theme-invariant by design, so they are declared
+ * once in `:root` and read from both ends rather than duplicated into `.dark`.
+ */
+const LAYER_1 = /^--(ink-\d{2}|accent-\d{3}|red-\d{3}|amber-\d{3}|green-\d{3}|white)$/;
+const isRampToken = (name: string) => LAYER_1.test(name);
+
+/** A legal layer-2 value: a bare `var()` reference into layer 1, and nothing else. */
+const LAYER_2_VALUE = /^var\(--(ink-\d{2}|accent-\d{3}|red-\d{3}|amber-\d{3}|green-\d{3}|white)\)$/;
+
+/** `--radius` is a length, not a colour role; it is the only non-colour token declared here. */
+const NON_COLOUR_TOKENS = new Set(["--radius"]);
 
 /**
  * Resolve a token to its `oklch` triple, following `var()` chains into layer 1.
@@ -74,7 +85,7 @@ function resolve(token: string, theme: Map<string, string>): [number, number, nu
   }
   if (value === undefined) throw new Error(`Token ${token} is not declared in either theme`);
 
-  if (value === "#ffffff") return [1, 0, 0]; // the one hex literal: --destructive-foreground, light
+  if (value === "#ffffff") return [1, 0, 0]; // the one hex primitive: --white, in layer 1
   const m = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)$/.exec(value);
   if (!m) throw new Error(`Token ${token} resolves to an unsupported colour format: ${value}`);
   return [Number(m[1]), Number(m[2]), Number(m[3])];
@@ -159,35 +170,60 @@ const TEXT_PAIRS: [string, string][] = [
 /** Each state's own text, on the page and on its matching surface tint. */
 const SEMANTIC_ROLES = ["--destructive", "--warning", "--success", "--info"];
 
+/** The layer-2 colour roles beyond the neutral set: the states, their surfaces, the draft pair. */
+const SEMANTIC_ROLE_TOKENS = [
+  ...SEMANTIC_ROLES,
+  ...SEMANTIC_ROLES.map((r) => `${r}-surface`),
+  "--destructive-foreground",
+  "--surface-draft",
+  "--surface-draft-border",
+];
+
 describe("criterion 1 — role tokens are references into the ramp, never literals", () => {
   it.each([
     ["light", light],
     ["dark", dark],
-  ])("%s role tokens all resolve through var()", (_theme, tokens) => {
+  ])("%s neutral role tokens all resolve through var()", (_theme, tokens) => {
     for (const token of ROLE_TOKENS) {
-      expect(tokens.get(token), `${token} is not declared`).toMatch(/^var\(--(ink-\d{2}|accent-\d{3})\)$/);
+      expect(tokens.get(token), `${token} is not declared`).toMatch(LAYER_2_VALUE);
     }
   });
 
-  it("layer 1 is the only place a neutral colour literal is written", () => {
-    // Anything that is not a var() reference is a literal, whatever its notation
-    // — checking for `oklch(` alone would let a newly added hex token through.
-    const literals = [...light.entries()]
-      .filter(([name, value]) => !value.startsWith("var(") && !isRampToken(name) && name !== "--radius")
-      .map(([name]) => name);
+  it.each([
+    ["light", light],
+    ["dark", dark],
+  ])("%s semantic role tokens all resolve through var()", (_theme, tokens) => {
+    for (const token of SEMANTIC_ROLE_TOKENS) {
+      expect(tokens.get(token), `${token} is not declared`).toMatch(LAYER_2_VALUE);
+    }
+  });
 
-    // Only the semantic states carry their own literals: their hues sit outside
-    // the neutral ramp, so they cannot be expressed as a step of it.
-    expect(literals.sort()).toEqual([
-      "--destructive",
-      "--destructive-foreground",
-      "--destructive-surface",
-      "--info-surface",
-      "--success",
-      "--success-surface",
-      "--warning",
-      "--warning-surface",
-    ]);
+  // The invariant itself, stated once and enforced over everything actually
+  // declared — not over a hand-maintained list, so a token added tomorrow is
+  // covered without anyone remembering to add it here. There is no whitelist:
+  // a colour literal anywhere in layer 2 fails the build, in either theme.
+  it.each([
+    ["light", light],
+    ["dark", dark],
+  ])("%s layer 2 contains no colour literal at all", (theme, tokens) => {
+    const offenders = [...tokens.entries()]
+      .filter(([name]) => !isRampToken(name) && !NON_COLOUR_TOKENS.has(name))
+      .filter(([, value]) => !LAYER_2_VALUE.test(value))
+      .map(([name, value]) => `${name}: ${value}`);
+
+    expect(offenders, `${theme} layer 2 must reference layer 1 only`).toEqual([]);
+  });
+
+  it("layer 1 primitives are the only declarations holding a literal", () => {
+    const literalBearing = [...light.entries()]
+      .filter(([, value]) => !value.startsWith("var("))
+      .map(([name]) => name)
+      .filter((name) => !NON_COLOUR_TOKENS.has(name));
+
+    // Every one of them is a layer-1 primitive. The assertion is on the property,
+    // not on the roster, so adding a ramp step needs no edit here.
+    expect(literalBearing.filter((name) => !isRampToken(name))).toEqual([]);
+    expect(literalBearing.length).toBeGreaterThan(0);
   });
 });
 
