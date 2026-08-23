@@ -14,8 +14,10 @@ decided "paper" system — one warm-neutral eleven-step ramp, every semantic rol
 step of it by `var()` reference, semantic/draft surfaces, and type/radius/shadow tokens — plus
 one colocated test that recomputes the palette's contrast from the stylesheet so the
 accessibility guarantee is measured rather than asserted. No screen is migrated and no component
-is edited — but, contrary to the brief's premise, this is **not** invisible to users: see the
-criterion-8 finding below for the five surfaces that do change.
+is edited — but, contrary to the brief's original premise, this is **not** pixel-identical:
+existing consumers of the semantic tokens inherit the new Paper colours. After the correction
+pass below, that is limited to `button.tsx`'s destructive and primary fills and the universal
+hairline; the radius change that accounted for the largest difference has been deferred.
 
 ## Scope
 
