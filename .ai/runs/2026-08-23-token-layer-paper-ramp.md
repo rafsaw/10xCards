@@ -119,11 +119,11 @@ right.
 
 ### Phase 1: The token layer in global.css
 
-- [ ] 1.1 Add layer 1 — the eleven-step ink ramp and the two accent literals
-- [ ] 1.2 Rewrite :root role tokens as var() references and add the new roles
-- [ ] 1.3 Mirror the identical token set in .dark
-- [ ] 1.4 Delete chart/sidebar tokens and extend @theme inline
-- [ ] 1.5 Add the theme-invariant @theme block and lower --radius
+- [x] 1.1 Add layer 1 — the eleven-step ink ramp and the two accent literals — 9431b07
+- [x] 1.2 Rewrite :root role tokens as var() references and add the new roles — 9431b07
+- [x] 1.3 Mirror the identical token set in .dark — 9431b07
+- [x] 1.4 Delete chart/sidebar tokens and extend @theme inline — 9431b07
+- [x] 1.5 Add the theme-invariant @theme block and lower --radius — 9431b07
 
 ### Phase 2: The contrast guard test
 
