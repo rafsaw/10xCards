@@ -170,14 +170,17 @@ describe("criterion 1 — role tokens are references into the ramp, never litera
   });
 
   it("layer 1 is the only place a neutral colour literal is written", () => {
+    // Anything that is not a var() reference is a literal, whatever its notation
+    // — checking for `oklch(` alone would let a newly added hex token through.
     const literals = [...light.entries()]
-      .filter(([name, value]) => value.startsWith("oklch(") && !isRampToken(name))
+      .filter(([name, value]) => !value.startsWith("var(") && !isRampToken(name) && name !== "--radius")
       .map(([name]) => name);
 
     // Only the semantic states carry their own literals: their hues sit outside
     // the neutral ramp, so they cannot be expressed as a step of it.
     expect(literals.sort()).toEqual([
       "--destructive",
+      "--destructive-foreground",
       "--destructive-surface",
       "--info-surface",
       "--success",
@@ -230,6 +233,15 @@ describe("criterion 3 — the dark palette meets the same thresholds, under a ha
 
   it.each(["--input", "--ring"])("%s clears the 3:1 non-text threshold", (token) => {
     expect(contrast(token, "--background", dark)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("--destructive-foreground clears 4.5:1 on the destructive fill", () => {
+    expect(contrast("--destructive-foreground", "--destructive", dark)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("the draft surface carries body and muted text at AA", () => {
+    expect(contrast("--foreground", "--surface-draft", dark)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast("--muted-foreground", "--surface-draft", dark)).toBeGreaterThanOrEqual(4.5);
   });
 
   // Maximum contrast on a dark background produces halation for readers with
