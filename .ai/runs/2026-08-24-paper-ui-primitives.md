@@ -56,34 +56,34 @@ no `Card`/`Field`, no proving route.
 
 ### Phase 1: Radius token
 
-- [ ] 1.1 Add `--radius-paper` to the plain `@theme` block in `global.css`
-- [ ] 1.2 Extend `tokens.test.ts` to assert `--radius` stays `0.625rem` and `--radius-paper` is `0.375rem`
+- [x] 1.1 Add `--radius-paper` to the plain `@theme` block in `global.css` — 977525c
+- [x] 1.2 Extend `tokens.test.ts` to assert `--radius` stays `0.625rem` and `--radius-paper` is `0.375rem` — 977525c
 
 ### Phase 2: `Notice` primitive
 
-- [ ] 2.1 Create `src/components/ui/Notice.tsx` with variant surfaces, role/aria-live mapping, lucide icons
-- [ ] 2.2 Add source-level test asserting the role/aria-live mapping per variant
+- [x] 2.1 Create `src/components/ui/Notice.tsx` with variant surfaces, role/aria-live mapping, lucide icons — e817422
+- [x] 2.2 Add source-level test asserting the role/aria-live mapping per variant — e817422
 
 ### Phase 3: `EmptyState` primitive
 
-- [ ] 3.1 Create `src/components/ui/EmptyState.tsx`, lifted in shape from `DoneCard`
+- [x] 3.1 Create `src/components/ui/EmptyState.tsx`, lifted in shape from `DoneCard` — e817422
 
 ### Phase 4: `PageHeader` primitive
 
-- [ ] 4.1 Create `src/components/ui/PageHeader.tsx`
+- [x] 4.1 Create `src/components/ui/PageHeader.tsx` — e817422
 
 ### Phase 5: `Banner.astro` token adoption
 
-- [ ] 5.1 Replace the nine hex literals in `Banner.astro`'s `<style>` with the semantic surface/role tokens
-- [ ] 5.2 Add a test asserting no hex/`rgb()`/`oklch()` literal remains in `Banner.astro`
+- [x] 5.1 Replace the nine hex literals in `Banner.astro`'s `<style>` with the semantic surface/role tokens — c5fa8ac
+- [x] 5.2 Add a test asserting no hex/`rgb()`/`oklch()` literal remains in `Banner.astro` — c5fa8ac
 
 ### Phase 6: `Button` focus correction
 
-- [ ] 6.1 Edit `button.tsx`: drop the `/50` alpha on the base ring, remove the `destructive` variant's own ring override
-- [ ] 6.2 Add a test asserting the two focus classes on `button.tsx`'s variant strings
+- [x] 6.1 Edit `button.tsx`: drop the `/50` alpha on the base ring, remove the `destructive` variant's own ring override — 5fbd19f
+- [x] 6.2 Add a test asserting the two focus classes on `button.tsx`'s variant strings — e817422 (bundled into `primitives.test.ts`, ahead of the 5fbd19f fix it covers)
 
 ### Phase 7: Primitive-wide source rules
 
-- [ ] 7.1 Add a test asserting no colour literal/`shadow-*`/`backdrop-blur-*`/`bg-cosmic`/gradient in `src/components/ui/`
-- [ ] 7.2 Add a test asserting the 58 `rounded-(md|lg|xl)` occurrences are unchanged and `rounded-paper` appears only under `src/components/ui/`
-- [ ] 7.3 Add a test asserting no `src/pages/dev/**` proving route exists
+- [x] 7.1 Add a test asserting no colour literal/`shadow-*`/`backdrop-blur-*`/`bg-cosmic`/gradient in `src/components/ui/` — e817422
+- [x] 7.2 Add a test asserting the 58 `rounded-(md|lg|xl)` occurrences are unchanged and `rounded-paper` appears only under `src/components/ui/` — e817422
+- [x] 7.3 Add a test asserting no `src/pages/dev/**` proving route exists — e817422
