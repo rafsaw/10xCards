@@ -114,6 +114,15 @@
   --popover: var(--ink-00);
   --popover-foreground: var(--ink-90);
 
+  /* The scrim behind a floating layer (currently only a <dialog>'s ::backdrop).
+   * Fixed to --ink-90 in both themes on purpose: a scrim's job is to dim
+   * whatever sits behind the floating layer, not to invert with the page the
+   * way --background does — it stays anchored to the ramp's darkest step in
+   * both themes. This token is opaque; consumers apply their own translucency
+   * (e.g. `opacity`), never color-mix() — see --shadow-raised below for why
+   * color-mix() with a floating-layer colour is unsafe in this build. */
+  --overlay: var(--ink-90);
+
   --primary: var(--ink-90);
   --primary-foreground: var(--ink-05);
   --secondary: var(--ink-10);
@@ -176,6 +185,9 @@
   --card-foreground: var(--ink-20);
   --popover: var(--ink-80);
   --popover-foreground: var(--ink-20);
+
+  /* Same anchor as :root — see there. */
+  --overlay: var(--ink-90);
 
   --primary: var(--ink-20);
   --primary-foreground: var(--ink-90);
@@ -276,6 +288,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-overlay: var(--overlay);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);

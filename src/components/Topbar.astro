@@ -191,7 +191,12 @@ const mobileLinkClass = (href: string) =>
     transform: translateX(0);
   }
   #mobile-nav-dialog::backdrop {
-    background: rgb(0 0 0 / 0.4);
+    /* var(--overlay) is opaque by design (see global.css) — translucency comes
+     * from `opacity` here, not color-mix(), which this build's Lightning CSS
+     * pass wraps in an @supports fallback that drops the alpha entirely (see
+     * --shadow-raised's comment in global.css for the same hazard, hit first). */
+    background: var(--overlay);
+    opacity: 0.4;
   }
   @media (min-width: 640px) {
     #mobile-nav-dialog {
