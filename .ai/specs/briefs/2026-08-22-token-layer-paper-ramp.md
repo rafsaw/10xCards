@@ -22,7 +22,7 @@
 
 This increment replaces the colour section of `src/styles/global.css` with a two-layer system and adds type, radius and shadow tokens. The two layers are the whole idea, so they come first.
 
-**Layer 1 — the raw primitives.** Eleven steps of one warm neutral (`oklch`, hue 85, chroma tapering with lightness); the four semantic hue families that cannot be expressed as steps of that ramp — `--accent-*` (blue), `--red-*`, `--amber-*`, `--green-*`, each with a light-theme text step (`-500`), a dark-theme text step (`-300`), a light surface tint (`-050`) and a dark surface tint (`-900`); and `--white`. Value-named, because they _are_ values. Nothing in `src/` outside `global.css` may reference these directly.
+**Layer 1 — the raw primitives.** Eleven steps of one warm neutral (`oklch`, hue 85, chroma tapering with lightness); the four semantic hue families that cannot be expressed as steps of that ramp — `--blue-*`, `--red-*`, `--amber-*`, `--green-*`, each with a light-theme text step (`-500`), a dark-theme text step (`-300`), a light surface tint (`-050`) and a dark surface tint (`-900`); and `--white`. Value-named, because they _are_ values. Nothing in `src/` outside `global.css` may reference these directly.
 
 **Layer 2 — the roles.** Every semantic token (`--background`, `--foreground`, `--border`, `--destructive`, `--warning-surface`, …) is a bare `var()` reference into layer 1. **No layer-2 role contains a colour literal — with no exceptions and no whitelist.**
 
@@ -229,7 +229,7 @@ Not applicable. This increment proposes no AI behaviour, changes no model, promp
 
 ### ✅ Acceptance criteria
 
-1. **Given** `src/styles/global.css` after the change, **when** its colour declarations are read, **then** every layer-2 role token's value is a bare `var()` reference into layer 1 — `--ink-*`, `--accent-*`, `--red-*`, `--amber-*`, `--green-*` or `--white` — and **no** layer-2 role contains a colour literal, with no exceptions and no whitelist. The semantic states are part of this: their hues cannot be steps of the neutral ramp, so they are promoted into layer 1 as named palette primitives rather than written inline as literals in layer 2.
+1. **Given** `src/styles/global.css` after the change, **when** its colour declarations are read, **then** every layer-2 role token's value is a bare `var()` reference into layer 1 — `--ink-*`, `--blue-*`, `--red-*`, `--amber-*`, `--green-*` or `--white` — and **no** layer-2 role contains a colour literal, with no exceptions and no whitelist. The semantic states are part of this: their hues cannot be steps of the neutral ramp, so they are promoted into layer 1 as named palette primitives rather than written inline as literals in layer 2.
 2. **Given** the light palette, **when** contrast is computed for `--foreground`, `--muted-foreground`, `--primary-foreground` on `--primary`, `--destructive`, `--warning`, `--success` and `--info` against their stated backgrounds, **then** each meets 4.5:1, and `--input` and `--ring` each meet 3:1.
 3. **Given** the dark palette, **when** the same computation runs, **then** the same thresholds hold, **and** `--foreground` on `--background` measures below 16:1 — the halation ceiling, which an over-eager "improvement" to the contrast would break.
 4. **Given** `:root` and `.dark`, **when** their declared token names are compared, **then** the two sets are identical. A token in one block and not the other fails (principle 2).
