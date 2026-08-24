@@ -170,8 +170,17 @@ const mobileLinkClass = (href: string) =>
    * hoists <style>/<script> as scoped/processed blocks at that level, not when
    * nested inside a JS expression like the user ? (...) : (...) branch above. */
   #mobile-nav-dialog {
+    /* left: auto is required, not decorative: the <dialog> UA stylesheet sets
+     * its own `inset: 0` (left: 0 included), and an unset `left` here would
+     * leave that active. With `right: 0` also set and an explicit width, a
+     * left:0-and-right:0 box is overconstrained and CSS resolves it by keeping
+     * `left` and dropping `right` — docking the panel to the leading edge
+     * instead of the trailing edge it's meant to slide in from. */
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
     margin: 0;
     transform: translateX(100%);
     transition: transform 200ms ease-out;

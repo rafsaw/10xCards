@@ -4,6 +4,11 @@
 //       operable disclosure control, with focus returning to the trigger on close.
 //       A wrong wiring — the dialog never opening, a link missing from the panel,
 //       or focus getting lost on close — is exactly what only a browser can catch.
+//       Also covers a real bug caught by manual QA screenshots: the <dialog>'s
+//       CSS overrode top/right/bottom but never cleared the UA stylesheet's own
+//       `left: 0`, so the panel docked to the leading edge instead of the
+//       trailing edge — invisible to a links-only assertion, only a geometry
+//       check (or a screenshot) catches it.
 //       Acceptance criteria exercised here: AC1, AC2, AC3, AC4, AC6.
 // seed: modeled on tests/e2e/seed.spec.ts — role/label locators, wait-for-state,
 //       a self-contained cycle. No data is created, so no cleanup is needed; auth
@@ -35,6 +40,19 @@ test.describe("shell — mobile navigation panel (390px)", () => {
     const dialog = page.getByRole("dialog", { name: "Main navigation" });
     await expect(dialog).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+    // Docks to the trailing (right) edge, not the leading edge — the panel's
+    // right border must settle flush against the viewport width once the
+    // entrance transition finishes. expect.poll waits for that settled state
+    // instead of a fixed timeout.
+    await expect
+      .poll(async () => {
+        const box = await dialog.boundingBox();
+        return box ? Math.round(box.x + box.width) : null;
+      })
+      .toBe(MOBILE_VIEWPORT.width);
+    const dialogBox = await dialog.boundingBox();
+    expect(dialogBox?.x).toBeGreaterThan(0);
 
     for (const name of ["Generate", "Review", "Library", "Dashboard", "Settings"]) {
       await expect(dialog.getByRole("link", { name, exact: true })).toBeVisible();
