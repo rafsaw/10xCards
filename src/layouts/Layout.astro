@@ -38,13 +38,7 @@ const { user, isReadOnly } = Astro.locals;
         </Banner>
       ))
     }
-    {
-      user && (
-        <div class="px-4 pt-4 sm:px-8">
-          <Topbar />
-        </div>
-      )
-    }
+    {user && <Topbar />}
     {isReadOnly && <RetentionBanner />}
     <slot />
   </body>

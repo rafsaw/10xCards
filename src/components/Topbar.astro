@@ -11,52 +11,234 @@ const navLinks = [
 ];
 
 const isActive = (href: string) => pathname === href || pathname === `${href}/`;
-const navItemBase = "rounded-lg px-3 py-1.5 transition-colors";
-const linkClass = (href: string) =>
-  isActive(href)
-    ? `${navItemBase} bg-white/15 text-white`
-    : `${navItemBase} text-blue-100/70 hover:bg-white/10 hover:text-white`;
+
+/* Matches button.tsx's corrected focus-visible pattern exactly: focus-visible:ring-ring
+ * at 3px, no alpha, no per-variant override. Hand-rolled rather than <Button> because
+ * Topbar stays plain Astro (no hydration boundary), same posture as Banner.astro. */
+const focusRing = "outline-none focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]";
+
+const desktopLinkClass = (href: string) =>
+  [
+    "rounded-md px-3 py-1.5 text-sm transition-colors",
+    isActive(href) ? "text-link font-medium" : "text-muted-foreground hover:text-foreground",
+    focusRing,
+  ].join(" ");
+
+const mobileLinkClass = (href: string) =>
+  [
+    "flex min-h-11 items-center rounded-md px-4 text-base transition-colors",
+    isActive(href) ? "text-link font-medium" : "text-muted-foreground hover:text-foreground",
+    focusRing,
+  ].join(" ");
 ---
 
-<div
-  class="mb-4 flex flex-wrap items-center justify-between gap-y-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80"
->
-  {
-    user ? (
-      <>
-        <span class="text-blue-100/70">{user.email}</span>
-        <nav class="flex flex-wrap items-center gap-1 sm:gap-2">
+{
+  user ? (
+    <>
+      <div class="border-border bg-background text-foreground border-b">
+        <div class="flex min-h-14 items-center justify-between gap-4 px-4 sm:px-8">
+          <span class="text-muted-foreground hidden min-w-0 truncate text-sm sm:inline" title={user.email}>
+            {user.email}
+          </span>
+
+          <nav aria-label="Main" class="hidden shrink-0 items-center gap-1 sm:flex">
+            {navLinks.map((link) => (
+              <a
+                href={link.href}
+                class:list={desktopLinkClass(link.href)}
+                aria-current={isActive(link.href) ? "page" : undefined}
+              >
+                {link.label}
+              </a>
+            ))}
+            <form method="POST" action="/api/auth/signout">
+              <button
+                type="submit"
+                class:list={[
+                  "text-muted-foreground hover:text-foreground rounded-md px-3 py-1.5 text-sm transition-colors",
+                  focusRing,
+                ]}
+              >
+                Sign out
+              </button>
+            </form>
+          </nav>
+
+          <button
+            id="mobile-nav-trigger"
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="mobile-nav-dialog"
+            class:list={["text-foreground ml-auto rounded-md p-2 sm:hidden", focusRing]}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="size-6"
+              aria-hidden="true"
+            >
+              <path d="M4 5h16" />
+              <path d="M4 12h16" />
+              <path d="M4 19h16" />
+            </svg>
+            <span class="sr-only">Open navigation</span>
+          </button>
+        </div>
+      </div>
+
+      <dialog
+        id="mobile-nav-dialog"
+        aria-label="Main navigation"
+        class="bg-background text-foreground m-0 h-dvh max-h-none w-full max-w-xs border-0 p-0 sm:hidden"
+      >
+        <div class="border-border flex h-14 items-center justify-between border-b px-4">
+          <span class="text-muted-foreground text-sm">{user.email}</span>
+          <button id="mobile-nav-close" type="button" class:list={["rounded-md p-2", focusRing]}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="size-6"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+            <span class="sr-only">Close navigation</span>
+          </button>
+        </div>
+
+        <nav aria-label="Main" class="flex flex-col gap-1 px-2 py-4">
           {navLinks.map((link) => (
             <a
               href={link.href}
-              class:list={linkClass(link.href)}
+              class:list={mobileLinkClass(link.href)}
               aria-current={isActive(link.href) ? "page" : undefined}
             >
               {link.label}
             </a>
           ))}
+        </nav>
+
+        <div class="border-border border-t px-2 py-4">
           <form method="POST" action="/api/auth/signout">
             <button
               type="submit"
-              class="rounded-lg px-3 py-1.5 text-blue-100/70 transition-colors hover:bg-white/10 hover:text-white"
+              class:list={[
+                "text-muted-foreground hover:text-foreground flex min-h-11 w-full items-center rounded-md px-4 text-base transition-colors",
+                focusRing,
+              ]}
             >
               Sign out
             </button>
           </form>
-        </nav>
-      </>
-    ) : (
-      <>
-        <span class="text-blue-100/70">Not signed in</span>
-        <div class="flex gap-3">
-          <a href="/auth/signin" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        </div>
+      </dialog>
+    </>
+  ) : (
+    <div class="border-border bg-background text-foreground border-b px-4 py-3 sm:px-8">
+      <div class="flex items-center justify-between">
+        <span class="text-muted-foreground text-sm">Not signed in</span>
+        <div class="flex gap-4 text-sm">
+          <a href="/auth/signin" class:list={["text-link hover:underline", focusRing, "rounded-md"]}>
             Sign in
           </a>
-          <a href="/auth/signup" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+          <a href="/auth/signup" class:list={["text-link hover:underline", focusRing, "rounded-md"]}>
             Sign up
           </a>
         </div>
-      </>
-    )
+      </div>
+    </div>
+  )
+}
+
+<style>
+  /* Only meaningful when the signed-in dialog markup above is present; harmless
+   * no-op selectors otherwise. Kept at the template root because Astro only
+   * hoists <style>/<script> as scoped/processed blocks at that level, not when
+   * nested inside a JS expression like the user ? (...) : (...) branch above. */
+  #mobile-nav-dialog {
+    /* left: auto is required, not decorative: the <dialog> UA stylesheet sets
+     * its own `inset: 0` (left: 0 included), and an unset `left` here would
+     * leave that active. With `right: 0` also set and an explicit width, a
+     * left:0-and-right:0 box is overconstrained and CSS resolves it by keeping
+     * `left` and dropping `right` — docking the panel to the leading edge
+     * instead of the trailing edge it's meant to slide in from. */
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    margin: 0;
+    transform: translateX(100%);
+    transition: transform 200ms ease-out;
   }
-</div>
+  #mobile-nav-dialog.is-open {
+    transform: translateX(0);
+  }
+  #mobile-nav-dialog::backdrop {
+    /* var(--overlay) is opaque by design (see global.css) — translucency comes
+     * from `opacity` here, not color-mix(), which this build's Lightning CSS
+     * pass wraps in an @supports fallback that drops the alpha entirely (see
+     * --shadow-raised's comment in global.css for the same hazard, hit first). */
+    background: var(--overlay);
+    opacity: 0.4;
+  }
+  @media (min-width: 640px) {
+    #mobile-nav-dialog {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const trigger = document.getElementById("mobile-nav-trigger");
+  const dialog = document.getElementById("mobile-nav-dialog");
+  const closeButton = document.getElementById("mobile-nav-close");
+
+  if (trigger instanceof HTMLButtonElement && dialog instanceof HTMLDialogElement) {
+    const open = () => {
+      dialog.showModal();
+      requestAnimationFrame(() => dialog.classList.add("is-open"));
+      trigger.setAttribute("aria-expanded", "true");
+    };
+
+    const close = () => {
+      dialog.classList.remove("is-open");
+      dialog.close();
+    };
+
+    trigger.addEventListener("click", open);
+    closeButton?.addEventListener("click", close);
+
+    // Native <dialog> does not return focus to the opener on close — restore it
+    // explicitly, and keep aria-expanded in sync with every close path (Escape,
+    // backdrop click, or the close button).
+    dialog.addEventListener("close", () => {
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.focus();
+    });
+
+    // A click on the ::backdrop fires with the dialog itself as event.target; a
+    // click inside the panel's content does not, because it targets a child
+    // element instead. Checking the target (not listening on document) is what
+    // makes this close on backdrop-click without also closing on an inside click.
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) close();
+    });
+  }
+</script>

@@ -87,12 +87,15 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
 
   const srcFiles = walk(SRC_DIR).filter((f) => /\.(tsx?|astro)$/.test(f));
 
-  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 58", () => {
+  // 63 = 58 (Increment 2 baseline) plus the net delta from the
+  // shell-mobile-navigation increment's Topbar.astro rewrite, which stays on
+  // the legacy radius scale since it lives outside src/components/ui/.
+  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 63", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(58);
+    expect(count).toBe(63);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
