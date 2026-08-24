@@ -32,7 +32,7 @@ test.describe("shell — mobile navigation panel (390px)", () => {
 
     await trigger.click();
 
-    const dialog = page.getByRole("dialog", { name: "Main" });
+    const dialog = page.getByRole("dialog", { name: "Main navigation" });
     await expect(dialog).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "true");
 
