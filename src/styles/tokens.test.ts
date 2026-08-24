@@ -343,3 +343,17 @@ describe("criterion 4 — the two themes declare the same tokens (principle 2)",
     }
   });
 });
+
+describe("criterion 5 — the transitional Paper radius does not touch the legacy scale", () => {
+  // `--radius` drives rounded-sm/md/lg/xl for the 58 legacy consumers measured in
+  // .ai/specs/briefs/2026-08-24-paper-ui-primitives.md. --radius-paper is a second,
+  // additive token read only by the primitives in src/components/ui/ — flipping
+  // --radius itself is a deliberate act for the migration increment, not a side effect.
+  it("--radius is still 0.625rem", () => {
+    expect(light.get("--radius")).toBe("0.625rem");
+  });
+
+  it("--radius-paper is 0.375rem, declared in the theme-invariant scales", () => {
+    expect(themeScales.get("--radius-paper")).toBe("0.375rem");
+  });
+});

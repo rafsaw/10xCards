@@ -257,6 +257,12 @@
    * The literal compiles to `oklch(19% .008 85/.18)` with its alpha intact and
    * no fallback branch at all. Re-test the build output before changing this. */
   --shadow-raised: 0 8px 24px -8px oklch(0.19 0.008 85 / 0.18), 0 2px 6px -2px oklch(0.19 0.008 85 / 0.12);
+
+  /* Transitional. Paper's geometry, consumed only by primitives in src/components/ui/.
+   * Legacy markup keeps reading --radius (0.625rem) via rounded-sm/md/lg/xl, so introducing
+   * this restyles nothing. REMOVAL CONDITION: when the last screen migrates, --radius becomes
+   * 0.375rem and this token and every `rounded-paper` usage are deleted in the same commit. */
+  --radius-paper: 0.375rem;
 }
 
 @theme inline {
