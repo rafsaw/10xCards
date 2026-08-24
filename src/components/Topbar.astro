@@ -36,10 +36,12 @@ const mobileLinkClass = (href: string) =>
   user ? (
     <>
       <div class="border-border bg-background text-foreground border-b">
-        <div class="flex h-14 items-center justify-between gap-4 px-4 sm:px-8">
-          <span class="text-muted-foreground hidden text-sm sm:inline">{user.email}</span>
+        <div class="flex min-h-14 items-center justify-between gap-4 px-4 sm:px-8">
+          <span class="text-muted-foreground hidden min-w-0 truncate text-sm sm:inline" title={user.email}>
+            {user.email}
+          </span>
 
-          <nav aria-label="Main" class="hidden items-center gap-1 sm:flex">
+          <nav aria-label="Main" class="hidden shrink-0 items-center gap-1 sm:flex">
             {navLinks.map((link) => (
               <a
                 href={link.href}

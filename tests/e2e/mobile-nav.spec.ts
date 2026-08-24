@@ -13,11 +13,21 @@
 // seed: modeled on tests/e2e/seed.spec.ts — role/label locators, wait-for-state,
 //       a self-contained cycle. No data is created, so no cleanup is needed; auth
 //       comes from storageState (playwright.config.ts -> `setup` project).
+//
+// risk (added in the om-ux-review-pr correction pass): the mobile-only 390px
+//       scrollWidth check above gave no coverage of the desktop/mobile handoff
+//       itself — the width range right at and above the `sm` (640px) breakpoint,
+//       where the desktop row first becomes visible. A real bug shipped there:
+//       the signed-in email had no truncation, so at 640-680px it wrapped across
+//       the fixed-height bar and pushed Sign out off-screen with a genuine
+//       horizontal overflow (scrollWidth > clientWidth). Only a browser at those
+//       exact widths catches it — a links-only or 390px-only assertion cannot.
 
 import { test, expect } from "@playwright/test";
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 const PROTECTED_ROUTES = ["/dashboard", "/generate", "/review", "/library", "/settings"];
+const HANDOFF_WIDTHS = [640, 660, 680];
 
 test.describe("shell — mobile navigation panel (390px)", () => {
   test.use({ viewport: MOBILE_VIEWPORT });
@@ -69,6 +79,28 @@ test.describe("shell — mobile navigation panel (390px)", () => {
     test(`${route} fits one row at 390px — no horizontal scroll`, async ({ page }) => {
       await page.goto(route);
       await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
+
+      const [scrollWidth, clientWidth] = await page.evaluate(() => [
+        document.documentElement.scrollWidth,
+        document.documentElement.clientWidth,
+      ]);
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  }
+});
+
+test.describe("shell — desktop/mobile handoff width (640-680px)", () => {
+  for (const width of HANDOFF_WIDTHS) {
+    test(`/dashboard at ${width}px — no horizontal scroll and Sign out stays reachable`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/dashboard");
+
+      // The desktop row (not the mobile trigger) is the one under test here.
+      await expect(page.getByRole("navigation", { name: "Main" })).toBeVisible();
+
+      const signOut = page.getByRole("button", { name: "Sign out" });
+      await expect(signOut).toBeVisible();
+      await expect(signOut).toBeInViewport();
 
       const [scrollWidth, clientWidth] = await page.evaluate(() => [
         document.documentElement.scrollWidth,
