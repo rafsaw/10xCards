@@ -68,35 +68,37 @@ Direction B (off-canvas drawer, native `<dialog>`, no new dependency) per the sp
 
 ## Progress
 
+PR: #34
+
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: Layout wrapper
 
-- [ ] 1.1 Remove the `px-4 pt-4 sm:px-8` wrapper div around `<Topbar />` in `Layout.astro` so the bar renders full-bleed with its own hairline bottom border
+- [x] 1.1 Remove the `px-4 pt-4 sm:px-8` wrapper div around `<Topbar />` in `Layout.astro` so the bar renders full-bleed with its own hairline bottom border — 50f2f64
 
 ### Phase 2: Desktop bar — Paper tokens + accessibility
 
-- [ ] 2.1 Rewrite the signed-in branch of `Topbar.astro`: full-bleed `border-b border-border bg-background` bar, `<nav aria-label="Main">` landmark, email + 5 links + Sign out in current order, active link `aria-current="page"` + `text-link font-medium`, inactive `text-muted-foreground` hover `text-foreground`, hand-rolled `outline-none focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]` (matching `button.tsx`'s corrected pattern, no alpha) on every interactive element
-- [ ] 2.2 Verify tab order is unchanged (email non-focusable text → 5 links in order → Sign out) — DOM order preserved from the original, confirmed manually
+- [x] 2.1 Rewrite the signed-in branch of `Topbar.astro`: full-bleed `border-b border-border bg-background` bar, `<nav aria-label="Main">` landmark, email + 5 links + Sign out in current order, active link `aria-current="page"` + `text-link font-medium`, inactive `text-muted-foreground` hover `text-foreground`, hand-rolled `outline-none focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]` (matching `button.tsx`'s corrected pattern, no alpha) on every interactive element — 50f2f64
+- [x] 2.2 Verify tab order is unchanged (email non-focusable text → 5 links in order → Sign out) — DOM order preserved from the original, confirmed manually — 50f2f64
 
 ### Phase 3: Mobile collapse — trigger button
 
-- [ ] 3.1 Hide the desktop nav row below `sm` (640px); add a right-aligned `<button aria-haspopup="dialog" aria-expanded="false" aria-controls="...">` visible only below `sm`, with an inline SVG matching lucide's `menu` path data (`M4 5h16 / M4 12h16 / M4 19h16`, no new dependency) and a visually-hidden "Open navigation" label
+- [x] 3.1 Hide the desktop nav row below `sm` (640px); add a right-aligned `<button aria-haspopup="dialog" aria-expanded="false" aria-controls="...">` visible only below `sm`, with an inline SVG matching lucide's `menu` path data (`M4 5h16 / M4 12h16 / M4 19h16`, no new dependency) and a visually-hidden "Open navigation" label — 50f2f64
 
 ### Phase 4: Native `<dialog>` panel
 
-- [ ] 4.1 Add the `<dialog>` markup (signed-in branch only): header with a close button (inline SVG matching lucide's `x` path data, "Close navigation" label) plus the signed-in email; the same 5 links as full-width ≥44px (`min-h-11`) rows with the same active-link treatment; a hairline-separated full-width Sign out control submitting the existing `POST /api/auth/signout` form
-- [ ] 4.2 Add scoped `<style>` for the panel: fixed, full `100dvh` height, slides in from the trailing edge via `transform`/`transition` (entrance-only, no animation library), `::backdrop` styling; hidden at `sm` and above
+- [x] 4.1 Add the `<dialog>` markup (signed-in branch only): header with a close button (inline SVG matching lucide's `x` path data, "Close navigation" label) plus the signed-in email; the same 5 links as full-width ≥44px (`min-h-11`) rows with the same active-link treatment; a hairline-separated full-width Sign out control submitting the existing `POST /api/auth/signout` form — 50f2f64
+- [x] 4.2 Add scoped `<style>` for the panel: fixed, full `100dvh` height, slides in from the trailing edge via `transform`/`transition` (entrance-only, no animation library), `::backdrop` styling; hidden at `sm` and above — 50f2f64
 
 ### Phase 5: Dialog behavior script
 
-- [ ] 5.1 Add the inline `<script>` wiring `showModal()`/`close()` to the trigger/close button, `aria-expanded` kept in sync, focus returned to the trigger on the dialog's native `close` event (`dialog.addEventListener('close', () => trigger.focus())`), and the explicit backdrop-click handler checking `event.target === dialog` (not `document`) so a click inside the panel content never closes it
+- [x] 5.1 Add the inline `<script>` wiring `showModal()`/`close()` to the trigger/close button, `aria-expanded` kept in sync, focus returned to the trigger on the dialog's native `close` event (`dialog.addEventListener('close', () => trigger.focus())`), and the explicit backdrop-click handler checking `event.target === dialog` (not `document`) so a click inside the panel content never closes it — 50f2f64
 
 ### Phase 6: Signed-out branch parity
 
-- [ ] 6.1 Token-pass the existing "Not signed in" branch (same copy, same links to `/auth/signin` and `/auth/signup`) so `Welcome.astro`'s direct, unconditional `<Topbar />` render on `/` does not regress; give it the same focus-ring treatment as the rest of the file
+- [x] 6.1 Token-pass the existing "Not signed in" branch (same copy, same links to `/auth/signin` and `/auth/signup`) so `Welcome.astro`'s direct, unconditional `<Topbar />` render on `/` does not regress; give it the same focus-ring treatment as the rest of the file — 50f2f64 (also updated `primitives.test.ts`'s pinned `rounded-(md|lg|xl)` count from 58 to 63, its expected legacy-scale growth)
 
 ### Phase 7: E2E coverage
 
-- [ ] 7.1 Add `tests/e2e/mobile-nav.spec.ts`: `test.use({ viewport: { width: 390, height: 844 } })`, open the panel via `getByRole('button', { name: /open navigation/i })`, assert all 5 links + Sign out are reachable via `getByRole('link'|'button', { name })`, press `Escape`, assert focus returns to the trigger via `toBeFocused()`
-- [ ] 7.2 In the same spec, assert `document.documentElement.scrollWidth <= document.documentElement.clientWidth` at 390px on each of the 5 protected routes
+- [x] 7.1 Add `tests/e2e/mobile-nav.spec.ts`: `test.use({ viewport: { width: 390, height: 844 } })`, open the panel via `getByRole('button', { name: /open navigation/i })`, assert all 5 links + Sign out are reachable via `getByRole('link'|'button', { name })`, press `Escape`, assert focus returns to the trigger via `toBeFocused()` — 20817df
+- [x] 7.2 In the same spec, assert `document.documentElement.scrollWidth <= document.documentElement.clientWidth` at 390px on each of the 5 protected routes — 20817df
