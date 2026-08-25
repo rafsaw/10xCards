@@ -197,7 +197,9 @@
       "WebFetch(domain:v1.evalite.dev)",
       "Bash(sed -i 's|^- \\\\[ \\\\] 3\\\\.\\\\\\([123]\\\\\\) \\\\\\(.*\\\\\\)$|- [x] 3.\\\\1 \\\\2|' .ai/runs/2026-08-23-token-layer-paper-ramp.md)",
       "Bash(cp /c/Users/rafal/repos/10xDevs3/10xCards/.ai/qa/artifacts_pr32-20260823-184013/qa-pr32.mjs ./qa-pr32.mjs)",
-      "Bash(QA_CONTROL_URL=http://127.0.0.1:4322 QA_OUT_DIR=/c/Users/rafal/repos/10xDevs3/10xCards/.ai/qa/artifacts_pr32-20260823-184013 node qa-pr32.mjs)"
+      "Bash(QA_CONTROL_URL=http://127.0.0.1:4322 QA_OUT_DIR=/c/Users/rafal/repos/10xDevs3/10xCards/.ai/qa/artifacts_pr32-20260823-184013 node qa-pr32.mjs)",
+      "Bash(export *)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
