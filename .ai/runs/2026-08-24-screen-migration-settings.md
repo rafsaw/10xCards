@@ -66,20 +66,25 @@ exact class strings, and acceptance criteria each Step must satisfy.
 
 ### Phase 1: Page shell — background, heading, danger-zone region
 
-- [ ] 1.1 Replace `settings.astro`'s outer wrapper `bg-cosmic` with `bg-background text-foreground`
-- [ ] 1.2 Replace the gradient `<h1>` + `← Dashboard` link with `<PageHeader title="Settings" />`
-- [ ] 1.3 Restyle the "Signed in as" line to token classes
-- [ ] 1.4 Restyle the danger-zone box to a hairline-separated region
+- [x] 1.1 Replace `settings.astro`'s outer wrapper `bg-cosmic` with `bg-background text-foreground` — d2a27d2
+- [x] 1.2 Replace the gradient `<h1>` + `← Dashboard` link with `<PageHeader title="Settings" />` — d2a27d2
+- [x] 1.3 Restyle the "Signed in as" line to token classes — d2a27d2
+- [x] 1.4 Restyle the danger-zone box to a hairline-separated region — d2a27d2
 
 ### Phase 2: Notice adoption — error and retention states
 
-- [ ] 2.1 `DeleteAccountButton.tsx` error state uses `Notice`
-- [ ] 2.2 New `RetentionNotice.tsx`
-- [ ] 2.3 Wire `RetentionNotice` into `settings.astro`
-- [ ] 2.4 Confirm `CancelDeletionButton.tsx` untouched; file follow-up issue
+- [x] 2.1 `DeleteAccountButton.tsx` error state uses `Notice` — d2a27d2
+- [x] 2.2 New `RetentionNotice.tsx` — d2a27d2
+- [x] 2.3 Wire `RetentionNotice` into `settings.astro` — d2a27d2
+- [x] 2.4 Confirm `CancelDeletionButton.tsx` untouched; file follow-up issue — untouched confirmed
+      (byte-for-byte, verified via `git diff`); follow-up filed as
+      https://github.com/rafsaw/10xCards/issues/36
 
 ### Phase 3: Test parity and validation gate
 
-- [ ] 3.1 Update `primitives.test.ts` criterion 5 count
-- [ ] 3.2 Full validation gate
-- [ ] 3.3 Manual/QA no-cosmic-visible check
+- [x] 3.1 Update `primitives.test.ts` criterion 5 count (63 → 61, re-measured, not assumed) — 365136b
+- [x] 3.2 Full validation gate: typecheck 0 errors, lint 0 errors (29 pre-existing warnings,
+      none from this change), build clean, test 203 passed / 1 skipped — 365136b
+- [ ] 3.3 Manual/QA no-cosmic-visible check — deferred to the outer `om-auto-implement-spec`
+      chain's UI-verification step (`om-auto-qa-pr`), which runs against this PR after the code
+      review pass; not blocking this engine's own gate, tracked here so it isn't dropped
