@@ -61,6 +61,8 @@ dark mode, `bg-cosmic`/`Layout.astro` change, `button.tsx` `shadow-xs` fix (file
 - Two assumptions about static `Section`+`Notice` composition in `.astro` (no hydration boundary) and
   inside `client:load` islands need `astro check` + real-render confirmation.
 
+PR: #38
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
