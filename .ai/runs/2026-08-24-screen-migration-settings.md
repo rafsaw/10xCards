@@ -62,6 +62,8 @@ exact class strings, and acceptance criteria each Step must satisfy.
 
 ## Progress
 
+PR: #35 (https://github.com/rafsaw/10xCards/pull/35)
+
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: Page shell — background, heading, danger-zone region
@@ -85,6 +87,7 @@ exact class strings, and acceptance criteria each Step must satisfy.
 - [x] 3.1 Update `primitives.test.ts` criterion 5 count (63 → 61, re-measured, not assumed) — 365136b
 - [x] 3.2 Full validation gate: typecheck 0 errors, lint 0 errors (29 pre-existing warnings,
       none from this change), build clean, test 203 passed / 1 skipped — 365136b
-- [ ] 3.3 Manual/QA no-cosmic-visible check — deferred to the outer `om-auto-implement-spec`
-      chain's UI-verification step (`om-auto-qa-pr`), which runs against this PR after the code
+- [x] 3.3 Manual/QA no-cosmic-visible check — `om-auto-qa-pr` PASS, real-browser evidence for both
+      the default and isReadOnly/pending-deletion states at desktop and 390px, no cosmic gradient
+      visible in either: https://github.com/rafsaw/10xCards/pull/35#issuecomment-5410394790
       review pass; not blocking this engine's own gate, tracked here so it isn't dropped
