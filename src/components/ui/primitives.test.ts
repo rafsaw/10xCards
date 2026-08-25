@@ -19,7 +19,7 @@ const readUi = (name: string) => readFileSync(join(UI_DIR, name), "utf8");
 // pre-existing parts of button.tsx are legacy consumers the increment does not
 // touch, and criterion 9 governs what this increment ships, not a retroactive
 // sweep of files it was told not to change.
-const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx"];
+const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx"];
 
 describe("criterion 1 — Notice role/aria-live mapping", () => {
   const source = readUi("Notice.tsx");
