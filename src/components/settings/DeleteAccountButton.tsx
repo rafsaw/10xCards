@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { CircleAlert, Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Notice } from "@/components/ui/Notice";
 import { parseErrorBody } from "@/lib/parse-error";
 
 interface DeleteError {
@@ -16,7 +17,7 @@ const FALLBACK_MESSAGES: Record<string, string> = {
 
 // Request account deletion (FR-016) from the settings Danger zone. Confirms,
 // then POSTs /api/account/delete; on success lands on the dashboard, which now
-// renders read-only with the retention banner. Inline <p> error on failure,
+// renders read-only with the retention banner. Errors render in a Notice,
 // mirroring the FALLBACK_MESSAGES pattern from CreateCardForm.
 export default function DeleteAccountButton() {
   const [pending, setPending] = useState(false);
@@ -50,12 +51,7 @@ export default function DeleteAccountButton() {
 
   return (
     <div className="space-y-3">
-      {error && (
-        <p className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-          <CircleAlert className="size-4 shrink-0" />
-          {error.message}
-        </p>
-      )}
+      {error && <Notice variant="error">{error.message}</Notice>}
       <Button
         type="button"
         variant="destructive"
