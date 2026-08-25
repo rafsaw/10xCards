@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CircleAlert, Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { parseErrorBody } from "@/lib/parse-error";
+import { Notice } from "@/components/ui/Notice";
+import { Section } from "@/components/ui/Section";
+import { Button } from "@/components/ui/button";
 
 const MIN_LENGTH = 200;
 const MAX_LENGTH = 8000;
@@ -20,7 +23,7 @@ const FALLBACK_MESSAGES: Record<string, string> = {
   bad_request: "Something went wrong with the request. Please try again.",
 };
 
-export default function PasteAndGenerateForm() {
+export default function PasteAndGenerateForm({ primary }: { primary: boolean }) {
   const [source, setSource] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<GenerationError | null>(null);
@@ -76,53 +79,51 @@ export default function PasteAndGenerateForm() {
   const tooShort = source.trim().length < MIN_LENGTH;
 
   return (
-    <form
-      onSubmit={(e) => {
-        void handleSubmit(e);
-      }}
-      className="space-y-4"
-    >
-      {error && (
-        <p className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-          <CircleAlert className="size-4 shrink-0" />
-          {error.message}
-        </p>
-      )}
-
-      <div>
-        <textarea
-          value={source}
-          onChange={(e) => {
-            setSource(e.target.value);
-          }}
-          disabled={submitting}
-          rows={8}
-          maxLength={MAX_LENGTH}
-          placeholder="Paste a passage (200–8000 characters)…"
-          className="w-full resize-y rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-blue-100/40 focus:border-blue-300/50 focus:outline-none disabled:opacity-50"
-        />
-        <div className="mt-1 text-right text-xs text-blue-100/50">
-          {source.length} / {MAX_LENGTH}
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        disabled={submitting || tooShort}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+    <Section title="Generate new cards from text">
+      <form
+        onSubmit={(e) => {
+          void handleSubmit(e);
+        }}
+        className="space-y-4"
       >
-        {submitting ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Generating… {elapsedSeconds}s
-          </>
-        ) : (
-          <>
-            <Sparkles className="size-4" />
-            Generate
-          </>
-        )}
-      </button>
-    </form>
+        {error && <Notice variant="error">{error.message}</Notice>}
+
+        <div>
+          <textarea
+            value={source}
+            onChange={(e) => {
+              setSource(e.target.value);
+            }}
+            disabled={submitting}
+            rows={8}
+            maxLength={MAX_LENGTH}
+            placeholder="Paste a passage (200–8000 characters)…"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-ring w-full resize-y rounded-lg border px-3 py-2 text-sm focus:outline-none disabled:opacity-50"
+          />
+          <div className="text-muted-foreground mt-1 text-right text-xs">
+            {source.length} / {MAX_LENGTH}
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          variant={primary ? "default" : "outline"}
+          disabled={submitting || tooShort}
+          className="w-full"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Generating… {elapsedSeconds}s
+            </>
+          ) : (
+            <>
+              <Sparkles className="size-4" />
+              Generate
+            </>
+          )}
+        </Button>
+      </form>
+    </Section>
   );
 }
