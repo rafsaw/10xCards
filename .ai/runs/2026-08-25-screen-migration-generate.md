@@ -1,6 +1,6 @@
 Tracking plan: .ai/runs/2026-08-25-screen-migration-generate.md
 Source doc: .ai/specs/briefs/2026-08-25-screen-migration-generate.md
-Status: in-progress
+Status: complete
 
 ## 🎯 Goal
 
@@ -67,24 +67,24 @@ dark mode, `bg-cosmic`/`Layout.astro` change, `button.tsx` `shadow-xs` fix (file
 
 ### Phase 1: `Section` primitive
 
-- [ ] 1.1 Create `src/components/ui/Section.tsx`
-- [ ] 1.2 Add `"Section.tsx"` to `NEW_PRIMITIVES` in `primitives.test.ts`
+- [x] 1.1 Create `src/components/ui/Section.tsx` — 4876648
+- [x] 1.2 Add `"Section.tsx"` to `NEW_PRIMITIVES` in `primitives.test.ts` — 4876648
 
 ### Phase 2: Page shell — background, heading, top-level notices
 
-- [ ] 2.1 Outer wrapper `bg-cosmic` → `bg-background text-foreground`, `max-w-3xl` → `max-w-content`
-- [ ] 2.2 `PageHeader` replaces gradient `<h1>` + back link
-- [ ] 2.3 Not-configured / loadError paragraphs → `Notice`
-- [ ] 2.4 isReadOnly branch → `Section` + bare warning `Notice`
-- [ ] 2.5 Pass `primary={drafts.length === 0}` to `PasteAndGenerateForm`
+- [x] 2.1 Outer wrapper `bg-cosmic` → `bg-background text-foreground`, `max-w-3xl` → `max-w-content` — 55d1967
+- [x] 2.2 `PageHeader` replaces gradient `<h1>` + back link — 55d1967
+- [x] 2.3 Not-configured / loadError paragraphs → `Notice` — 55d1967
+- [x] 2.4 isReadOnly branch → `Section` + bare warning `Notice` — 55d1967
+- [x] 2.5 Pass `primary={drafts.length === 0}` to `PasteAndGenerateForm` — 55d1967
 
 ### Phase 3: Form and draft-review islands
 
-- [ ] 3.1 `PasteAndGenerateForm.tsx` — `Section`, `Notice`, `Button` variant, token colours
-- [ ] 3.2 `DraftReviewList.tsx` — `Section`, `Notice`, `Button`, success/destructive/surface-draft tokens
+- [x] 3.1 `PasteAndGenerateForm.tsx` — `Section`, `Notice`, `Button` variant, token colours — 55d1967
+- [x] 3.2 `DraftReviewList.tsx` — `Section`, `Notice`, `Button`, success/destructive/surface-draft tokens — 55d1967
 
 ### Phase 4: Test parity and validation gate
 
-- [ ] 4.1 Re-measure and update `rounded-(md|lg|xl)` count in `primitives.test.ts`
-- [ ] 4.2 Full validation gate green
-- [ ] 4.3 Manual/QA verification of all states at desktop and 390px
+- [x] 4.1 Re-measure and update `rounded-(md|lg|xl)` count in `primitives.test.ts` — ba23a37 (measured 54, matching the spec's prediction)
+- [x] 4.2 Full validation gate green — typecheck 0 errors, lint 0 errors (29 pre-existing warnings), build succeeds, 206 passed / 1 skipped
+- [ ] 4.3 Manual/QA verification of all states at desktop and 390px — deferred to `om-auto-qa-pr` after this PR is ready
