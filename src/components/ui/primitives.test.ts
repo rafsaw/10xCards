@@ -181,11 +181,16 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // allowlist is therefore explicit rather than a widened path prefix: a third file
   // reaching for this token still fails, which is the whole point. Increment 10 deletes
   // --radius-paper and every one of its usages together.
+  //
+  // Test files are exempt for the reason every guard in this repo is: a guard has to name
+  // what it forbids in order to forbid it. auth-paper.test.ts quotes AuthCard's shell
+  // class list verbatim, and that quotation is the assertion — not a third consumer.
   const PAPER_RADIUS_CONSUMERS = [join("components", "ui"), join("components", "auth", "AuthCard.astro")];
 
   it("the Paper radius appears only in its two recorded consumers", () => {
     const offenders = srcFiles.filter(
       (f) =>
+        !f.includes(".test.") &&
         !PAPER_RADIUS_CONSUMERS.some((allowed) => f.includes(allowed)) &&
         readFileSync(f, "utf8").includes("rounded-paper"),
     );
