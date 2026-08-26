@@ -39,3 +39,24 @@
 - Browser walk: 9 routes × 2 viewports = 20 rows, 0 problems. Paper ground and `background-image: none` on every route, `scrollWidth` exactly equal to viewport width on every route (AC9), no legacy glass class on any element (AC3), signed-in `/` still redirects to `/dashboard` (AC5). Sign-in used the three unmodified `auth.setup.ts` locators — direct evidence for AC11 ahead of the E2E run.
 - **False positive recorded:** the walk's first version searched the served HTML and reported all five legacy utilities on all nine routes. `bg-cosmic` matched this run's own worktree directory name in dev-server file paths; the other four matched CSS rule *definitions* Tailwind generated from scanning this run's markdown and the test files that quote them. The check now asks the live DOM whether any element carries the class.
 - Environment: the dev server died mid-walk on Vite's stale optimised-dep cache; restarting cleared it.
+
+## 2026-08-26T16:20:00Z — final gate
+
+- Full `validation.commands` green: typecheck 0 errors, lint 0 errors, build complete, `npm test` 605 passed / 1 skipped across 23 files.
+- Integration suite: 8 passed across 3 files. The first run flaked (1 file failed, 4 skipped) while the UI walk's dev server was still up; three consecutive re-runs were green. Disclosed in `final-gate-checks.md` and the PR body rather than quietly re-run.
+- E2E: 14 passed including `auth.setup.ts`, with `tests/` untouched by the diff — AC11 on its own terms.
+- AC13 deliberate break performed: restoring `class="bg-cosmic"` and the `@utility` block turns `colour-sweep.test.ts` red; reverted and re-verified green. Output recorded.
+- Design-system pass: recorded as not applicable — the repo has no separate style lint, and the design system is enforced by the guard tests, all green.
+
+## 2026-08-26T16:35:00Z — `om-auto-review-pr` (chain hand-off) completed
+
+- Verdict: **no blockers, no majors**; two minors recorded (spinner treatment inverted in `SubmitButton.tsx`; focus indicator quieter in `FormField.tsx`, by design). The autofix loop had nothing actionable to fix.
+- **GitHub refuses self-approval** (author and reviewer are the same actor), so the report was posted as a marker comment and the pipeline label was deliberately left at `review` rather than moved to `merge-queue` — an automated pass finding no blockers is not an independent reviewer having read the diff.
+- PR flipped draft to ready; label rationale and diff-derived manual-QA instructions posted. `needs-qa` stands and `qaGate` blocks the merge until `qa-approved`.
+- CI: no GitHub Actions run exists for this branch (`total_count: 0`) although the workflow ran for a comparable branch a day earlier; the only check, `Workers Builds: 10x-cards`, **passed**. Nothing pending, so the CI follow-up is settled and `ci-monitoring` was never needed.
+
+## 2026-08-26T16:38:00Z — run ended
+
+- PR: https://github.com/rafsaw/10xCards/pull/46 — ready for review, Status: complete, 22/22 Tasks rows done.
+- Follow-up filed: issue #47 (Increment 10 — flip `--radius`, retire `--radius-paper`).
+- Bookkeeping note: the first close-out attempt truncated `HANDOFF.md` before its write failed, and that commit captured the deletion. Restored in the next commit and recorded in the file rather than rewritten out of history.
