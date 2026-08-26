@@ -13,7 +13,7 @@
 
 | Phase | Step | Title | Exec | Status | Commit |
 |-------|------|-------|------|--------|--------|
-| 1 | 1.1 | Delete the `AC3 — SURVIVORS` block from `dashboard-paper.test.ts` | inline | todo | — |
+| 1 | 1.1 | Delete the `AC3 — SURVIVORS` block from `dashboard-paper.test.ts` | inline | done | pending |
 | 1 | 1.2 | Retokenise `FormField.tsx` and add the `autocomplete` prop | inline | todo | — |
 | 1 | 1.3 | Retokenise `PasswordToggle.tsx` | inline | todo | — |
 | 1 | 1.4 | Retokenise `SubmitButton.tsx` | inline | todo | — |
