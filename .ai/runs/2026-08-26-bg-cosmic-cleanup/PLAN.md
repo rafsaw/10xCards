@@ -18,8 +18,8 @@
 | 1 | 1.3 | Retokenise `PasswordToggle.tsx` | inline | done | 157512d |
 | 1 | 1.4 | Retokenise `SubmitButton.tsx` | inline | done | c009633 |
 | 1 | 1.5 | Delete `ServerError.tsx`; both call sites render `Notice variant="error"` | inline | done | 794d4ad |
-| 1 | 1.6 | `SignUpForm.tsx` — retokenise the hint, add `autocomplete` to three fields | inline | done | pending |
-| 1 | 1.7 | `SignInForm.tsx` — add `autocomplete` to two fields | inline | todo | — |
+| 1 | 1.6 | `SignUpForm.tsx` — retokenise the hint, add `autocomplete` to three fields | inline | done | a3a80b6 |
+| 1 | 1.7 | `SignInForm.tsx` — add `autocomplete` to two fields | inline | done | pending |
 | 1 | 1.8 | `button.tsx` destructive variant → `text-destructive-foreground` (contrast measured) | inline | todo | — |
 | 1 | 1.9 | `CancelDeletionButton.tsx` — `text-red-700` → `text-destructive` | inline | todo | — |
 | 2 | 2.1 | Create `src/components/auth/AuthCard.astro` | inline | todo | — |
