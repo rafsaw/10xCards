@@ -170,26 +170,22 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
       {
         state.kind === "review-waiting" && (
           <>
-            <section class:list={sectionClass}>
-              <h2 class:list={sectionHeadingClass}>Next up</h2>
-              <p class:list={bodyClass}>{dueSentence(state.dueCount)}</p>
-              <div class:list={actionsClass}>
-                <a href="/review" class:list={primaryLinkClass}>
-                  Start review session
-                </a>
-              </div>
-            </section>
+            <DashboardLead label="Next up" statement={dueSentence(state.dueCount)}>
+              <Button asChild>
+                <a href="/review">Start review session</a>
+              </Button>
+            </DashboardLead>
 
-            {/* Subordinate by construction: no card, no filled control. Drafts are the
-                reminder, never a second primary action competing with the review. */}
+            {/* Subordinate by construction: a hairline, a quiet eyebrow and a text link.
+                Drafts are the reminder, never a second primary action competing with the
+                review. */}
             {state.alsoWaitingDrafts !== null && (
-              <section class:list={asideClass}>
-                <h2 class:list={asideHeadingClass}>Also waiting</h2>
-                <p class:list={asideBodyClass}>{alsoWaitingSentence(state.alsoWaitingDrafts)}</p>
-                <a href="/generate" class:list={textLinkClass}>
+              <DashboardNote label="Also waiting">
+                {alsoWaitingSentence(state.alsoWaitingDrafts)}{" "}
+                <a href="/generate" class="text-link text-sm underline underline-offset-4">
                   Check generated cards
                 </a>
-              </section>
+              </DashboardNote>
             )}
           </>
         )
