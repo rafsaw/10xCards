@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import DashboardLead from "@/components/dashboard/DashboardLead.astro";
 import DashboardNote from "@/components/dashboard/DashboardNote.astro";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { createClient } from "@/lib/supabase";
@@ -155,9 +155,9 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
         state.kind === "review-waiting" && (
           <>
             <DashboardLead label="Next up" statement={dueSentence(state.dueCount)}>
-              <Button asChild>
-                <a href="/review">Start review session</a>
-              </Button>
+              <a href="/review" class:list={buttonVariants()}>
+                Start review session
+              </a>
             </DashboardLead>
 
             {/* Subordinate by construction: a hairline, a quiet eyebrow and a text link.
@@ -178,9 +178,9 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
       {
         state.kind === "drafts-waiting" && (
           <DashboardLead label="Next up" statement={draftsWaitingSentence(state.draftCount)}>
-            <Button asChild>
-              <a href="/generate">Check generated cards</a>
-            </Button>
+            <a href="/generate" class:list={buttonVariants()}>
+              Check generated cards
+            </a>
           </DashboardLead>
         )
       }
@@ -193,9 +193,9 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
             label="All caught up"
             statement="Nothing is due right now. Cards come back when their interval is up."
           >
-            <Button asChild>
-              <a href="/generate">Generate more cards</a>
-            </Button>
+            <a href="/generate" class:list={buttonVariants()}>
+              Generate more cards
+            </a>
           </DashboardLead>
         )
       }
@@ -206,9 +206,9 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
             label="Start your first deck"
             statement="You have no cards yet. Paste a passage and 10xCards drafts question-and-answer cards for you to review before anything is saved."
           >
-            <Button asChild>
-              <a href="/generate">Create your first cards</a>
-            </Button>
+            <a href="/generate" class:list={buttonVariants()}>
+              Create your first cards
+            </a>
             <a href="/library" class="text-link text-sm underline underline-offset-4">
               Or add a card by hand
             </a>

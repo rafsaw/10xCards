@@ -138,12 +138,12 @@ describe("AC5 — the both-waiting state is a lead plus a hairline note, never t
     expect(reviewWaiting).not.toBe("");
   });
 
-  it("its lead carries the one filled Button, over an anchor to /review", () => {
+  it("its lead carries the one filled action, an anchor to /review", () => {
     expect(reviewWaiting).toMatch(/<DashboardLead label="Next up" statement=\{dueSentence\(state\.dueCount\)\}>/);
     expect(reviewWaiting).toMatch(
-      /<Button asChild>\s*\n\s*<a href="\/review">Start review session<\/a>\s*\n\s*<\/Button>/,
+      /<a href="\/review" class:list=\{buttonVariants\(\)\}>\s*\n\s*Start review session\s*\n\s*<\/a>/,
     );
-    expect((reviewWaiting.match(/<Button\b/g) ?? []).length).toBe(1);
+    expect((reviewWaiting.match(/class:list=\{buttonVariants\(\)\}/g) ?? []).length).toBe(1);
   });
 
   it("Also waiting is a note whose only control is an underlined text link", () => {
@@ -154,33 +154,38 @@ describe("AC5 — the both-waiting state is a lead plus a hairline note, never t
   });
 });
 
-describe("AC6 — at most one filled Button per state, and every action is a link", () => {
+describe("AC6 — at most one filled action per state, and every action is a link", () => {
   it("no file contains a literal button element", () => {
     for (const [, source] of FILES) {
       expect(source).not.toMatch(/<button\b/);
     }
   });
 
-  it("every Button occurrence carries asChild, so none of them renders a real button", () => {
-    // A bare "zero <button elements" regex would pass for the wrong reason: <Button>
-    // without asChild renders one. Both halves are asserted.
-    const buttons = page.match(/<Button\b[^>]*>/g) ?? [];
-    expect(buttons.length).toBeGreaterThan(0);
-    for (const tag of buttons) {
-      expect(tag).toMatch(/\basChild\b/);
-    }
+  it("the filled action is an anchor wearing buttonVariants(), never a <Button> element", () => {
+    // The spec's recorded fallback, taken at the walkthrough. <Button asChild> merges
+    // its classes correctly from JSX but NOT from an Astro template: Astro hands React
+    // an HTML-string child, Radix Slot cannot clone a string, and the whole class list
+    // is silently dropped — the walkthrough caught an unstyled, transparent anchor.
+    // Applying buttonVariants() to the anchor keeps the filled recipe, keeps every
+    // action an <a href>, and keeps the page free of any real <button>, which is what
+    // AC6 exists to protect. AC6 and this assertion were amended together.
+    expect(page).not.toMatch(/<Button\b/);
+    expect(page).toMatch(/import \{ buttonVariants \} from "@\/components\/ui\/button";/);
+    expect((page.match(/class:list=\{buttonVariants\(\)\}/g) ?? []).length).toBe(4);
   });
 
-  it("no Button carries a non-default variant, and no state branch holds two", () => {
-    expect(page).not.toMatch(/<Button[^>]*variant=/);
+  it("every filled action points at a real route, and no state branch carries two", () => {
+    for (const match of page.matchAll(/<a href="([^"]+)" class:list=\{buttonVariants\(\)\}>/g)) {
+      expect(match[1]).toMatch(/^\/(review|generate|library)$/);
+    }
     const branches = page.split(/state\.kind === /).slice(1);
     for (const branch of branches) {
-      expect((branch.match(/<Button\b/g) ?? []).length).toBeLessThanOrEqual(1);
+      expect((branch.match(/class:list=\{buttonVariants\(\)\}/g) ?? []).length).toBeLessThanOrEqual(1);
     }
   });
 
-  it("there are exactly four filled Buttons across the page — one per lead", () => {
-    expect((page.match(/<Button\b/g) ?? []).length).toBe(4);
+  it("buttonVariants is called bare, so every action takes the one filled default", () => {
+    expect(page).not.toMatch(/buttonVariants\(\{/);
   });
 });
 
