@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { CircleAlert, Loader2, Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/Field";
+import { Notice } from "@/components/ui/Notice";
 import { parseErrorBody } from "@/lib/parse-error";
 
 interface CreateError {
@@ -60,52 +63,29 @@ export default function CreateCardForm() {
       }}
       className="space-y-4"
     >
-      {error && (
-        <p className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-          <CircleAlert className="size-4 shrink-0" />
-          {error.message}
-        </p>
-      )}
+      {error && <Notice variant="error">{error.message}</Notice>}
 
-      <div>
-        <label htmlFor="card-front" className="mb-1 block text-sm text-blue-100/80">
-          Front
-        </label>
-        <textarea
-          id="card-front"
-          value={front}
-          onChange={(e) => {
-            setFront(e.target.value);
-          }}
-          disabled={submitting}
-          rows={2}
-          placeholder="The question or prompt…"
-          className="w-full resize-y rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-blue-100/40 focus:border-blue-300/50 focus:outline-none disabled:opacity-50"
-        />
-      </div>
+      <Field
+        id="card-front"
+        label="Front"
+        value={front}
+        onChange={setFront}
+        disabled={submitting}
+        rows={2}
+        placeholder="The question or prompt…"
+      />
 
-      <div>
-        <label htmlFor="card-back" className="mb-1 block text-sm text-blue-100/80">
-          Back
-        </label>
-        <textarea
-          id="card-back"
-          value={back}
-          onChange={(e) => {
-            setBack(e.target.value);
-          }}
-          disabled={submitting}
-          rows={2}
-          placeholder="The answer…"
-          className="w-full resize-y rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-blue-100/40 focus:border-blue-300/50 focus:outline-none disabled:opacity-50"
-        />
-      </div>
+      <Field
+        id="card-back"
+        label="Back"
+        value={back}
+        onChange={setBack}
+        disabled={submitting}
+        rows={2}
+        placeholder="The answer…"
+      />
 
-      <button
-        type="submit"
-        disabled={submitting || !canSubmit}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <Button type="submit" className="w-full" disabled={submitting || !canSubmit}>
         {submitting ? (
           <>
             <Loader2 className="size-4 animate-spin" />
@@ -117,7 +97,7 @@ export default function CreateCardForm() {
             Create card
           </>
         )}
-      </button>
+      </Button>
     </form>
   );
 }

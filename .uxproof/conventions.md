@@ -111,7 +111,11 @@ Written as decidable rules, not taste. Each says what counts as a finding.
    library card are indistinguishable is a finding — the "AI proposes, the human decides" gate has to
    be visible, not merely implemented.
 8. **One shell, one page skeleton.** Every screen composes registry primitives (`PageHeader`,
-   `Section`, `Card`, `Notice`, `EmptyState`, `Field`). A page that repeats the card, header, error or
+   `Section`, `Notice`, `EmptyState`, `Field`). `Card` is deliberately not in the registry: through
+   four screen migrations no two card-shaped surfaces wanted the same contract — /review's flashcard
+   face, /generate's provisional draft row and /library's saved row each differ in surface treatment
+   by design (principle 7), so a shared `Card` would have been a wrapper with a different body at
+   every call site. A page that repeats the card, header, error or
    empty-state recipe inline is a finding even when the result looks right. The shell fits one row at
    390px, `scrollWidth` never exceeds the viewport on any screen with any content, and during a review
    session the shell reduces to an exit control and a progress indicator.

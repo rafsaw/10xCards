@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { CircleAlert, Loader2, Pencil, Trash2, X } from "lucide-react";
+import { Loader2, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/Field";
+import { Notice } from "@/components/ui/Notice";
 import { parseErrorBody } from "@/lib/parse-error";
 
 interface SavedCard {
@@ -94,47 +96,30 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
     }
   }
 
+  // The spec writes the row surface on the Paper radius, but --radius-paper is
+  // documented at global.css:273 as consumed only by primitives under
+  // src/components/ui/, and primitives.test.ts enforces that confinement.
+  // /review's card face and /generate's draft row set the precedent for a
+  // screen-level surface: stay on the legacy radius scale.
   return (
-    <li className="rounded-lg border border-white/10 bg-white/5 p-4">
+    <li className="border-border rounded-lg border p-4">
       {error && (
-        <p className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-          <CircleAlert className="size-4 shrink-0" />
-          {error.message}
-        </p>
+        <div className="mb-3">
+          <Notice variant="error">{error.message}</Notice>
+        </div>
       )}
 
       {editing ? (
         <div className="space-y-3">
-          <div>
-            <label htmlFor={`card-front-${card.id}`} className="mb-1 block text-sm text-blue-100/80">
-              Front
-            </label>
-            <textarea
-              id={`card-front-${card.id}`}
-              value={front}
-              onChange={(e) => {
-                setFront(e.target.value);
-              }}
-              disabled={pending}
-              rows={2}
-              className="w-full resize-y rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-blue-100/40 focus:border-blue-300/50 focus:outline-none disabled:opacity-50"
-            />
-          </div>
-          <div>
-            <label htmlFor={`card-back-${card.id}`} className="mb-1 block text-sm text-blue-100/80">
-              Back
-            </label>
-            <textarea
-              id={`card-back-${card.id}`}
-              value={back}
-              onChange={(e) => {
-                setBack(e.target.value);
-              }}
-              disabled={pending}
-              rows={2}
-              className="w-full resize-y rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-blue-100/40 focus:border-blue-300/50 focus:outline-none disabled:opacity-50"
-            />
-          </div>
+          <Field
+            id={`card-front-${card.id}`}
+            label="Front"
+            value={front}
+            onChange={setFront}
+            disabled={pending}
+            rows={2}
+          />
+          <Field id={`card-back-${card.id}`} label="Back" value={back} onChange={setBack} disabled={pending} rows={2} />
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -154,13 +139,17 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
           </div>
         </div>
       ) : (
-        <div className="flex items-start justify-between gap-4">
+        // Below sm the actions stack under the content instead of sitting beside it:
+        // inline, Edit and Delete claim ~150px of a 390px viewport and wrap the front
+        // onto extra lines, which puts the chrome above the content (principle 3).
+        // DOM order is unchanged, so tab order and both accessible names are too.
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0">
-            <p className="font-medium break-words text-white">{card.front}</p>
-            <p className="mt-1 text-sm break-words text-blue-100/70">{card.back}</p>
+            <p className="text-foreground text-title font-serif break-words">{card.front}</p>
+            <p className="text-muted-foreground text-title mt-1 font-serif break-words">{card.back}</p>
           </div>
           {!readOnly && (
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="-ml-3 flex shrink-0 items-center gap-2 sm:ml-0">
               <Button type="button" size="sm" variant="ghost" onClick={startEdit} disabled={pending}>
                 <Pencil className="size-4" />
                 Edit
@@ -168,7 +157,13 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
               <Button
                 type="button"
                 size="sm"
-                variant="destructive"
+                variant="ghost"
+                // `ghost` carries `hover:text-accent-foreground`; because that is a hover:
+                // variant and `text-destructive` is a base utility, tailwind-merge keeps
+                // both and the destructive tint disappears exactly when the pointer is on
+                // the control. Re-stating it under hover: (and focus-visible:, for the
+                // keyboard path) pins the semantic colour through every interaction state.
+                className="text-destructive hover:text-destructive focus-visible:text-destructive"
                 onClick={() => {
                   void handleDelete();
                 }}

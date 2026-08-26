@@ -1,0 +1,33 @@
+---
+import { Button } from "@/components/ui/button";
+
+interface Props {
+  q: string;
+}
+
+const { q } = Astro.props;
+---
+
+{
+  /* Page-local composition, not a registry primitive: two branches of the saved-cards
+    region render this row, and duplicating it inline is what principle 8 objects to. */
+}
+<form method="get" action="/library" class="flex items-center gap-2">
+  <label for="library-search" class="sr-only">Search cards</label>
+  <input
+    type="text"
+    id="library-search"
+    name="q"
+    value={q}
+    placeholder="Search front or back…"
+    class="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-ring w-full resize-y rounded-lg border px-3 py-2 text-sm focus:outline-none disabled:opacity-50"
+  />
+  <Button type="submit" variant="outline" size="sm">Search</Button>
+  {
+    q && (
+      <a href="/library" class="text-link shrink-0 text-sm underline underline-offset-4">
+        Clear
+      </a>
+    )
+  }
+</form>

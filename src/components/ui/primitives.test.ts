@@ -19,7 +19,7 @@ const readUi = (name: string) => readFileSync(join(UI_DIR, name), "utf8");
 // pre-existing parts of button.tsx are legacy consumers the increment does not
 // touch, and criterion 9 governs what this increment ships, not a retroactive
 // sweep of files it was told not to change.
-const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx"];
+const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx", "Field.tsx"];
 
 describe("criterion 1 — Notice role/aria-live mapping", () => {
   const source = readUi("Notice.tsx");
@@ -77,6 +77,50 @@ describe("criterion 9 — src/components/ui/ carries no literal, shadow, blur, o
   });
 });
 
+describe("Field — the label-plus-textarea primitive (screen-migration-library)", () => {
+  const source = readUi("Field.tsx");
+
+  it("pairs htmlFor with the textarea id, so the label is programmatic", () => {
+    expect(source).toMatch(/<label htmlFor=\{id\}/);
+    expect(source).toMatch(/<textarea\s+id=\{id\}/);
+  });
+
+  it("carries the Paper control recipe, verbatim from PasteAndGenerateForm", () => {
+    expect(source).toMatch(
+      /border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-ring w-full resize-y rounded-lg border px-3 py-2 text-sm focus:outline-none disabled:opacity-50/,
+    );
+  });
+
+  it("rows defaults to 2", () => {
+    expect(source).toMatch(/rows = 2/);
+  });
+
+  it("onChange takes the string, not the event", () => {
+    expect(source).toMatch(/onChange: \(value: string\) => void/);
+    expect(source).toMatch(/onChange\(e\.target\.value\)/);
+  });
+
+  it("declares no error, icon or hint slot — no consumer exists for any of them", () => {
+    // Scoped to the props interface: the file's doc comment explains *why*
+    // those slots are absent, and naming them there is the point.
+    const props = /export interface FieldProps \{([\s\S]*?)\}/.exec(source)?.[1] ?? "";
+    expect(props).not.toBe("");
+    expect(props).not.toMatch(/\berror\b/);
+    expect(props).not.toMatch(/\bicon\b/);
+    expect(props).not.toMatch(/\bhint\b/);
+  });
+});
+
+describe("PageHeader does not decide the page's measure (screen-migration-library)", () => {
+  // Width is the page's concern, not the header's: all three pre-existing
+  // consumers (settings, generate, review) already wrap PageHeader in
+  // `max-w-content mx-auto`, and /library renders at max-w-3xl instead. A
+  // primitive that describes a page header should not also fix its width.
+  it("PageHeader.tsx carries no max-w- utility", () => {
+    expect(readUi("PageHeader.tsx")).not.toMatch(/\bmax-w-/);
+  });
+});
+
 describe("criterion 5 — rounded-paper is confined to src/components/ui/", () => {
   function walk(dir: string): string[] {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -87,22 +131,23 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
 
   const srcFiles = walk(SRC_DIR).filter((f) => /\.(tsx?|astro)$/.test(f));
 
-  // 50 = 54 (screen-migration-generate baseline) minus 4 net from the
-  // screen-migration-review increment. /review shed seven legacy-radius controls
-  // — the restart button, the Back-to-dashboard link, the hand-rolled error
-  // paragraph, the reveal button and both rating buttons, plus DoneCard's own
-  // control — as they converted to the shared Button and Notice primitives, which
-  // carry their radius under src/components/ui/. Two screen-level surfaces are
-  // added back on the legacy radius scale: the flashcard face and the Kbd key cap.
-  // They stay on that scale deliberately: --radius-paper is documented at
-  // global.css:273 as "consumed only by primitives in src/components/ui/", and the
-  // merged /generate migration set the same precedent for its draft row.
-  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 50", () => {
+  // 38 = 50 (screen-migration-review baseline) minus 12 net from the
+  // screen-migration-library increment. /library shed its whole legacy control
+  // set as it converted — the two hand-rolled create textareas, the create
+  // submit button, the two row edit textareas, both hand-rolled error
+  // paragraphs, the row surface's own radius, the search input, the search
+  // button, and the four pagination link/disabled surfaces — while the shared
+  // Field, Notice and Button primitives carry their radius under
+  // src/components/ui/. Added back: Field.tsx's control recipe (once), this
+  // file's quotation of that recipe in the Field contract assertion, the row
+  // surface converted to the legacy scale, LibrarySearch's input, and
+  // library-paper.test.ts's own quotation of the row surface class.
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 38", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(50);
+    expect(count).toBe(38);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
