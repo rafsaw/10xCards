@@ -21,7 +21,8 @@
 | 1 | 1.6 | `SignUpForm.tsx` — retokenise the hint, add `autocomplete` to three fields | inline | done | a3a80b6 |
 | 1 | 1.7 | `SignInForm.tsx` — add `autocomplete` to two fields | inline | done | 7000793 |
 | 1 | 1.8 | `button.tsx` destructive variant → `text-destructive-foreground` (contrast measured) | inline | done | 9d03d6d |
-| 1 | 1.9 | `CancelDeletionButton.tsx` — `text-red-700` → `text-destructive` | inline | done | pending |
+| 1 | 1.9 | `CancelDeletionButton.tsx` — `text-red-700` → `text-destructive` | inline | done | 4f20032 |
+| 1 | 1.9-ledger-fix | Re-baseline the radius ledger to 34 and apply prettier fixes | inline | done | pending |
 | 2 | 2.1 | Create `src/components/auth/AuthCard.astro` | inline | todo | — |
 | 2 | 2.2 | `/auth/signin` composes `AuthCard`; footer retokenised | inline | todo | — |
 | 2 | 2.3 | `/auth/signup` composes `AuthCard`; footer retokenised | inline | todo | — |

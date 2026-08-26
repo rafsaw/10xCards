@@ -12,14 +12,10 @@ export function SubmitButton({ pendingText, icon, children }: SubmitButtonProps)
   const { pending } = useFormStatus();
 
   return (
-    <Button
-      type="submit"
-      disabled={pending}
-      className="w-full"
-    >
+    <Button type="submit" disabled={pending} className="w-full">
       {pending ? (
         <span className="flex items-center gap-2">
-          <span className="size-4 animate-spin rounded-full border-muted border-t-foreground border-2" />
+          <span className="border-muted border-t-foreground size-4 animate-spin rounded-full border-2" />
           {pendingText}
         </span>
       ) : (
