@@ -215,14 +215,18 @@ session`**; an E2E spec asserts `getByRole("button", { name: "Restart" })`.
     `<Notice variant="error">{error.message}</Notice>`. This is the accessibility fix: `Notice` sets
     `role="alert"` and `aria-live="assertive"` for the error variant, which the current paragraph does
     not.
-11. **The card face** is the one bordered surface and where the serif lives. **Q1 resolved (a)** — the
+11. **The card face** is the one bordered surface and where the serif lives. It stays on the legacy
+    radius scale rather than `rounded-paper`: `--radius-paper` is documented at `global.css:273` as
+    "consumed only by primitives in `src/components/ui/`", `primitives.test.ts` criterion 5 enforces
+    that confinement, and the merged `/generate` migration set the same precedent for its draft row.
+    **Q1 resolved (a)** — the
     token layer is authoritative: `global.css:239` states _"Content never goes below `--text-title`"_,
     and the back of a card is content, so **both front and back render at `text-title`**. The FRONT /
     BACK labels stay at `text-meta`. The two faces are distinguished by the hairline, the label, and the
     reveal, not by a size step:
 
     ```tsx
-    <div className="border-border bg-card rounded-paper space-y-3 border p-6">
+    <div className="border-border bg-card space-y-3 rounded-lg border p-6">
       <div>
         <p className="text-meta text-muted-foreground tracking-wide uppercase">Front</p>
         <p className="text-foreground text-title mt-1 font-serif break-words">{card.front}</p>
@@ -245,7 +249,7 @@ session`**; an E2E spec asserts `getByRole("button", { name: "Restart" })`.
     never competes with step 13.
 13. **The rating-button tiers** — see below.
 14. **`Kbd`** becomes
-    `className="rounded-paper border-border bg-muted text-muted-foreground text-meta border px-1.5 py-0.5 font-mono"`.
+    `className="rounded-lg border-border bg-muted text-muted-foreground text-meta border px-1.5 py-0.5 font-mono"`.
     **Q4 resolved (b)**: the arbitrary `text-[0.7rem]` is replaced by `text-meta`, accepting slightly
     larger key caps — an arbitrary value below the smallest token has no place on the increment whose
     purpose is token conformance. The hint row becomes `text-meta text-muted-foreground`, keeping the

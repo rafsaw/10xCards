@@ -96,10 +96,11 @@ describe("AC5 — a failed rating is announced", () => {
 });
 
 describe("AC6 — the rating buttons are distinguished by tier, not by colour", () => {
-  const ratingBlock = session.slice(
-    session.indexOf('aria-keyshortcuts="1"'),
-    session.indexOf('aria-keyshortcuts="2"') + 400,
-  );
+  // Assert over the code with comments stripped, not over a fixed-width slice
+  // around the two buttons: a slice silently stops covering the Right button if
+  // its JSX grows, and the file-wide alternative trips over the prose comment
+  // that explains *why* these tokens are not licensed here.
+  const code = session.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
   it("Wrong is the Secondary tier and Right is Primary", () => {
     expect(session).toMatch(/variant="outline"[\s\S]{0,200}aria-keyshortcuts="1"/);
@@ -107,8 +108,8 @@ describe("AC6 — the rating buttons are distinguished by tier, not by colour", 
   });
 
   it("neither rating button nor either glyph carries a semantic-colour token", () => {
-    expect(ratingBlock).not.toMatch(/destructive/);
-    expect(ratingBlock).not.toMatch(/success/);
+    expect(code).not.toMatch(/destructive/);
+    expect(code).not.toMatch(/success/);
   });
 
   it("the revealed view contains exactly one filled button", () => {
