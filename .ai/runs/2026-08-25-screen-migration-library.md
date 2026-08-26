@@ -53,34 +53,36 @@ The principle-8 edit and `library-paper.test.ts`, proven by a deliberate break, 
 
 ## Progress
 
+PR: #40
+
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: The primitive and the width fix
 
-- [ ] 1.1 Create `src/components/ui/Field.tsx` per the Architecture contract
-- [ ] 1.2 Extend `primitives.test.ts` with `Field.tsx` and its contract criteria
-- [ ] 1.3 Delete `max-w-content mx-auto` from `PageHeader.tsx` and assert no `max-w-` survives
+- [x] 1.1 Create `src/components/ui/Field.tsx` per the Architecture contract — bc210fa
+- [x] 1.2 Extend `primitives.test.ts` with `Field.tsx` and its contract criteria — bc210fa
+- [x] 1.3 Delete `max-w-content mx-auto` from `PageHeader.tsx` and assert no `max-w-` survives — bc210fa
 
 ### Phase 2: The two React islands
 
-- [ ] 2.1 `CreateCardForm`: error paragraph becomes `Notice variant="error"`
-- [ ] 2.2 `CreateCardForm`: both label/textarea blocks become `Field`
-- [ ] 2.3 `CreateCardForm`: hand-rolled submit becomes `Button`
-- [ ] 2.4 `CardRow`: error becomes `Notice`; both edit textareas become `Field`
-- [ ] 2.5 `CardRow`: restyle the `<li>` surface and the front/back typography
-- [ ] 2.6 `CardRow`: `Delete` becomes a ghost Button carrying `text-destructive`
+- [x] 2.1 `CreateCardForm`: error paragraph becomes `Notice variant="error"` — 0992d0e
+- [x] 2.2 `CreateCardForm`: both label/textarea blocks become `Field` — 0992d0e
+- [x] 2.3 `CreateCardForm`: hand-rolled submit becomes `Button` — 0992d0e
+- [x] 2.4 `CardRow`: error becomes `Notice`; both edit textareas become `Field` — 0992d0e
+- [x] 2.5 `CardRow`: restyle the `<li>` surface and the front/back typography — 0992d0e
+- [x] 2.6 `CardRow`: `Delete` becomes a ghost Button carrying `text-destructive` — 0992d0e
 
 ### Phase 3: The page
 
-- [ ] 3.1 Create `src/components/library/LibrarySearch.astro`
-- [ ] 3.2 `library.astro`: page frame, `PageHeader`, both errors through `Notice`
-- [ ] 3.3 `library.astro`: the create region becomes a `Section`
-- [ ] 3.4 `library.astro`: the saved-cards region's three branches
-- [ ] 3.5 `library.astro`: pagination links and disabled spans
+- [x] 3.1 Create `src/components/library/LibrarySearch.astro` — 315edb9
+- [x] 3.2 `library.astro`: page frame, `PageHeader`, both errors through `Notice` — 315edb9
+- [x] 3.3 `library.astro`: the create region becomes a `Section` — 315edb9
+- [x] 3.4 `library.astro`: the saved-cards region's three branches — 315edb9
+- [x] 3.5 `library.astro`: pagination links and disabled spans — 315edb9
 
 ### Phase 4: The record and the guard
 
-- [ ] 4.1 Edit principle 8 in `.uxproof/conventions.md`
-- [ ] 4.2 Create `src/components/library/library-paper.test.ts`
-- [ ] 4.3 Prove the guard with a deliberate break, then revert
-- [ ] 4.4 Run the full validation gate and the E2E suite
+- [x] 4.1 Edit principle 8 in `.uxproof/conventions.md` — c48cbca
+- [x] 4.2 Create `src/components/library/library-paper.test.ts` — c48cbca
+- [x] 4.3 Prove the guard with a deliberate break, then revert — c48cbca
+- [x] 4.4 Run the full validation gate and the E2E suite — c48cbca
