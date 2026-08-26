@@ -131,7 +131,7 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
 
   const srcFiles = walk(SRC_DIR).filter((f) => /\.(tsx?|astro)$/.test(f));
 
-  // 37 = 50 (screen-migration-review baseline) minus 13 net from the
+  // 38 = 50 (screen-migration-review baseline) minus 12 net from the
   // screen-migration-library increment. /library shed its whole legacy control
   // set as it converted — the two hand-rolled create textareas, the create
   // submit button, the two row edit textareas, both hand-rolled error
@@ -140,13 +140,14 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // Field, Notice and Button primitives carry their radius under
   // src/components/ui/. Added back: Field.tsx's control recipe (once), this
   // file's quotation of that recipe in the Field contract assertion, the row
-  // surface converted to the legacy scale, and LibrarySearch's input.
-  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 37", () => {
+  // surface converted to the legacy scale, LibrarySearch's input, and
+  // library-paper.test.ts's own quotation of the row surface class.
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 38", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(37);
+    expect(count).toBe(38);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
