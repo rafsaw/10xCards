@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleAlert, Eye, Check, X, PartyPopper, Loader2, RotateCcw } from "lucide-react";
+import { Eye, Check, X, PartyPopper, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseErrorBody } from "@/lib/parse-error";
 import { resolveReviewShortcut, type ShortcutTarget } from "@/lib/review-shortcuts";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Notice } from "@/components/ui/Notice";
 import type { ReviewRating } from "@/lib/leitner";
 
 export interface DueCard {
@@ -26,47 +29,9 @@ const FALLBACK_MESSAGES: Record<string, string> = {
   network_error: "Network error — please try again.",
 };
 
-function DoneCard({
-  icon,
-  title,
-  body,
-  onRestart,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-  onRestart?: () => void;
-}) {
-  return (
-    <section className="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl">
-      <div className="flex justify-center text-blue-200">{icon}</div>
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="text-sm text-blue-100/70">{body}</p>
-      <div className="flex flex-wrap justify-center gap-3">
-        {onRestart && (
-          <button
-            type="button"
-            onClick={onRestart}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
-          >
-            <RotateCcw className="size-4" />
-            Restart session
-          </button>
-        )}
-        <a
-          href="/dashboard"
-          className="inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40"
-        >
-          Back to dashboard
-        </a>
-      </div>
-    </section>
-  );
-}
-
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[0.7rem] text-blue-100/80">
+    <kbd className="border-border bg-muted text-muted-foreground text-meta rounded-lg border px-1.5 py-0.5 font-mono">
       {children}
     </kbd>
   );
@@ -164,19 +129,19 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
     };
   }, [card, revealed, submitting, handleRate]);
 
+  // An error state, not an empty one — a failed load is something going wrong,
+  // and EmptyState carries no "something went wrong" affordance.
   if (loadError) {
     return (
-      <DoneCard
-        icon={<CircleAlert className="size-10" />}
-        title="Could not load your review session"
-        body="Something went wrong fetching your due cards. Try refreshing the page."
-      />
+      <Notice variant="error" title="Could not load your review session">
+        Something went wrong fetching your due cards. Try refreshing the page.
+      </Notice>
     );
   }
 
   if (dueCards.length === 0) {
     return (
-      <DoneCard
+      <EmptyState
         icon={<PartyPopper className="size-10" />}
         title="All caught up!"
         body="You have no cards due for review right now. Come back later."
@@ -186,11 +151,16 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
 
   if (index >= dueCards.length) {
     return (
-      <DoneCard
+      <EmptyState
         icon={<PartyPopper className="size-10" />}
         title="Session complete"
         body={`You reviewed ${dueCards.length} card${dueCards.length === 1 ? "" : "s"}. Nicely done.`}
-        onRestart={handleRestart}
+        action={
+          <Button type="button" variant="outline" onClick={handleRestart}>
+            <RotateCcw className="size-4" />
+            Restart session
+          </Button>
+        }
       />
     );
   }
@@ -209,67 +179,71 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   }
 
   return (
-    <section className="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+    <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-blue-100/70">
+        <p className="text-meta text-muted-foreground">
           Card {index + 1} of {dueCards.length}
         </p>
-        <button
-          type="button"
-          onClick={handleRestart}
-          disabled={submitting}
-          className="flex items-center gap-1.5 text-xs text-blue-100/60 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        {/* Name stays "Restart", not "Restart session" — an E2E spec asserts it, and
+            the two controls never render at the same time. */}
+        <Button type="button" variant="ghost" size="sm" onClick={handleRestart} disabled={submitting}>
           <RotateCcw className="size-3.5" />
           Restart
-        </button>
+        </Button>
       </div>
 
-      {error && (
-        <p className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-          <CircleAlert className="size-4 shrink-0" />
-          {error.message}
-        </p>
-      )}
+      {/* Notice supplies role="alert" + aria-live="assertive" for the error variant,
+          which the plain paragraph this replaces did not — a failed rating used to be
+          silent to a screen reader. */}
+      {error && <Notice variant="error">{error.message}</Notice>}
 
-      <div className="space-y-3 rounded-lg border border-white/10 bg-white/5 p-6">
+      {/* The one bordered surface on the screen, which is what makes it the hero
+          (principles 3 and 4). Both faces sit at --text-title: the token layer states
+          content never goes below it, and the back of a card is content. */}
+      <div className="border-border bg-card space-y-3 rounded-lg border p-6">
         <div>
-          <p className="text-xs tracking-wide text-blue-100/50 uppercase">Front</p>
-          <p className="mt-1 text-lg font-medium text-white">{card.front}</p>
+          <p className="text-meta text-muted-foreground tracking-wide uppercase">Front</p>
+          <p className="text-foreground text-title mt-1 font-serif break-words">{card.front}</p>
         </div>
         {revealed && (
-          <div className="border-t border-white/10 pt-3">
-            <p className="text-xs tracking-wide text-blue-100/50 uppercase">Back</p>
-            <p className="mt-1 text-blue-100/90">{card.back}</p>
+          <div className="border-border border-t pt-3">
+            <p className="text-meta text-muted-foreground tracking-wide uppercase">Back</p>
+            <p className="text-foreground text-title mt-1 font-serif break-words">{card.back}</p>
           </div>
         )}
       </div>
 
       {!revealed ? (
-        <button
+        <Button
           type="button"
+          variant="default"
+          className="w-full"
           aria-keyshortcuts="Space"
           onClick={() => {
             setRevealed(true);
           }}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-400/30 bg-blue-600/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600/50"
         >
           <Eye className="size-4" />
           Reveal answer
-        </button>
+        </Button>
       ) : (
+        /* Principle 6's "shape, not colour" fix. The two are different tiers of the
+           house button system, not a red button and a green button: semantic
+           destructive/success are reserved for deletion and confirmation, and a
+           self-assessment rating is neither. Principle 5 requires exactly one filled
+           button per view and forbids a destructive-analogue action being primary, so
+           Right is default and Wrong is outline. Icons inherit their button's text
+           colour (Direction A §10) — no colour class on either glyph. */
         <div className="flex gap-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            className="flex-1"
+            aria-keyshortcuts="1"
+            disabled={submitting}
             onClick={() => {
               void handleRate("wrong");
             }}
-            aria-keyshortcuts="1"
-            disabled={submitting}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-              "border-red-500/30 bg-red-900/20 text-red-200 hover:bg-red-900/40",
-            )}
           >
             {submitting && pendingRating === "wrong" ? (
               <Loader2 className="size-4 animate-spin" />
@@ -277,18 +251,16 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               <X className="size-4" />
             )}
             Wrong
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="default"
+            className="flex-1"
+            aria-keyshortcuts="2"
+            disabled={submitting}
             onClick={() => {
               void handleRate("right");
             }}
-            aria-keyshortcuts="2"
-            disabled={submitting}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-              "border-green-500/30 bg-green-900/20 text-green-200 hover:bg-green-900/40",
-            )}
           >
             {submitting && pendingRating === "right" ? (
               <Loader2 className="size-4 animate-spin" />
@@ -296,14 +268,14 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               <Check className="size-4" />
             )}
             Right
-          </button>
+          </Button>
         </div>
       )}
 
       {/* AC7: the shortcuts are discoverable without documentation. Both rows are
           always rendered so the hint never reflows the card as the state flips;
           the row that isn't active right now is dimmed rather than removed. */}
-      <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-blue-100/50">
+      <p className="text-meta text-muted-foreground flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
         <span className={cn("flex items-center gap-1.5", revealed && "opacity-40")}>
           <Kbd>Space</Kbd> Reveal
         </span>

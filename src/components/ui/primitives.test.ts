@@ -87,20 +87,22 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
 
   const srcFiles = walk(SRC_DIR).filter((f) => /\.(tsx?|astro)$/.test(f));
 
-  // 54 = 61 (screen-migration-settings baseline) minus 7 from the
-  // screen-migration-generate increment: 2 page-level notices
-  // (not-configured/loadError) and 2 component error notices become Notice,
-  // which already carries the Paper radius under src/components/ui/, and the
-  // Generate and Save-changes submits convert to the shared Button primitive,
-  // dropping the two hand-rolled legacy-radius submit controls they replace.
-  // Token-only swaps (Keep/Discard/toggle colours, the draft-row surface)
-  // touch colour, not radius, so they contribute no net change.
-  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 54", () => {
+  // 50 = 54 (screen-migration-generate baseline) minus 4 net from the
+  // screen-migration-review increment. /review shed seven legacy-radius controls
+  // — the restart button, the Back-to-dashboard link, the hand-rolled error
+  // paragraph, the reveal button and both rating buttons, plus DoneCard's own
+  // control — as they converted to the shared Button and Notice primitives, which
+  // carry their radius under src/components/ui/. Two screen-level surfaces are
+  // added back on the legacy radius scale: the flashcard face and the Kbd key cap.
+  // They stay on that scale deliberately: --radius-paper is documented at
+  // global.css:273 as "consumed only by primitives in src/components/ui/", and the
+  // merged /generate migration set the same precedent for its draft row.
+  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 50", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(54);
+    expect(count).toBe(50);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
