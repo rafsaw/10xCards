@@ -208,7 +208,9 @@
       "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-lib3/.ai/qa/**)",
       "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-qa40/.ai/qa/**)",
       "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-qa40/**)",
-      "Bash(BASE_URL=http://127.0.0.1:4321 node .ai/qa/artifacts_pr40qa/qa.mjs)"
+      "Bash(BASE_URL=http://127.0.0.1:4321 node .ai/qa/artifacts_pr40qa/qa.mjs)",
+      "Bash(cd *)",
+      "Bash(python -c ' *)"
     ],
     "deny": [
       "Bash(rm -rf *)"
