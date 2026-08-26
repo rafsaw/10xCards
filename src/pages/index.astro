@@ -8,7 +8,8 @@ if (Astro.locals.user) {
 }
 ---
 
-{/* A gateway, not a landing page. The product's v1 audience is one person dogfooding,
+{
+  /* A gateway, not a landing page. The product's v1 audience is one person dogfooding,
     so positioning copy for an audience of one is work nobody asked for; what a
     signed-out visitor needs here is the name, one sentence naming the job, and a way
     in. The description is a placeholder by construction — it lives on exactly one line
@@ -16,7 +17,8 @@ if (Astro.locals.user) {
 
     No island: `<a class:list={buttonVariants()}>` is the link-as-button pattern
     dashboard.astro already uses, chosen over `<Button asChild>` because the latter
-    would drag React onto a static page. */}
+    would drag React onto a static page. */
+}
 <Layout>
   <div class="bg-background text-foreground min-h-screen p-4">
     <div class="max-w-content mx-auto space-y-6 py-8">

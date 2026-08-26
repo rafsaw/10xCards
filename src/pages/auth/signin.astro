@@ -9,9 +9,11 @@ const error = Astro.url.searchParams.get("error");
 <Layout title="Sign in">
   <AuthCard title="Sign in">
     <SignInForm serverError={error} client:load />
-    {/* Underlined rather than colour-only: the previous text-purple-300 hover:underline
+    {
+      /* Underlined rather than colour-only: the previous text-purple-300 hover:underline
         showed its underline only on hover, which fails WCAG 1.4.1. This is
-        dashboard.astro's link recipe verbatim. */}
+        dashboard.astro's link recipe verbatim. */
+    }
     <p class="text-muted-foreground mt-4 text-sm">
       Don't have an account? <a href="/auth/signup" class="text-link underline underline-offset-4">Sign up</a>
     </p>

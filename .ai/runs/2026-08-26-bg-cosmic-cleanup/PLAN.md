@@ -29,7 +29,8 @@
 | 2 | 2.4 | `/auth/confirm-email` composes `AuthCard`; emoji → `aria-hidden` lucide icon | inline | done | 79ad0b9 |
 | 2 | 2.5 | `index.astro` — the gateway, written inline | inline | done | 0812c88 |
 | 2 | 2.6 | Delete `src/components/Welcome.astro` | inline | done | d0d088f |
-| 2 | 2.6-ledger-fix | Re-baseline the radius ledger to 29 after Phase 2 | inline | done | pending |
+| 2 | 2.6-ledger-fix | Re-baseline the radius ledger to 29 after Phase 2 | inline | done | c58f7a5 |
+| 2 | 2.6-guard-fix | Repair the Paper-radius guard regex and apply prettier fixes | inline | done | pending |
 | 3 | 3.1 | `Layout.astro` — remove `class="bg-cosmic"` from `<body>` | inline | todo | — |
 | 3 | 3.2 | `global.css` — delete the `@utility bg-cosmic` block; amend the `--radius-paper` condition | inline | todo | — |
 | 3 | 3.3 | Delete `src/components/ui/LibBadge.astro` | inline | todo | — |

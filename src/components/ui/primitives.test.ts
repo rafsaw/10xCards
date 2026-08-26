@@ -182,7 +182,7 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
     const offenders = srcFiles.filter(
       (f) =>
         !PAPER_RADIUS_CONSUMERS.some((allowed) => f.includes(allowed)) &&
-        /rounded-paper/.test(readFileSync(f, "utf8")),
+        readFileSync(f, "utf8").includes("rounded-paper"),
     );
     expect(offenders).toEqual([]);
   });
