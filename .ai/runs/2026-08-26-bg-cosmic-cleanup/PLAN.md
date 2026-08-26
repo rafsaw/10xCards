@@ -39,8 +39,8 @@
 | 4 | 4.2 | Write `src/components/auth/auth-paper.test.ts` — the auth-family guard | inline | done | 01f4e17 |
 | 4 | 4.2-guard-fix | Repair the comment-stripper's whole-line pattern | inline | done | 1eedb9d |
 | 4 | 4.2-guard-fix-3 | Exempt test files from the Paper-radius confinement guard | inline | done | fe65f27 |
-| 4 | 4.3 | Add the repository-wide colour sweep test | inline | done | pending |
-| 4 | 4.4 | File the Increment 10 follow-up issue and record its number | inline | todo | — |
+| 4 | 4.3 | Add the repository-wide colour sweep test | inline | done | 6f568d0 |
+| 4 | 4.4 | File the Increment 10 follow-up issue and record its number | inline | done | pending |
 
 ## 🎯 Goal
 
@@ -177,7 +177,8 @@ None — no `--skill-url` was passed.
   string `bg-cosmic`. This makes the dark-mode entry condition self-enforcing.
 - **4.4** File the Increment 10 follow-up issue (`--radius` → `0.375rem`, `--radius-paper` and every
   `rounded-paper` deleted, `tokens.test.ts:352` amended) and record its number in this plan and in the
-  spec's Follow-ups section.
+  spec's Follow-ups section. **Filed as issue #47**, carrying the Q3 reasoning, the two recorded
+  `rounded-paper` consumers, and the two ledger traps this run lost time to.
 
 ## Verification
 

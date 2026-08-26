@@ -554,7 +554,7 @@ Each step leaves the application working and `npm run build` green.
 ## 📋 Follow-ups, explicitly not this increment
 
 - **Increment 10** — `--radius` → `0.375rem`, `--radius-paper` and every `rounded-paper` deleted,
-  `tokens.test.ts:352` amended. Filed as an issue in Phase 4.
+  `tokens.test.ts:352` amended. Filed as **issue #47**.
 - **Dark mode** — unblocked by this increment. Its first task is the deliberate inspection of
   `button.tsx`'s four dormant `dark:` variants, which have never been reviewed and come alive the
   moment a toggle lands (`.uxproof/conventions.md`, "Light/dark drift").
