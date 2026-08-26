@@ -142,12 +142,18 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // file's quotation of that recipe in the Field contract assertion, the row
   // surface converted to the legacy scale, LibrarySearch's input, and
   // library-paper.test.ts's own quotation of the row surface class.
-  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 38", () => {
+  //
+  // 36 = 38 minus 2 net from the screen-migration-dashboard increment: /dashboard's
+  // two legacy-scale radius recipes — the gradient-filled primary link and the
+  // bespoke red notice paragraph — left with the glass, and the Paper replacements
+  // (Button, Notice) carry their radius under src/components/ui/ instead. The two
+  // new page-local components introduce no radius at all.
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 36", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(38);
+    expect(count).toBe(36);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
