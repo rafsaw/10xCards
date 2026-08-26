@@ -109,7 +109,7 @@ export default function PasteAndGenerateForm({ primary }: { primary: boolean }) 
           type="submit"
           variant={primary ? "default" : "outline"}
           disabled={submitting || tooShort}
-          className="w-full"
+          className="w-full transition-colors"
         >
           {submitting ? (
             <>

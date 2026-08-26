@@ -116,3 +116,42 @@ describe("DraftReviewList.tsx — errors render through Notice, draft rows use t
     expect(source).toMatch(/variant="default"/);
   });
 });
+
+describe("focus-visible ring regression — transition-all must not delay the Button ring", () => {
+  // Root cause: Button's base classes include `transition-all`, which animates
+  // box-shadow over 150ms. A consumer whose own className doesn't override the
+  // transition group (as SubmitButton's `transition-colors` does) gets a ring
+  // that fades in instead of appearing immediately. Guard the className string
+  // directly, since this repo has no jsdom/RTL harness to assert real timing.
+  const draftReviewSource = readGenerateComponent("DraftReviewList.tsx");
+  const pasteFormSource = readGenerateComponent("PasteAndGenerateForm.tsx");
+
+  it("DraftReviewList's Save changes Button overrides transition-all with transition-colors", () => {
+    expect(draftReviewSource).toMatch(/className="w-full transition-colors"/);
+  });
+
+  it("PasteAndGenerateForm's Generate Button overrides transition-all with transition-colors", () => {
+    expect(pasteFormSource).toMatch(/className="w-full transition-colors"/);
+  });
+
+  it("Keep all, Discard all, and the per-draft toggle carry the Paper focus-ring contract", () => {
+    // Match each <button>'s className block independently — order-agnostic, since
+    // prettier-plugin-tailwindcss is free to re-sort the class list — and covers
+    // both the plain string ("...") and template-literal ({`...`}) forms in this file.
+    const quotedClassAttr = [...draftReviewSource.matchAll(/className="([^"]*)"/g)].map((m) => m[1]);
+    const templateClassAttr = [...draftReviewSource.matchAll(/className=\{`([\s\S]*?)`\}/g)].map((m) => m[1]);
+    const buttonClassBlocks = [...quotedClassAttr, ...templateClassAttr];
+    const ringBlocks = buttonClassBlocks.filter((block) => block.includes("focus-visible:ring-ring"));
+    // Keep all, Discard all, and the per-draft toggle: three raw <button>s carrying the ring contract.
+    expect(ringBlocks.length).toBe(3);
+    for (const block of ringBlocks) {
+      expect(block).toMatch(/\boutline-none\b/);
+      expect(block).toMatch(/\bfocus-visible:border-ring\b/);
+      expect(block).toMatch(/\bfocus-visible:ring-\[3px\](?:\s|$)/);
+    }
+  });
+
+  it("the two-state toggle semantics are untouched by the focus-ring fix", () => {
+    expect(draftReviewSource).toMatch(/aria-pressed=\{!rejected\}/);
+  });
+});

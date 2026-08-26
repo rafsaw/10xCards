@@ -110,7 +110,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           type="button"
           onClick={acceptAll}
           disabled={submitting}
-          className="border-success bg-success-surface text-success flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-success bg-success-surface text-success focus-visible:border-ring focus-visible:ring-ring flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Check className="size-4" />
           Keep all
@@ -119,7 +119,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           type="button"
           onClick={rejectAll}
           disabled={submitting}
-          className="border-destructive bg-destructive-surface text-destructive flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-destructive bg-destructive-surface text-destructive focus-visible:border-ring focus-visible:ring-ring flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Trash2 className="size-4" />
           Discard all
@@ -146,7 +146,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
                   toggle(draft.id);
                 }}
                 aria-pressed={!rejected}
-                className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:opacity-80 ${
+                className={`focus-visible:border-ring focus-visible:ring-ring flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] ${
                   rejected
                     ? "border-destructive bg-destructive-surface text-destructive"
                     : "border-success bg-success-surface text-success"
@@ -176,7 +176,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           void handleSave();
         }}
         disabled={submitting}
-        className="w-full"
+        className="w-full transition-colors"
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
         {submitting ? "Saving…" : "Save changes"}
