@@ -26,8 +26,8 @@
 | 2 | 2.1 | Create `src/components/auth/AuthCard.astro` | inline | done | 595610e |
 | 2 | 2.2 | `/auth/signin` composes `AuthCard`; footer retokenised | inline | done | 8e4c258 |
 | 2 | 2.3 | `/auth/signup` composes `AuthCard`; footer retokenised | inline | done | 4cfc314 |
-| 2 | 2.4 | `/auth/confirm-email` composes `AuthCard`; emoji → `aria-hidden` lucide icon | inline | done | pending |
-| 2 | 2.5 | `index.astro` — the gateway, written inline | inline | todo | — |
+| 2 | 2.4 | `/auth/confirm-email` composes `AuthCard`; emoji → `aria-hidden` lucide icon | inline | done | 79ad0b9 |
+| 2 | 2.5 | `index.astro` — the gateway, written inline | inline | done | pending |
 | 2 | 2.6 | Delete `src/components/Welcome.astro` | inline | todo | — |
 | 3 | 3.1 | `Layout.astro` — remove `class="bg-cosmic"` from `<body>` | inline | todo | — |
 | 3 | 3.2 | `global.css` — delete the `@utility bg-cosmic` block; amend the `--radius-paper` condition | inline | todo | — |
