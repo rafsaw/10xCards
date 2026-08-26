@@ -148,18 +148,22 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // bespoke red notice paragraph — left with the glass, and the Paper replacements
   // (Button, Notice) carry their radius under src/components/ui/ instead. The two
   // new page-local components introduce no radius at all.
+  // 29 = 34 minus 5 net from the same increment's Phase 2: the four screens shed the
+  // legacy-scale radii that belonged to the glass recipe — Welcome.astro's feature cards
+  // and pill, and the three auth pages' cards — while AuthCard.astro carries the Paper
+  // radius instead, which this counter does not include.
   // 34 = 36 minus 2 net from the bg-cosmic-cleanup increment's Phase 1: SubmitButton
   // shed the legacy-scale radius it carried in the second recipe layered over <Button>,
   // and ServerError.tsx — an error paragraph in hardcoded reds with a radius of its own —
   // was deleted in favour of the registry's Notice, which carries its radius under
   // src/components/ui/. Note this counter reads every file under src/ including this one,
   // so a comment here may not spell the utility names out literally.
-  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 34", () => {
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 29", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(34);
+    expect(count).toBe(29);
   });
 
   // The invariant this guards is "the transitional Paper radius does not spread by
