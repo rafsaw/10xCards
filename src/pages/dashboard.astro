@@ -128,7 +128,7 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
       {
         state.kind === "read-only" && (
           <>
-            <Notice variant="warning" title="Your account is read-only">
+            <Notice variant="warning" title="Your account is read-only" titleAs="h2">
               While deletion is pending you can browse your cards, but you can't review, generate, or edit them. Cancel
               the deletion in the banner above to continue.
             </Notice>

@@ -24,6 +24,16 @@ const page = readFileSync(join(SRC_DIR, "pages", "dashboard.astro"), "utf8");
 const lead = readFileSync(join(DASHBOARD_DIR, "DashboardLead.astro"), "utf8");
 const note = readFileSync(join(DASHBOARD_DIR, "DashboardNote.astro"), "utf8");
 
+/**
+ * The markup half of an .astro file — everything after the closing `---` of the
+ * frontmatter. The heading-level assertions below must read this and not the whole
+ * file: both components document their own heading levels in prose, and a negative
+ * assertion over the raw source would match the comment rather than the template.
+ */
+const template = (source: string): string => source.split(/^---$/m)[2] ?? "";
+const leadTemplate = template(lead);
+const noteTemplate = template(note);
+
 const FILES: [name: string, source: string][] = [
   ["dashboard.astro", page],
   ["DashboardLead.astro", lead],
@@ -92,20 +102,37 @@ describe("AC3 — bg-cosmic is removed from dashboard.astro and nowhere else", (
 });
 
 describe("AC4 and Q3 — the lead recipe, with a quiet eyebrow above a loud statement", () => {
-  const EYEBROW = /<h2 class="text-meta text-muted-foreground font-sans tracking-wide uppercase">\{label\}<\/h2>/;
+  const EYEBROW_CLASSES = 'class="text-meta text-muted-foreground font-sans tracking-wide uppercase"';
 
-  it("the eyebrow is an h2 at text-meta on --muted-foreground, with no font-medium", () => {
+  it("the eyebrow carries the text-meta --muted-foreground recipe, with no font-medium", () => {
     // Q3: the recipe is ReviewSession.tsx:205's verbatim, sans substituted for serif.
     // No weight is added ahead of the walkthrough. If the fallback is ever taken, this
-    // assertion and AC4 are amended in the same commit.
-    expect(lead).toMatch(EYEBROW);
+    // assertion and AC4 are amended in the same commit. The class list is identical in
+    // both components; only the element carrying it differs, which is what the two
+    // assertions below pin.
+    expect(lead).toContain(EYEBROW_CLASSES);
     expect(lead).not.toMatch(/font-medium/);
-    expect(note).toMatch(EYEBROW);
+    expect(note).toContain(EYEBROW_CLASSES);
     expect(note).not.toMatch(/font-medium/);
   });
 
-  it("the statement is text-title at full --foreground, the largest text below the h1", () => {
-    expect(lead).toMatch(/<p class="text-foreground text-title font-sans">\{statement\}<\/p>/);
+  it("the eyebrow is a plain p in the lead, so the statement can be the heading", () => {
+    expect(lead).toMatch(/<p class="text-meta text-muted-foreground font-sans tracking-wide uppercase">\{label\}<\/p>/);
+    expect(leadTemplate).not.toMatch(/<h[13]\b/);
+  });
+
+  it("the note's eyebrow is an h3, one level below the lead's statement h2", () => {
+    // The two tiers are peers in the outline unless this holds — and four of the five
+    // cues that separate them are visual, so the structure is the only place a screen
+    // reader can learn the rank (WCAG 2.2 §1.3.1).
+    expect(note).toMatch(
+      /<h3 class="text-meta text-muted-foreground font-sans tracking-wide uppercase">\{label\}<\/h3>/,
+    );
+    expect(noteTemplate).not.toMatch(/<h2\b/);
+  });
+
+  it("the statement is the h2 — text-title at full --foreground, the largest text below the h1", () => {
+    expect(lead).toMatch(/<h2 class="text-foreground text-title font-sans">\{statement\}<\/h2>/);
     // Nothing on the page or in the two components outranks it: text-display belongs to
     // PageHeader's h1 alone.
     for (const [, source] of FILES) {
@@ -193,13 +220,29 @@ describe("AC7 and Q1 — the read-only state announces itself through Notice", (
   const readOnly = /state\.kind === "read-only" && \(([\s\S]*?)\n {6}\}/.exec(page)?.[1] ?? "";
 
   it("both user-visible strings survive, as Notice's title and body", () => {
-    expect(readOnly).toMatch(/<Notice variant="warning" title="Your account is read-only">/);
+    expect(readOnly).toMatch(/<Notice variant="warning" title="Your account is read-only" titleAs="h2">/);
     expect(readOnly).toMatch(
       /While deletion is pending you can browse your cards, but you can't review, generate, or edit them\. Cancel\s*\n\s*the deletion in the banner above to continue\./,
     );
   });
 
-  it("the warning variant is what supplies role=status and aria-live=polite", () => {
+  it("the title renders as a real h2, not a bold paragraph", () => {
+    // This state renders a heading on origin/main. Routing the same words through
+    // Notice's default `<p class="font-bold">` title would delete the only outline
+    // entry between the h1 and the library note, so the state's name would be
+    // unreachable by heading navigation (WCAG 2.2 §1.3.1) — a regression, not a
+    // trade. The role=status/aria-live=polite pair below cannot stand in for it:
+    // Notice renders here with no `client:` directive, so it is static server markup,
+    // and a live region that already holds its content at load announces nothing.
+    expect(readOnly).toMatch(/<Notice variant="warning" title="Your account is read-only" titleAs="h2">/);
+
+    const notice = readFileSync(join(SRC_DIR, "components", "ui", "Notice.tsx"), "utf8");
+    expect(notice).toMatch(/titleAs\?: "p" \| "h2" \| "h3";/);
+    expect(notice).toMatch(/titleAs = "p"/);
+    expect(notice).toMatch(/<TitleTag className="font-bold">\{title\}<\/TitleTag>/);
+  });
+
+  it("the warning variant still supplies role=status and aria-live=polite", () => {
     const notice = readFileSync(join(SRC_DIR, "components", "ui", "Notice.tsx"), "utf8");
     expect(notice).toMatch(/const role = variant === "error" \? "alert" : "status";/);
     expect(notice).toMatch(/const ariaLive = variant === "error" \? "assertive" : "polite";/);
@@ -276,7 +319,9 @@ describe("AC9 — every user-visible sentence is byte-identical to what main ren
     }
   });
 
-  it("the four eyebrows carry the headings main rendered as h2s", () => {
+  it("every heading main rendered on this page still has a label at its call site", () => {
+    // The words survive one-for-one; what changed is which element carries them —
+    // see the AC4 block for the lead/note heading levels.
     expect((page.match(/label="Next up"/g) ?? []).length).toBe(2);
     expect(page).toMatch(/label="All caught up"/);
     expect(page).toMatch(/label="Start your first deck"/);
