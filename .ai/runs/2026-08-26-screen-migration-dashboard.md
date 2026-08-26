@@ -79,13 +79,13 @@ panel-as-elevation, which three of Paper's eight principles forbid.
 
 ### Phase 2: The page
 
-- [ ] 2.1 Page frame, imports, PageHeader, PR #31 note
-- [ ] 2.2 review-waiting lead and the Button asChild check
-- [ ] 2.3 Also waiting note
-- [ ] 2.4 drafts-waiting, caught-up and new-account leads
-- [ ] 2.5 Your library note
-- [ ] 2.6 read-only Notice
-- [ ] 2.7 not-configured and error Notices
+- [x] 2.1 Page frame, imports, PageHeader, PR #31 note — 3eea851
+- [x] 2.2 review-waiting lead and the Button asChild check — 0b17cb1
+- [x] 2.3 Also waiting note — 0b17cb1
+- [x] 2.4 drafts-waiting, caught-up and new-account leads — da65270
+- [x] 2.5 Your library note — da65270
+- [x] 2.6 read-only Notice — da65270
+- [x] 2.7 not-configured and error Notices — da65270
 
 ### Phase 3: The guard and the gate
 
