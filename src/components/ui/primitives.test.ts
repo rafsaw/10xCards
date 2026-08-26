@@ -15,10 +15,11 @@ const SRC_DIR = fileURLToPath(new URL("../..", import.meta.url));
 
 const readUi = (name: string) => readFileSync(join(UI_DIR, name), "utf8");
 
-// Scoped to the three primitives this increment adds. LibBadge.astro and the
-// pre-existing parts of button.tsx are legacy consumers the increment does not
-// touch, and criterion 9 governs what this increment ships, not a retroactive
-// sweep of files it was told not to change.
+// Scoped to the three primitives the paper-ui-primitives increment added. The
+// pre-existing parts of button.tsx are a legacy consumer that increment did not
+// touch, and criterion 9 governs what it shipped, not a retroactive sweep of files
+// it was told not to change. (LibBadge.astro was named here too, until the
+// bg-cosmic-cleanup increment deleted it for having no consumer at all.)
 const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx", "Field.tsx"];
 
 describe("criterion 1 — Notice role/aria-live mapping", () => {
@@ -148,6 +149,10 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // bespoke red notice paragraph — left with the glass, and the Paper replacements
   // (Button, Notice) carry their radius under src/components/ui/ instead. The two
   // new page-local components introduce no radius at all.
+  // 28 = 29 minus 1 from the same increment's Phase 3: ui/LibBadge.astro, a starter badge
+  // with no consumer in src/ or tests/, was deleted outright rather than given an invented
+  // one. Its surface carried the last legacy-scale radius in src/components/ui/.
+  //
   // 29 = 34 minus 5 net from the same increment's Phase 2: the four screens shed the
   // legacy-scale radii that belonged to the glass recipe — Welcome.astro's feature cards
   // and pill, and the three auth pages' cards — while AuthCard.astro carries the Paper
@@ -158,12 +163,12 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // was deleted in favour of the registry's Notice, which carries its radius under
   // src/components/ui/. Note this counter reads every file under src/ including this one,
   // so a comment here may not spell the utility names out literally.
-  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 29", () => {
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 28", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(29);
+    expect(count).toBe(28);
   });
 
   // The invariant this guards is "the transitional Paper radius does not spread by

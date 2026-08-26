@@ -33,8 +33,8 @@
 | 2 | 2.6-guard-fix | Repair the Paper-radius guard regex and apply prettier fixes | inline | done | 99a49f4 |
 | 2 | 2.6-guard-fix-2 | Strip the stray byte the prefer-includes autofix carried into the guard | inline | done | e1aa628 |
 | 3 | 3.1 | `Layout.astro` — remove `class="bg-cosmic"` from `<body>` | inline | done | 4715010 |
-| 3 | 3.2 | `global.css` — delete the `@utility bg-cosmic` block; amend the `--radius-paper` condition | inline | done | pending |
-| 3 | 3.3 | Delete `src/components/ui/LibBadge.astro` | inline | todo | — |
+| 3 | 3.2 | `global.css` — delete the `@utility bg-cosmic` block; amend the `--radius-paper` condition | inline | done | bb1d252 |
+| 3 | 3.3 | Delete `src/components/ui/LibBadge.astro` | inline | done | pending |
 | 4 | 4.1 | Write `src/pages/index.test.ts` — the landing guard | inline | todo | — |
 | 4 | 4.2 | Write `src/components/auth/auth-paper.test.ts` — the auth-family guard | inline | todo | — |
 | 4 | 4.3 | Add the repository-wide colour sweep test | inline | todo | — |
