@@ -13,3 +13,12 @@
 
 - The spec's guard-test ordering was adjusted so every Step's commit leaves the suite green: `AC3 — SURVIVORS` is deleted first (Step 1.1) because `Welcome.astro`'s deletion at Step 2.6 would make its `readFileSync` throw, and the new guards land after their subjects. The red-then-green deliberate-break proof (AC13) moves to the final gate.
 - AC1's "not a test regex" clause conflicts with the spec's own Edge Cases table, which keeps `primitives.test.ts:75`. Resolved in favour of the more specific rule: zero `bg-cosmic` in non-test sources, negative assertions in tests retained. To be surfaced in the PR body for a reviewer to re-open.
+
+## 2026-08-26T14:06:00Z — checkpoint 1 (Phase 1 complete)
+
+- Steps covered: 1.1 … 1.9-ledger-fix (`3221e86` … `168c9e4`).
+- Targeted gate green: typecheck 0 errors, lint 0 errors / 29 pre-existing warnings, build complete, `npm test` 363 passed / 1 skipped.
+- UI verification deferred with reason: Phase 1 changes component internals only; no screen renders differently yet, because the auth pages keep the legacy glass until Phase 2.
+- Decision: appended Step `1.9-ledger-fix` to re-baseline `primitives.test.ts`'s `rounded-(md|lg|xl)` ledger from 36 to 34, rather than folding it silently into an earlier Step's commit.
+- Measurement recorded: `--destructive` `oklch(0.48 0.17 27)` against `#ffffff` is 7.14:1 — AA and AAA both clear, so no token adjustment was needed for `text-destructive-foreground`.
+- Environment: `packages/code-reviewer` needed its own `npm ci` in this fresh worktree; without it `npm run typecheck` reports ten errors that have nothing to do with this run.
