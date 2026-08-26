@@ -149,8 +149,16 @@ describe("AC9 — one filled button on the screen; row actions and pagination st
 
   it("outside edit mode every CardRow action is ghost", () => {
     expect(cardRow).toMatch(/variant="ghost"[\s\S]*?Edit/);
-    expect(cardRow).toMatch(/variant="ghost"\n\s*className="text-destructive"/);
+    expect(cardRow).toMatch(/variant="ghost"[\s\S]*?Delete/);
     expect(cardRow).not.toMatch(/variant="destructive"/);
+  });
+
+  it("Delete keeps its destructive tint through hover and keyboard focus", () => {
+    // The ghost variant ships `hover:text-accent-foreground`. tailwind-merge keeps a
+    // base utility and a hover: variant side by side, so `text-destructive` alone is
+    // silently overridden on hover. Fixed at the call site rather than by widening the
+    // shared Button contract with a destructive-ghost variant no second caller wants.
+    expect(cardRow).toMatch(/className="text-destructive hover:text-destructive focus-visible:text-destructive"/);
   });
 
   it("pagination renders links and disabled spans, never Buttons", () => {

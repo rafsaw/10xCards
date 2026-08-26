@@ -154,7 +154,12 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="text-destructive"
+                // `ghost` carries `hover:text-accent-foreground`; because that is a hover:
+                // variant and `text-destructive` is a base utility, tailwind-merge keeps
+                // both and the destructive tint disappears exactly when the pointer is on
+                // the control. Re-stating it under hover: (and focus-visible:, for the
+                // keyboard path) pins the semantic colour through every interaction state.
+                className="text-destructive hover:text-destructive focus-visible:text-destructive"
                 onClick={() => {
                   void handleDelete();
                 }}
