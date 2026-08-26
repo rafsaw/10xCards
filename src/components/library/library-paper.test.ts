@@ -172,6 +172,34 @@ describe("AC9 — one filled button on the screen; row actions and pagination st
   });
 });
 
+describe("AC12 — a saved row and a draft row are visibly different surfaces (principle 7)", () => {
+  // The two surfaces must not converge as either screen evolves. This pins the
+  // distinction at the token level, where it actually lives:
+  //   saved row  — no fill; the page's own --background (--ink-05) shows through,
+  //                separated by the neutral --border hairline (--ink-30).
+  //   draft row  — an explicit --surface-draft fill (--ink-10) inside a stronger
+  //                --surface-draft-border (--ink-40).
+  // A draft is therefore both filled and more heavily outlined than a saved card,
+  // which is what keeps "AI proposes, the human decides" visible rather than merely
+  // implemented. Colour is not the only carrier: /generate also labels its drafts.
+  const draftList = readFileSync(join(SRC_DIR, "components", "generate", "DraftReviewList.tsx"), "utf8");
+
+  it("the draft row carries the draft fill and the draft border", () => {
+    expect(draftList).toMatch(/border-surface-draft-border bg-surface-draft/);
+  });
+
+  it("the saved row carries neither the draft fill nor any background fill of its own", () => {
+    expect(cardRow).not.toMatch(/bg-surface-draft/);
+    expect(cardRow).not.toMatch(/<li className="[^"]*\bbg-/);
+  });
+
+  it("the two surfaces do not share a class list", () => {
+    const savedSurface = /<li className="([^"]*)">/.exec(cardRow)?.[1] ?? "";
+    expect(savedSurface).not.toBe("");
+    expect(draftList).not.toMatch(new RegExp(`className="${savedSurface}"`));
+  });
+});
+
 describe("AC10 — each empty branch renders one region, and the empty library has no search row", () => {
   it("the empty-search branch pairs LibrarySearch with LibraryEmpty, outside any Section", () => {
     expect(page).toMatch(
