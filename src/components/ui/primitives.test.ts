@@ -162,9 +162,23 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
     expect(count).toBe(34);
   });
 
-  it("rounded-paper appears only under src/components/ui/", () => {
+  // The invariant this guards is "the transitional Paper radius does not spread by
+  // accident", not "src/components/ui/ is the only folder allowed to have a card". The
+  // bg-cosmic-cleanup increment adds one deliberate second consumer: auth/AuthCard.astro,
+  // the shell the three auth screens share. It is page-local to the auth family by
+  // decision — three consumers, all in one folder — so promoting it into the registry to
+  // satisfy a path check would assert a generality it does not have, and giving it the
+  // legacy radius instead would contradict the geometry it is being migrated to. The
+  // allowlist is therefore explicit rather than a widened path prefix: a third file
+  // reaching for this token still fails, which is the whole point. Increment 10 deletes
+  // --radius-paper and every one of its usages together.
+  const PAPER_RADIUS_CONSUMERS = [join("components", "ui"), join("components", "auth", "AuthCard.astro")];
+
+  it("the Paper radius appears only in its two recorded consumers", () => {
     const offenders = srcFiles.filter(
-      (f) => !f.includes(join("components", "ui")) && /rounded-paper\b/.test(readFileSync(f, "utf8")),
+      (f) =>
+        !PAPER_RADIUS_CONSUMERS.some((allowed) => f.includes(allowed)) &&
+        /rounded-paper/.test(readFileSync(f, "utf8")),
     );
     expect(offenders).toEqual([]);
   });
