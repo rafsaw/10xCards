@@ -80,6 +80,11 @@ PR: #40
 - [x] 3.4 `library.astro`: the saved-cards region's three branches — 315edb9
 - [x] 3.5 `library.astro`: pagination links and disabled spans — 315edb9
 
+### Phase 5: Review follow-ups (post-review, PR #40)
+
+- [x] 5.1 Keep Delete's destructive tint through hover and keyboard focus — c267802
+- [x] 5.2 Exercise AC12 explicitly and pin the saved-vs-draft surface distinction — 5573fa1
+
 ### Phase 4: The record and the guard
 
 - [x] 4.1 Edit principle 8 in `.uxproof/conventions.md` — c48cbca
