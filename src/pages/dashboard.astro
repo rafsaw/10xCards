@@ -1,5 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import DashboardLead from "@/components/dashboard/DashboardLead.astro";
+import DashboardNote from "@/components/dashboard/DashboardNote.astro";
+import { buttonVariants } from "@/components/ui/button";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { createClient } from "@/lib/supabase";
 import {
   alsoWaitingSentence,
@@ -76,122 +81,95 @@ const state = resolveDashboardState({
 
 const libraryText = "libraryCount" in state && state.libraryCount !== null ? librarySentence(state.libraryCount) : null;
 
-// Inherited from the sibling pages verbatim — this change introduces no new colour
-// decision and extracts no shared component, so that the eventual design-system
-// sweep restyles the dashboard alongside every other screen instead of finding a
-// second thing to migrate.
-//
 // Two tiers, and only two, after the UX review of PR #31 (findings 1 and 2). The
-// review measured every section rendering at an identical 20px/600 heading inside
-// an identical card, with a 30%-opacity gradient on one button as the sole cue that
-// anything outranked anything else — so "Next up" did not read as the answer to
-// "what now?". Now exactly one section per state is a card with the gradient
-// action; everything else is quiet text with an underlined link. "Your library" in
-// particular is context, not an action, which is what the brief asked for all along
-// ("one sentence of context plus a link. Not an action.").
-const headingClass = "bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent";
-
-// Tier 1 — the single primary surface. At most one of these renders per state.
-const sectionClass = "space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl";
-const sectionHeadingClass = "text-xl font-semibold";
-const bodyClass = "text-blue-100/80";
-const primaryLinkClass =
-  "inline-block rounded-lg border border-white/20 bg-gradient-to-r from-blue-500/30 to-purple-500/30 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500/40 hover:to-purple-500/40";
-
-// Tier 2 — subordinate. No card, no filled control: a quieter heading, small body
-// text, and a text link. The underline is deliberate, so a link is identifiable
-// without relying on colour (WCAG 1.4.1).
-// px-6 matches the card's inner padding, so a subordinate section's text starts on the
-// same left edge as the primary card's text instead of hanging 20px outside it.
-const asideClass = "space-y-1 px-6";
-const asideHeadingClass = "text-base font-semibold text-white";
-const asideBodyClass = "text-sm text-blue-100/70";
-const textLinkClass =
-  "inline-block text-sm font-medium text-blue-100/80 underline underline-offset-4 transition-colors hover:text-white";
-
-const actionsClass = "flex flex-wrap items-center gap-3";
-const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300";
+// review measured every section rendering at an identical 20px/600 heading inside an
+// identical card, with a 30%-opacity gradient on one button as the sole cue that
+// anything outranked anything else — so "Next up" did not read as the answer to "what
+// now?". That requirement still holds; only its expression changed. Paper has no glass,
+// no gradient and no panel-as-elevation, so the two tiers now live in
+// `DashboardLead` (the answer, with the page's single filled button) and
+// `DashboardNote` (hairline-separated context, never a peer). See
+// .ai/specs/2026-08-26-screen-migration-dashboard.md.
 ---
 
 <Layout title="Dashboard">
-  <div class="bg-cosmic min-h-screen p-4">
-    <div class="mx-auto max-w-3xl space-y-6 py-8">
-      <header>
-        <h1 class:list={headingClass}>Dashboard</h1>
-      </header>
+  <div class="bg-background text-foreground min-h-screen p-4">
+    <div class="max-w-content mx-auto space-y-6 py-8">
+      <PageHeader title="Dashboard" />
 
       {
         state.kind === "not-configured" && (
-          <p class:list={noticeClass}>Supabase is not configured — your dashboard cannot be loaded.</p>
+          <Notice variant="error">Supabase is not configured — your dashboard cannot be loaded.</Notice>
         )
       }
 
       {
         state.kind === "error" && (
-          <section class:list={sectionClass}>
+          <>
             {/* The message precedes the links so it is read before the choices it qualifies.
                 Three plain links, as the brief specifies: no count survived the failure, so
                 nothing here outranks anything else and none of them is dressed as a primary. */}
-            <p class:list={noticeClass}>We couldn't load your dashboard right now. Try refreshing the page.</p>
-            <div class:list={actionsClass}>
-              <a href="/review" class:list={textLinkClass}>
+            <Notice variant="error">We couldn't load your dashboard right now. Try refreshing the page.</Notice>
+            <div class="flex flex-wrap items-center gap-3">
+              <a href="/review" class="text-link text-sm underline underline-offset-4">
                 Start review session
               </a>
-              <a href="/generate" class:list={textLinkClass}>
+              <a href="/generate" class="text-link text-sm underline underline-offset-4">
                 Generate cards
               </a>
-              <a href="/library" class:list={textLinkClass}>
+              <a href="/library" class="text-link text-sm underline underline-offset-4">
                 Browse library
               </a>
             </div>
-          </section>
+          </>
         )
       }
 
       {
         state.kind === "read-only" && (
-          <section class:list={sectionClass}>
-            <h2 class:list={sectionHeadingClass}>Your account is read-only</h2>
-            <p class:list={bodyClass}>
+          <>
+            <Notice variant="warning" title="Your account is read-only" titleAs="h2">
               While deletion is pending you can browse your cards, but you can't review, generate, or edit them. Cancel
               the deletion in the banner above to continue.
-            </p>
-            {/* Browsing is the one thing still available. When the library aside below
-                renders it already carries this link, so it is not repeated here. */}
+            </Notice>
+
+            {/* Browsing is the one thing still available. When the library note below
+                renders it already carries this link, so it is not repeated here.
+                Rendered as a sibling rather than through Notice's `action` prop: an
+                Astro template cannot pass markup in a component attribute (esbuild
+                rejects `action={<a href=…>}`), and the alternative — a React wrapper
+                island purely to hold one static link — would put a `client:` directive
+                on a page the spec keeps island-free. */}
             {libraryText === null && (
-              <div class:list={actionsClass}>
-                <a href="/library" class:list={textLinkClass}>
+              <div class="flex flex-wrap items-center gap-3">
+                <a href="/library" class="text-link text-sm underline underline-offset-4">
                   Browse library
                 </a>
               </div>
             )}
-          </section>
+          </>
         )
       }
 
       {
         state.kind === "review-waiting" && (
           <>
-            <section class:list={sectionClass}>
-              <h2 class:list={sectionHeadingClass}>Next up</h2>
-              <p class:list={bodyClass}>{dueSentence(state.dueCount)}</p>
-              <div class:list={actionsClass}>
-                <a href="/review" class:list={primaryLinkClass}>
-                  Start review session
-                </a>
-              </div>
-            </section>
+            <DashboardLead label="Next up" statement={dueSentence(state.dueCount)}>
+              <a href="/review" class:list={buttonVariants()}>
+                Start review session
+              </a>
+            </DashboardLead>
 
-            {/* Subordinate by construction: no card, no filled control. Drafts are the
-                reminder, never a second primary action competing with the review. */}
+            {/* Subordinate by construction: a hairline, a quiet eyebrow and a text link.
+                Drafts are the reminder, never a second primary action competing with the
+                review. */}
             {state.alsoWaitingDrafts !== null && (
-              <section class:list={asideClass}>
-                <h2 class:list={asideHeadingClass}>Also waiting</h2>
-                <p class:list={asideBodyClass}>{alsoWaitingSentence(state.alsoWaitingDrafts)}</p>
-                <a href="/generate" class:list={textLinkClass}>
+              <DashboardNote label="Also waiting">
+                {alsoWaitingSentence(state.alsoWaitingDrafts)}{" "}
+                <a href="/generate" class="text-link text-sm underline underline-offset-4">
                   Check generated cards
                 </a>
-              </section>
+              </DashboardNote>
             )}
           </>
         )
@@ -199,51 +177,42 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
 
       {
         state.kind === "drafts-waiting" && (
-          <section class:list={sectionClass}>
-            <h2 class:list={sectionHeadingClass}>Next up</h2>
-            <p class:list={bodyClass}>{draftsWaitingSentence(state.draftCount)}</p>
-            <div class:list={actionsClass}>
-              <a href="/generate" class:list={primaryLinkClass}>
-                Check generated cards
-              </a>
-            </div>
-          </section>
+          <DashboardLead label="Next up" statement={draftsWaitingSentence(state.draftCount)}>
+            <a href="/generate" class:list={buttonVariants()}>
+              Check generated cards
+            </a>
+          </DashboardLead>
         )
       }
 
       {
         state.kind === "caught-up" && (
-          <section class:list={sectionClass}>
-            <h2 class:list={sectionHeadingClass}>All caught up</h2>
-            <p class:list={bodyClass}>Nothing is due right now. Cards come back when their interval is up.</p>
-            {/* "Browse library" is the library section's link — this state always has a
-                library, so offering it twice would be one action too many. */}
-            <div class:list={actionsClass}>
-              <a href="/generate" class:list={primaryLinkClass}>
-                Generate more cards
-              </a>
-            </div>
-          </section>
+          /* "Browse library" is the library note's link — this state always has a
+             library, so offering it twice would be one action too many. */
+          <DashboardLead
+            label="All caught up"
+            statement="Nothing is due right now. Cards come back when their interval is up."
+          >
+            <a href="/generate" class:list={buttonVariants()}>
+              Generate more cards
+            </a>
+          </DashboardLead>
         )
       }
 
       {
         state.kind === "new-account" && (
-          <section class:list={sectionClass}>
-            <h2 class:list={sectionHeadingClass}>Start your first deck</h2>
-            <p class:list={bodyClass}>
-              You have no cards yet. Paste a passage and 10xCards drafts question-and-answer cards for you to review
-              before anything is saved.
-            </p>
-            <div class:list={actionsClass}>
-              <a href="/generate" class:list={primaryLinkClass}>
-                Create your first cards
-              </a>
-              <a href="/library" class:list={textLinkClass}>
-                Or add a card by hand
-              </a>
-            </div>
-          </section>
+          <DashboardLead
+            label="Start your first deck"
+            statement="You have no cards yet. Paste a passage and 10xCards drafts question-and-answer cards for you to review before anything is saved."
+          >
+            <a href="/generate" class:list={buttonVariants()}>
+              Create your first cards
+            </a>
+            <a href="/library" class="text-link text-sm underline underline-offset-4">
+              Or add a card by hand
+            </a>
+          </DashboardLead>
         )
       }
 
@@ -254,15 +223,12 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
       }
       {
         libraryText !== null && (
-          <section class:list={asideClass}>
-            <h2 class:list={asideHeadingClass}>Your library</h2>
-            <p class:list={asideBodyClass}>
-              {libraryText}{" "}
-              <a href="/library" class:list={textLinkClass}>
-                Browse library
-              </a>
-            </p>
-          </section>
+          <DashboardNote label="Your library">
+            {libraryText}{" "}
+            <a href="/library" class="text-link text-sm underline underline-offset-4">
+              Browse library
+            </a>
+          </DashboardNote>
         )
       }
     </div>
