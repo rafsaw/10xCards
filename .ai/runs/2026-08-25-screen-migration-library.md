@@ -84,6 +84,7 @@ PR: #40
 
 - [x] 5.1 Keep Delete's destructive tint through hover and keyboard focus — c267802
 - [x] 5.2 Exercise AC12 explicitly and pin the saved-vs-draft surface distinction — 5573fa1
+- [x] 5.3 UX finding 1 — stack the saved row's actions under its content below sm — 19c4f63
 
 ### Phase 4: The record and the guard
 
