@@ -69,8 +69,20 @@ describe("src/ ships no hardcoded colour — the dark-mode entry condition", () 
     );
   });
 
-  it.each(SHIPPED_FILES)("%s uses no white/N or black/N opacity utility", (_name, source) => {
-    expect(source).not.toMatch(/\b(?:bg|text|border|from|to|via|ring|placeholder)-(?:white|black)\/\d{1,3}\b/);
+  // The opacity suffix is OPTIONAL, and that is the whole point of this assertion.
+  //
+  // It first shipped as `-(white|black)/\d{1,3}` — opacity required — which meant a bare
+  // `text-white` matched nothing here (no numeric scale, so the palette pattern misses it
+  // too) and sailed through the entire suite. `text-white` is the class the removal
+  // condition at global.css:317-323 was written around: "the same commit that removes the
+  // last text-white". The sweep that exists to stop it coming back could not see it.
+  //
+  // Verified by injecting `text-white` into a file with no per-screen guard: before this
+  // fix all 23 test files stayed green; after it, the file fails by name.
+  it.each(SHIPPED_FILES)("%s uses no white or black colour utility, with or without opacity", (_name, source) => {
+    expect(source).not.toMatch(
+      /\b(?:bg|text|border|from|to|via|ring|placeholder|fill|stroke|divide|outline|decoration|accent|caret)-(?:white|black)(?:\/\d{1,3})?\b/,
+    );
   });
 
   it.each(SHIPPED_FILES)("%s carries no raw hex, rgb() or oklch() colour literal", (_name, source) => {
