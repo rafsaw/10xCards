@@ -203,7 +203,12 @@
       "Read(//c/Users/rafal/repos/10xDevs3/10xCards-pr38-review-2/**)",
       "Bash(netstat -ano)",
       "Bash(taskkill //F //PID 58888)",
-      "Bash(taskkill //F //PID 27692)"
+      "Bash(taskkill //F //PID 27692)",
+      "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-lib-paper2/.ai/qa/**)",
+      "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-lib3/.ai/qa/**)",
+      "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-qa40/.ai/qa/**)",
+      "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-qa40/**)",
+      "Bash(BASE_URL=http://127.0.0.1:4321 node .ai/qa/artifacts_pr40qa/qa.mjs)"
     ],
     "deny": [
       "Bash(rm -rf *)"
