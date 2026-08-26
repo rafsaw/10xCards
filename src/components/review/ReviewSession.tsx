@@ -31,7 +31,7 @@ const FALLBACK_MESSAGES: Record<string, string> = {
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="rounded-paper border-border bg-muted text-muted-foreground text-meta border px-1.5 py-0.5 font-mono">
+    <kbd className="border-border bg-muted text-muted-foreground text-meta rounded-lg border px-1.5 py-0.5 font-mono">
       {children}
     </kbd>
   );
@@ -200,7 +200,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
       {/* The one bordered surface on the screen, which is what makes it the hero
           (principles 3 and 4). Both faces sit at --text-title: the token layer states
           content never goes below it, and the back of a card is content. */}
-      <div className="border-border bg-card rounded-paper space-y-3 border p-6">
+      <div className="border-border bg-card space-y-3 rounded-lg border p-6">
         <div>
           <p className="text-meta text-muted-foreground tracking-wide uppercase">Front</p>
           <p className="text-foreground text-title mt-1 font-serif break-words">{card.front}</p>
