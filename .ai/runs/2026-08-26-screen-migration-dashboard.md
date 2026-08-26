@@ -70,6 +70,8 @@ panel-as-elevation, which three of Paper's eight principles forbid.
 
 ## Progress
 
+PR: #41
+
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: The two components
@@ -89,6 +91,6 @@ panel-as-elevation, which three of Paper's eight principles forbid.
 
 ### Phase 3: The guard and the gate
 
-- [ ] 3.1 dashboard-paper.test.ts
-- [ ] 3.2 Deliberate-break proof
-- [ ] 3.3 Full validation gate
+- [x] 3.1 dashboard-paper.test.ts — ca680ba
+- [x] 3.2 Deliberate-break proof — ca680ba
+- [x] 3.3 Full validation gate — ca680ba
