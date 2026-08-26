@@ -14,8 +14,8 @@
 | Phase | Step | Title | Exec | Status | Commit |
 |-------|------|-------|------|--------|--------|
 | 1 | 1.1 | Delete the `AC3 — SURVIVORS` block from `dashboard-paper.test.ts` | inline | done | 3221e86 |
-| 1 | 1.2 | Retokenise `FormField.tsx` and add the `autocomplete` prop | inline | done | pending |
-| 1 | 1.3 | Retokenise `PasswordToggle.tsx` | inline | todo | — |
+| 1 | 1.2 | Retokenise `FormField.tsx` and add the `autocomplete` prop | inline | done | 74dd8f8 |
+| 1 | 1.3 | Retokenise `PasswordToggle.tsx` | inline | done | pending |
 | 1 | 1.4 | Retokenise `SubmitButton.tsx` | inline | todo | — |
 | 1 | 1.5 | Delete `ServerError.tsx`; both call sites render `Notice variant="error"` | inline | todo | — |
 | 1 | 1.6 | `SignUpForm.tsx` — retokenise the hint, add `autocomplete` to three fields | inline | todo | — |
