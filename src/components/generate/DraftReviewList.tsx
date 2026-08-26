@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { CircleAlert, Check, Trash2, Save, Loader2 } from "lucide-react";
+import { Check, Trash2, Save, Loader2 } from "lucide-react";
 import { parseErrorBody } from "@/lib/parse-error";
+import { Notice } from "@/components/ui/Notice";
+import { Section } from "@/components/ui/Section";
+import { Button } from "@/components/ui/button";
 
 interface Draft {
   id: string;
@@ -92,31 +95,22 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
   }
 
   return (
-    <section className="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-      <div>
-        <h2 className="text-xl font-semibold">Review draft batch ({drafts.length})</h2>
-        <p className="mt-1 text-sm text-blue-100/70">
-          {acceptCount} to save · {rejectCount} to discard
-        </p>
-      </div>
-
-      {error && (
-        <p className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-          <CircleAlert className="size-4 shrink-0" />
-          {error.message}
-        </p>
-      )}
+    <Section
+      title={`Review draft batch (${drafts.length})`}
+      description={`${acceptCount} to save · ${rejectCount} to discard`}
+    >
+      {error && <Notice variant="error">{error.message}</Notice>}
 
       {/* Bulk selection setters — they only mark every card's Keep/Discard decision;
           nothing persists until "Save to deck" below. Kept separate from the immediate
           "Discard all drafts" action above so the deferred intent reads clearly. */}
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="text-blue-100/70">Set all:</span>
+        <span className="text-muted-foreground">Set all:</span>
         <button
           type="button"
           onClick={acceptAll}
           disabled={submitting}
-          className="flex items-center gap-1.5 rounded-lg border border-green-500/30 bg-green-900/20 px-3 py-1.5 text-green-200 transition-colors hover:bg-green-900/40 disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-success bg-success-surface text-success focus-visible:border-ring focus-visible:ring-ring flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Check className="size-4" />
           Keep all
@@ -125,7 +119,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           type="button"
           onClick={rejectAll}
           disabled={submitting}
-          className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-900/20 px-3 py-1.5 text-red-200 transition-colors hover:bg-red-900/40 disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-destructive bg-destructive-surface text-destructive focus-visible:border-ring focus-visible:ring-ring flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Trash2 className="size-4" />
           Discard all
@@ -138,13 +132,13 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           return (
             <li
               key={draft.id}
-              className={`flex items-start justify-between gap-4 rounded-lg border border-white/10 bg-white/5 p-4 transition-opacity ${
+              className={`border-surface-draft-border bg-surface-draft flex items-start justify-between gap-4 rounded-lg border p-4 transition-opacity ${
                 rejected ? "opacity-50" : ""
               }`}
             >
               <div className="min-w-0">
-                <p className={`font-medium text-white ${rejected ? "line-through" : ""}`}>{draft.front}</p>
-                <p className={`mt-1 text-sm text-blue-100/70 ${rejected ? "line-through" : ""}`}>{draft.back}</p>
+                <p className={`text-foreground font-medium ${rejected ? "line-through" : ""}`}>{draft.front}</p>
+                <p className={`text-muted-foreground mt-1 text-sm ${rejected ? "line-through" : ""}`}>{draft.back}</p>
               </div>
               <button
                 type="button"
@@ -152,10 +146,10 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
                   toggle(draft.id);
                 }}
                 aria-pressed={!rejected}
-                className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                className={`focus-visible:border-ring focus-visible:ring-ring flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] ${
                   rejected
-                    ? "border-red-500/30 bg-red-900/20 text-red-200 hover:bg-red-900/40"
-                    : "border-green-500/30 bg-green-900/20 text-green-200 hover:bg-green-900/40"
+                    ? "border-destructive bg-destructive-surface text-destructive"
+                    : "border-success bg-success-surface text-success"
                 }`}
               >
                 {rejected ? (
@@ -175,17 +169,18 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
         })}
       </ul>
 
-      <button
+      <Button
         type="button"
+        variant="default"
         onClick={() => {
           void handleSave();
         }}
         disabled={submitting}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-400/30 bg-blue-600/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600/50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full transition-colors"
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
         {submitting ? "Saving…" : "Save changes"}
-      </button>
-    </section>
+      </Button>
+    </Section>
   );
 }

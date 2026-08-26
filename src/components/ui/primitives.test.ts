@@ -19,7 +19,7 @@ const readUi = (name: string) => readFileSync(join(UI_DIR, name), "utf8");
 // pre-existing parts of button.tsx are legacy consumers the increment does not
 // touch, and criterion 9 governs what this increment ships, not a retroactive
 // sweep of files it was told not to change.
-const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx"];
+const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx"];
 
 describe("criterion 1 — Notice role/aria-live mapping", () => {
   const source = readUi("Notice.tsx");
@@ -87,20 +87,20 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
 
   const srcFiles = walk(SRC_DIR).filter((f) => /\.(tsx?|astro)$/.test(f));
 
-  // 61 = 63 (shell-mobile-navigation baseline) minus 2 from the
-  // screen-migration-settings increment, which replaces settings.astro's own
-  // amber isReadOnly box and DeleteAccountButton.tsx's error box — one legacy
-  // radius utility each — with Notice, which already carries the Paper radius
-  // under src/components/ui/, so composing it removes a legacy occurrence
-  // rather than relocating one. The one legacy-radius control that survives
-  // (the Cancel-deletion action button) moves from settings.astro into the
-  // new RetentionNotice.tsx with no net change to the count.
-  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 61", () => {
+  // 54 = 61 (screen-migration-settings baseline) minus 7 from the
+  // screen-migration-generate increment: 2 page-level notices
+  // (not-configured/loadError) and 2 component error notices become Notice,
+  // which already carries the Paper radius under src/components/ui/, and the
+  // Generate and Save-changes submits convert to the shared Button primitive,
+  // dropping the two hand-rolled legacy-radius submit controls they replace.
+  // Token-only swaps (Keep/Discard/toggle colours, the draft-row surface)
+  // touch colour, not radius, so they contribute no net change.
+  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 54", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(61);
+    expect(count).toBe(54);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
