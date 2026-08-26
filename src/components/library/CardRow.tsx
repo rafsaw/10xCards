@@ -139,13 +139,17 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
           </div>
         </div>
       ) : (
-        <div className="flex items-start justify-between gap-4">
+        // Below sm the actions stack under the content instead of sitting beside it:
+        // inline, Edit and Delete claim ~150px of a 390px viewport and wrap the front
+        // onto extra lines, which puts the chrome above the content (principle 3).
+        // DOM order is unchanged, so tab order and both accessible names are too.
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0">
             <p className="text-foreground text-title font-serif break-words">{card.front}</p>
             <p className="text-muted-foreground text-title mt-1 font-serif break-words">{card.back}</p>
           </div>
           {!readOnly && (
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="-ml-3 flex shrink-0 items-center gap-2 sm:ml-0">
               <Button type="button" size="sm" variant="ghost" onClick={startEdit} disabled={pending}>
                 <Pencil className="size-4" />
                 Edit

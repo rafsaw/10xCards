@@ -70,6 +70,20 @@ describe("AC2 — the saved row's two faces are the hero, at the content floor",
   it("the row separates by hairline and space, with no background fill", () => {
     expect(cardRow).toMatch(/<li className="border-border rounded-lg border p-4">/);
   });
+
+  it("below sm the actions stack under the content, so the front keeps the full width", () => {
+    // UX review finding 1: inline at 390px, Edit + Delete took ~150px of the row and
+    // wrapped the front onto extra lines — chrome outranking content (principle 3).
+    // The row is column-first and only goes side-by-side from sm up.
+    expect(cardRow).toMatch(/flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4/);
+    expect(cardRow).not.toMatch(/<div className="flex items-start justify-between gap-4">/);
+  });
+
+  it("the actions keep their source order, so tab order and both labels are unchanged", () => {
+    const display = cardRow.slice(cardRow.indexOf("sm:justify-between"));
+    expect(display.indexOf("{card.front}")).toBeLessThan(display.indexOf("Edit"));
+    expect(display.indexOf("Edit")).toBeLessThan(display.indexOf("Delete"));
+  });
 });
 
 describe("AC5 — every error is announced through Notice", () => {
