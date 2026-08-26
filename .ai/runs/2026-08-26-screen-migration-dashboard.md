@@ -74,8 +74,8 @@ panel-as-elevation, which three of Paper's eight principles forbid.
 
 ### Phase 1: The two components
 
-- [ ] 1.1 DashboardLead.astro
-- [ ] 1.2 DashboardNote.astro
+- [x] 1.1 DashboardLead.astro — 198c2a8
+- [x] 1.2 DashboardNote.astro — 198c2a8
 
 ### Phase 2: The page
 
