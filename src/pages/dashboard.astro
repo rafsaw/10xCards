@@ -1,5 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import DashboardLead from "@/components/dashboard/DashboardLead.astro";
+import DashboardNote from "@/components/dashboard/DashboardNote.astro";
+import { Button } from "@/components/ui/button";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { createClient } from "@/lib/supabase";
 import {
   alsoWaitingSentence,
@@ -76,20 +81,15 @@ const state = resolveDashboardState({
 
 const libraryText = "libraryCount" in state && state.libraryCount !== null ? librarySentence(state.libraryCount) : null;
 
-// Inherited from the sibling pages verbatim — this change introduces no new colour
-// decision and extracts no shared component, so that the eventual design-system
-// sweep restyles the dashboard alongside every other screen instead of finding a
-// second thing to migrate.
-//
 // Two tiers, and only two, after the UX review of PR #31 (findings 1 and 2). The
-// review measured every section rendering at an identical 20px/600 heading inside
-// an identical card, with a 30%-opacity gradient on one button as the sole cue that
-// anything outranked anything else — so "Next up" did not read as the answer to
-// "what now?". Now exactly one section per state is a card with the gradient
-// action; everything else is quiet text with an underlined link. "Your library" in
-// particular is context, not an action, which is what the brief asked for all along
-// ("one sentence of context plus a link. Not an action.").
-const headingClass = "bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent";
+// review measured every section rendering at an identical 20px/600 heading inside an
+// identical card, with a 30%-opacity gradient on one button as the sole cue that
+// anything outranked anything else — so "Next up" did not read as the answer to "what
+// now?". That requirement still holds; only its expression changed. Paper has no glass,
+// no gradient and no panel-as-elevation, so the two tiers now live in
+// `DashboardLead` (the answer, with the page's single filled button) and
+// `DashboardNote` (hairline-separated context, never a peer). See
+// .ai/specs/2026-08-26-screen-migration-dashboard.md.
 
 // Tier 1 — the single primary surface. At most one of these renders per state.
 const sectionClass = "space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl";
@@ -114,11 +114,9 @@ const noticeClass = "rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2
 ---
 
 <Layout title="Dashboard">
-  <div class="bg-cosmic min-h-screen p-4">
-    <div class="mx-auto max-w-3xl space-y-6 py-8">
-      <header>
-        <h1 class:list={headingClass}>Dashboard</h1>
-      </header>
+  <div class="bg-background text-foreground min-h-screen p-4">
+    <div class="max-w-content mx-auto space-y-6 py-8">
+      <PageHeader title="Dashboard" />
 
       {
         state.kind === "not-configured" && (
