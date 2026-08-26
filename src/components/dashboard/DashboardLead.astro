@@ -1,0 +1,31 @@
+---
+/**
+ * The dashboard's tier-1 recipe: the answer to "what should I do now?".
+ *
+ * Paper has no glass, no gradient and no panel-as-elevation (principles 1, 3 and 4),
+ * so the tier that used to be a padded card with a gradient-filled action is re-derived
+ * from four non-colour cues instead — position (first under the header), type size
+ * (`text-title`, the largest text below the `<h1>`), text colour (full `--foreground`
+ * against the notes' `--muted-foreground`) and control weight (the page's single filled
+ * `Button`, passed in through the slot).
+ *
+ * Deliberately no top hairline: that absence is what says "this is not one of a list of
+ * sections". The label/statement pair is the recipe ReviewSession.tsx:205-206 already
+ * ships for a flashcard's front face, with sans substituted for serif — a dashboard
+ * sentence is chrome reporting a count, not card content.
+ *
+ * Source: .ai/specs/2026-08-26-screen-migration-dashboard.md
+ */
+interface Props {
+  label: string;
+  statement: string;
+}
+
+const { label, statement } = Astro.props;
+---
+
+<section class="space-y-3">
+  <h2 class="text-meta text-muted-foreground font-sans tracking-wide uppercase">{label}</h2>
+  <p class="text-foreground text-title font-sans">{statement}</p>
+  <div class="flex flex-wrap items-center gap-3"><slot /></div>
+</section>

@@ -1,0 +1,23 @@
+---
+/**
+ * The dashboard's tier-2 recipe: the reminder and the context, subordinate by
+ * construction.
+ *
+ * The hairline is what separates a note from the lead, and it is the only separator on
+ * the page — one border token, no surface fill and no shadow anywhere (principle 4).
+ * The body and its link go in the slot; the link recipe is underlined so it is
+ * identifiable without colour (WCAG 2.2 §1.4.1).
+ *
+ * Source: .ai/specs/2026-08-26-screen-migration-dashboard.md
+ */
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<section class="border-border space-y-1 border-t pt-4">
+  <h2 class="text-meta text-muted-foreground font-sans tracking-wide uppercase">{label}</h2>
+  <p class="text-muted-foreground text-sm"><slot /></p>
+</section>
