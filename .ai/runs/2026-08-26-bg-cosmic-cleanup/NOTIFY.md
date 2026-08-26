@@ -22,3 +22,12 @@
 - Decision: appended Step `1.9-ledger-fix` to re-baseline `primitives.test.ts`'s `rounded-(md|lg|xl)` ledger from 36 to 34, rather than folding it silently into an earlier Step's commit.
 - Measurement recorded: `--destructive` `oklch(0.48 0.17 27)` against `#ffffff` is 7.14:1 — AA and AAA both clear, so no token adjustment was needed for `text-destructive-foreground`.
 - Environment: `packages/code-reviewer` needed its own `npm ci` in this fresh worktree; without it `npm run typecheck` reports ten errors that have nothing to do with this run.
+
+## 2026-08-26T15:22:00Z — checkpoint 2 (Phase 2 complete)
+
+- Steps covered: 2.1 … 2.6-guard-fix-2 (`595610e` … `59fc3b3`).
+- Targeted gate green: typecheck 0 errors, lint 0 errors, build complete, `npm test` 364 passed / 1 skipped.
+- Decision: `AuthCard.astro` is a deliberate second consumer of `rounded-paper`. The confinement guard became an explicit two-name allowlist rather than a widened path prefix, so a third file reaching for the transitional token still fails.
+- Decision: radius ledger re-baselined again, 34 → 29, as Step `2.6-ledger-fix`.
+- **Defect found and fixed in our own guard:** Step 2.1 left the Paper-radius assertion matching a literal backspace byte, so it passed on every input — green and inert. `npm run lint` surfaced it, not the test run. Repaired across two appended Steps and then proven by deliberate break: an offender turns it red, removing the offender turns it green.
+- UI screenshots deferred to checkpoint 3 with reason: `<body>` still carries `bg-cosmic`, so evidence captured now would document a state that never ships.

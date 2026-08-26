@@ -1,20 +1,20 @@
 # Handoff — 2026-08-26-bg-cosmic-cleanup
 
-**Last updated:** 2026-08-26T14:06:00Z
+**Last updated:** 2026-08-26T15:22:00Z
 **Branch:** feat/bg-cosmic-cleanup
 **PR:** https://github.com/rafsaw/10xCards/pull/46 (draft)
-**Current phase/step:** Phase 1 complete; Phase 2 Step 2.1 not started
-**Last commit:** 168c9e4 — test(ui): re-baseline the radius ledger after the Phase 1 retokenisation
+**Current phase/step:** Phase 2 complete; Phase 3 Step 3.1 not started
+**Last commit:** 59fc3b3 — test(ui): strip the stray byte the includes() autofix carried into the guard
 
 ## What just happened
 
-- Phase 1 landed in ten commits: the auth form family and the two strays are retokenised, `ServerError.tsx` is deleted in favour of `Notice`, all four credential fields carry `autocomplete`, and the destructive button names its label with its token.
-- Checkpoint 1 ran the targeted gate green — typecheck, lint, build and the unit suite all pass (363 passed, 1 skipped).
-- `bg-cosmic` is deliberately untouched so far. It is still declared in `global.css`, still on `<body>`, and still on the three auth pages and `Welcome.astro`.
+- Phase 2 landed: `AuthCard.astro` now carries the shell the three auth screens share, all three compose it, and `index.astro` is a sign-in gateway. `Welcome.astro` is deleted, proven by a green build.
+- Two appended Steps repaired the Paper-radius confinement guard, which Step 2.1 had left matching a literal backspace byte — green, and inert. It is now proven by a deliberate break.
+- Checkpoint 2's targeted gate is green: typecheck, lint, build and 364 unit tests.
 
 ## Next concrete action
 
-- Start Step 2.1 — create `src/components/auth/AuthCard.astro` with the `title` prop and default slot, per the contract in the spec's UI/UX section. Nothing consumes it until Step 2.2.
+- Start Step 3.1 — remove `class="bg-cosmic"` from `<body>` in `src/layouts/Layout.astro`.
 
 ## Blockers / open questions
 
@@ -23,9 +23,9 @@
 ## Environment caveats
 
 - Dev runtime runnable: yes — `.env` and `.dev.vars` copied from the primary checkout.
-- Browser / UI checks: enabled but not yet exercised; deferred at checkpoint 1 because no page markup has changed. They run at checkpoint 2 and at the final gate.
-- `packages/code-reviewer` is not an npm workspace: a fresh worktree needs its own `npm ci` inside that folder or `npm run typecheck` reports ten false errors. Already done in this worktree.
-- Database/migration state: clean — this increment touches no data model, migration or RLS surface.
+- Browser / UI checks: enabled; deliberately deferred to checkpoint 3, immediately after Phase 3, because `<body>` still carries `bg-cosmic` and screenshots taken now would document a state that never ships.
+- `packages/code-reviewer` is not an npm workspace: a fresh worktree needs its own `npm ci` inside that folder or `npm run typecheck` reports ten false errors. Already done here.
+- Database/migration state: clean.
 
 ## Worktree
 
