@@ -19,7 +19,7 @@ const readUi = (name: string) => readFileSync(join(UI_DIR, name), "utf8");
 // pre-existing parts of button.tsx are legacy consumers the increment does not
 // touch, and criterion 9 governs what this increment ships, not a retroactive
 // sweep of files it was told not to change.
-const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx"];
+const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx", "Field.tsx"];
 
 describe("criterion 1 — Notice role/aria-live mapping", () => {
   const source = readUi("Notice.tsx");
@@ -77,6 +77,46 @@ describe("criterion 9 — src/components/ui/ carries no literal, shadow, blur, o
   });
 });
 
+describe("Field — the label-plus-textarea primitive (screen-migration-library)", () => {
+  const source = readUi("Field.tsx");
+
+  it("pairs htmlFor with the textarea id, so the label is programmatic", () => {
+    expect(source).toMatch(/<label htmlFor=\{id\}/);
+    expect(source).toMatch(/<textarea\s+id=\{id\}/);
+  });
+
+  it("carries the Paper control recipe, verbatim from PasteAndGenerateForm", () => {
+    expect(source).toMatch(
+      /border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-ring w-full resize-y rounded-lg border px-3 py-2 text-sm focus:outline-none disabled:opacity-50/,
+    );
+  });
+
+  it("rows defaults to 2", () => {
+    expect(source).toMatch(/rows = 2/);
+  });
+
+  it("onChange takes the string, not the event", () => {
+    expect(source).toMatch(/onChange: \(value: string\) => void/);
+    expect(source).toMatch(/onChange\(e\.target\.value\)/);
+  });
+
+  it("declares no error, icon or hint slot — no consumer exists for any of them", () => {
+    expect(source).not.toMatch(/error/);
+    expect(source).not.toMatch(/icon/);
+    expect(source).not.toMatch(/hint/);
+  });
+});
+
+describe("PageHeader does not decide the page's measure (screen-migration-library)", () => {
+  // Width is the page's concern, not the header's: all three pre-existing
+  // consumers (settings, generate, review) already wrap PageHeader in
+  // `max-w-content mx-auto`, and /library renders at max-w-3xl instead. A
+  // primitive that describes a page header should not also fix its width.
+  it("PageHeader.tsx carries no max-w- utility", () => {
+    expect(readUi("PageHeader.tsx")).not.toMatch(/max-w-/);
+  });
+});
+
 describe("criterion 5 — rounded-paper is confined to src/components/ui/", () => {
   function walk(dir: string): string[] {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -87,22 +127,17 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
 
   const srcFiles = walk(SRC_DIR).filter((f) => /\.(tsx?|astro)$/.test(f));
 
-  // 50 = 54 (screen-migration-generate baseline) minus 4 net from the
-  // screen-migration-review increment. /review shed seven legacy-radius controls
-  // — the restart button, the Back-to-dashboard link, the hand-rolled error
-  // paragraph, the reveal button and both rating buttons, plus DoneCard's own
-  // control — as they converted to the shared Button and Notice primitives, which
-  // carry their radius under src/components/ui/. Two screen-level surfaces are
-  // added back on the legacy radius scale: the flashcard face and the Kbd key cap.
-  // They stay on that scale deliberately: --radius-paper is documented at
-  // global.css:273 as "consumed only by primitives in src/components/ui/", and the
-  // merged /generate migration set the same precedent for its draft row.
-  it("rounded-(md|lg|xl) occurrences across src/ are unchanged at 50", () => {
+  // 52 = 50 (screen-migration-review baseline) plus 2 from the
+  // screen-migration-library increment: Field.tsx's control recipe carries one
+  // legacy-scale radius, and this file quotes that recipe once more in the Field
+  // contract assertion above. The count is revisited again at the end of the
+  // increment, once /library's own legacy controls have converted.
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 52", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(50);
+    expect(count).toBe(52);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
