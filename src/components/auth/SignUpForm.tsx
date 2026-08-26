@@ -56,7 +56,7 @@ export default function SignUpForm({ serverError }: Props) {
 
   const passwordHint =
     !errors.password && password.length > 0 && password.length < MIN_PASSWORD_LENGTH ? (
-      <p className="mt-1 text-xs text-blue-100/50">
+      <p className="text-meta text-muted-foreground mt-1">
         {MIN_PASSWORD_LENGTH - password.length} more character
         {MIN_PASSWORD_LENGTH - password.length !== 1 ? "s" : ""} needed
       </p>
@@ -74,6 +74,7 @@ export default function SignUpForm({ serverError }: Props) {
           clearError("email");
         }}
         placeholder="you@example.com"
+        autocomplete="email"
         error={errors.email}
         icon={<Mail className="size-4" />}
       />
@@ -88,6 +89,7 @@ export default function SignUpForm({ serverError }: Props) {
           clearError("password");
         }}
         placeholder="Min. 6 characters"
+        autocomplete="new-password"
         error={errors.password}
         hint={passwordHint}
         icon={<Lock className="size-4" />}
@@ -112,6 +114,7 @@ export default function SignUpForm({ serverError }: Props) {
           clearError("confirmPassword");
         }}
         placeholder="Re-enter your password"
+        autocomplete="new-password"
         error={errors.confirmPassword}
         icon={<Lock className="size-4" />}
         endContent={
