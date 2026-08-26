@@ -40,7 +40,7 @@
 | 4 | 4.2-guard-fix | Repair the comment-stripper's whole-line pattern | inline | done | 1eedb9d |
 | 4 | 4.2-guard-fix-3 | Exempt test files from the Paper-radius confinement guard | inline | done | fe65f27 |
 | 4 | 4.3 | Add the repository-wide colour sweep test | inline | done | 6f568d0 |
-| 4 | 4.4 | File the Increment 10 follow-up issue and record its number | inline | done | pending |
+| 4 | 4.4 | File the Increment 10 follow-up issue and record its number | inline | done | 4e47268 |
 
 ## 🎯 Goal
 
