@@ -3,6 +3,11 @@ import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
 import CreateCardForm from "@/components/library/CreateCardForm";
 import CardList from "@/components/library/CardList";
+import LibrarySearch from "@/components/library/LibrarySearch.astro";
+import { LibraryEmpty } from "@/components/library/LibraryEmpty";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Section } from "@/components/ui/Section";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 const { isReadOnly } = Astro.locals;
@@ -83,113 +88,66 @@ const hasNext = effectivePage < totalPages;
       </script>
     )
   }
-  <div class="bg-cosmic min-h-screen p-4">
-    <div class="mx-auto max-w-3xl space-y-6 py-8">
-      <header class="flex items-center justify-between">
-        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-          Card library
-        </h1>
-        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
-      </header>
+  <div class="bg-background text-foreground min-h-screen p-4">
+    <div class="mx-auto max-w-3xl space-y-8 py-8">
+      <PageHeader title="Card library" />
 
-      {
-        !supabase && (
-          <p class="rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-            Supabase is not configured — your library cannot be loaded.
-          </p>
-        )
-      }
+      {!supabase && <Notice variant="error">Supabase is not configured — your library cannot be loaded.</Notice>}
 
-      {
-        loadError && (
-          <p class="rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
-            Could not load your cards. Try refreshing the page.
-          </p>
-        )
-      }
+      {loadError && <Notice variant="error">Could not load your cards. Try refreshing the page.</Notice>}
 
-      <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-        <h2 class="text-xl font-semibold">Create a card</h2>
+      <Section title="Create a card">
         {
           isReadOnly ? (
-            <p class="rounded-lg border border-amber-500/30 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+            <Notice variant="warning">
               Your account is pending deletion and is read-only. Cancel the deletion to create cards.
-            </p>
+            </Notice>
           ) : (
             <CreateCardForm client:load />
           )
         }
-      </section>
+      </Section>
 
-      <section class="space-y-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <h2 class="text-xl font-semibold">Saved cards ({totalCount})</h2>
-          <form method="get" action="/library" class="flex items-center gap-2">
-            <input
-              type="text"
-              name="q"
-              value={q}
-              placeholder="Search front or back…"
-              class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white placeholder:text-blue-100/50 focus:border-blue-300/50 focus:outline-none"
-            />
-            <button
-              type="submit"
-              class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm transition-colors hover:bg-white/20"
-            >
-              Search
-            </button>
-            {
-              q && (
-                <a href="/library" class="text-sm text-blue-100/70 transition-colors hover:text-white">
-                  Clear
-                </a>
-              )
-            }
-          </form>
-        </div>
-        {
-          cards.length === 0 ? (
-            <p class="text-sm text-blue-100/70">
-              {q ? `No saved cards match “${q}”.` : "You have no saved cards yet. Create your first card above."}
-            </p>
-          ) : (
-            <>
-              <CardList client:load cards={cards} readOnly={isReadOnly} />
-              {totalPages > 1 && (
-                <nav class="flex items-center justify-between pt-2 text-sm" aria-label="Library pagination">
-                  {hasPrev ? (
-                    <a
-                      href={buildHref(effectivePage - 1)}
-                      class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 transition-colors hover:bg-white/20"
-                    >
-                      ← Previous
-                    </a>
-                  ) : (
-                    <span class="cursor-not-allowed rounded-lg border border-white/10 px-3 py-1.5 text-blue-100/40">
-                      ← Previous
-                    </span>
-                  )}
-                  <span class="text-blue-100/70">
-                    Page {effectivePage} of {totalPages}
+      {
+        cards.length > 0 ? (
+          <Section title={`Saved cards (${totalCount})`}>
+            <LibrarySearch q={q} />
+            <CardList client:load cards={cards} readOnly={isReadOnly} />
+            {totalPages > 1 && (
+              <nav class="flex items-center justify-between pt-2 text-sm" aria-label="Library pagination">
+                {hasPrev ? (
+                  <a href={buildHref(effectivePage - 1)} class="text-link text-sm underline underline-offset-4">
+                    ← Previous
+                  </a>
+                ) : (
+                  <span class="text-muted-foreground text-sm" aria-disabled="true">
+                    ← Previous
                   </span>
-                  {hasNext ? (
-                    <a
-                      href={buildHref(effectivePage + 1)}
-                      class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 transition-colors hover:bg-white/20"
-                    >
-                      Next →
-                    </a>
-                  ) : (
-                    <span class="cursor-not-allowed rounded-lg border border-white/10 px-3 py-1.5 text-blue-100/40">
-                      Next →
-                    </span>
-                  )}
-                </nav>
-              )}
-            </>
-          )
-        }
-      </section>
+                )}
+                <span class="text-muted-foreground">
+                  Page {effectivePage} of {totalPages}
+                </span>
+                {hasNext ? (
+                  <a href={buildHref(effectivePage + 1)} class="text-link text-sm underline underline-offset-4">
+                    Next →
+                  </a>
+                ) : (
+                  <span class="text-muted-foreground text-sm" aria-disabled="true">
+                    Next →
+                  </span>
+                )}
+              </nav>
+            )}
+          </Section>
+        ) : q ? (
+          <div class="space-y-4">
+            <LibrarySearch q={q} />
+            <LibraryEmpty q={q} />
+          </div>
+        ) : (
+          <LibraryEmpty />
+        )
+      }
     </div>
   </div>
 </Layout>

@@ -101,9 +101,13 @@ describe("Field — the label-plus-textarea primitive (screen-migration-library)
   });
 
   it("declares no error, icon or hint slot — no consumer exists for any of them", () => {
-    expect(source).not.toMatch(/error/);
-    expect(source).not.toMatch(/icon/);
-    expect(source).not.toMatch(/hint/);
+    // Scoped to the props interface: the file's doc comment explains *why*
+    // those slots are absent, and naming them there is the point.
+    const props = /export interface FieldProps \{([\s\S]*?)\}/.exec(source)?.[1] ?? "";
+    expect(props).not.toBe("");
+    expect(props).not.toMatch(/\berror\b/);
+    expect(props).not.toMatch(/\bicon\b/);
+    expect(props).not.toMatch(/\bhint\b/);
   });
 });
 
@@ -113,7 +117,7 @@ describe("PageHeader does not decide the page's measure (screen-migration-librar
   // `max-w-content mx-auto`, and /library renders at max-w-3xl instead. A
   // primitive that describes a page header should not also fix its width.
   it("PageHeader.tsx carries no max-w- utility", () => {
-    expect(readUi("PageHeader.tsx")).not.toMatch(/max-w-/);
+    expect(readUi("PageHeader.tsx")).not.toMatch(/\bmax-w-/);
   });
 });
 
@@ -127,17 +131,22 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
 
   const srcFiles = walk(SRC_DIR).filter((f) => /\.(tsx?|astro)$/.test(f));
 
-  // 52 = 50 (screen-migration-review baseline) plus 2 from the
-  // screen-migration-library increment: Field.tsx's control recipe carries one
-  // legacy-scale radius, and this file quotes that recipe once more in the Field
-  // contract assertion above. The count is revisited again at the end of the
-  // increment, once /library's own legacy controls have converted.
-  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 52", () => {
+  // 37 = 50 (screen-migration-review baseline) minus 13 net from the
+  // screen-migration-library increment. /library shed its whole legacy control
+  // set as it converted — the two hand-rolled create textareas, the create
+  // submit button, the two row edit textareas, both hand-rolled error
+  // paragraphs, the row surface's own radius, the search input, the search
+  // button, and the four pagination link/disabled surfaces — while the shared
+  // Field, Notice and Button primitives carry their radius under
+  // src/components/ui/. Added back: Field.tsx's control recipe (once), this
+  // file's quotation of that recipe in the Field contract assertion, the row
+  // surface converted to the legacy scale, and LibrarySearch's input.
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 37", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(52);
+    expect(count).toBe(37);
   });
 
   it("rounded-paper appears only under src/components/ui/", () => {
