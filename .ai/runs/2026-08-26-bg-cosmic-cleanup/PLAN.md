@@ -38,8 +38,8 @@
 | 4 | 4.1 | Write `src/pages/index.test.ts` — the landing guard | inline | done | e6ce159 |
 | 4 | 4.2 | Write `src/components/auth/auth-paper.test.ts` — the auth-family guard | inline | done | 01f4e17 |
 | 4 | 4.2-guard-fix | Repair the comment-stripper's whole-line pattern | inline | done | 1eedb9d |
-| 4 | 4.2-guard-fix-3 | Exempt test files from the Paper-radius confinement guard | inline | done | pending |
-| 4 | 4.3 | Add the repository-wide colour sweep test | inline | todo | — |
+| 4 | 4.2-guard-fix-3 | Exempt test files from the Paper-radius confinement guard | inline | done | fe65f27 |
+| 4 | 4.3 | Add the repository-wide colour sweep test | inline | done | pending |
 | 4 | 4.4 | File the Increment 10 follow-up issue and record its number | inline | todo | — |
 
 ## 🎯 Goal
