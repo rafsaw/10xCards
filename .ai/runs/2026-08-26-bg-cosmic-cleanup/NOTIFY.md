@@ -31,3 +31,11 @@
 - Decision: radius ledger re-baselined again, 34 → 29, as Step `2.6-ledger-fix`.
 - **Defect found and fixed in our own guard:** Step 2.1 left the Paper-radius assertion matching a literal backspace byte, so it passed on every input — green and inert. `npm run lint` surfaced it, not the test run. Repaired across two appended Steps and then proven by deliberate break: an offender turns it red, removing the offender turns it green.
 - UI screenshots deferred to checkpoint 3 with reason: `<body>` still carries `bg-cosmic`, so evidence captured now would document a state that never ships.
+
+## 2026-08-26T15:57:00Z — checkpoint 3 (Phase 3 complete, first UI evidence)
+
+- Steps covered: 3.1 … 3.3 (`4715010` … `c7aaada`). `bg-cosmic` is gone from `src/` outside test regexes.
+- Targeted gate green; `tokens.test.ts` passes unmodified with `--radius` still `0.625rem` (AC12).
+- Browser walk: 9 routes × 2 viewports = 20 rows, 0 problems. Paper ground and `background-image: none` on every route, `scrollWidth` exactly equal to viewport width on every route (AC9), no legacy glass class on any element (AC3), signed-in `/` still redirects to `/dashboard` (AC5). Sign-in used the three unmodified `auth.setup.ts` locators — direct evidence for AC11 ahead of the E2E run.
+- **False positive recorded:** the walk's first version searched the served HTML and reported all five legacy utilities on all nine routes. `bg-cosmic` matched this run's own worktree directory name in dev-server file paths; the other four matched CSS rule *definitions* Tailwind generated from scanning this run's markdown and the test files that quote them. The check now asks the live DOM whether any element carries the class.
+- Environment: the dev server died mid-walk on Vite's stale optimised-dep cache; restarting cleared it.
