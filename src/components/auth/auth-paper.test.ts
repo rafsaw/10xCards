@@ -36,7 +36,7 @@ const stripComments = (source: string): string =>
   source
     .replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "")
     .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/^[ 	]*\/\/.*$/gm, "");
+    .replace(/^ *\/\/.*$/gm, "");
 
 const readAuth = (name: string) => stripComments(readFileSync(join(AUTH_DIR, name), "utf8"));
 const readAuthPage = (name: string) => stripComments(readFileSync(join(SRC_DIR, "pages", "auth", name), "utf8"));
