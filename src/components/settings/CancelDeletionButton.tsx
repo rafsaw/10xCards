@@ -42,7 +42,7 @@ export default function CancelDeletionButton({ className }: { className?: string
         {pending ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />}
         Cancel deletion
       </button>
-      {error && <span className="text-sm text-red-700">{error}</span>}
+      {error && <span className="text-destructive text-sm">{error}</span>}
     </span>
   );
 }
