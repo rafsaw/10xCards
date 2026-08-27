@@ -3,7 +3,7 @@ import { Mail, Lock, LogIn } from "lucide-react";
 import { FormField } from "@/components/auth/FormField";
 import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
-import { ServerError } from "@/components/auth/ServerError";
+import { Notice } from "@/components/ui/Notice";
 
 interface Props {
   serverError?: string | null;
@@ -51,6 +51,7 @@ export default function SignInForm({ serverError }: Props) {
           clearError("email");
         }}
         placeholder="you@example.com"
+        autocomplete="email"
         error={errors.email}
         icon={<Mail className="size-4" />}
       />
@@ -65,6 +66,7 @@ export default function SignInForm({ serverError }: Props) {
           clearError("password");
         }}
         placeholder="Your password"
+        autocomplete="current-password"
         error={errors.password}
         icon={<Lock className="size-4" />}
         endContent={
@@ -77,7 +79,7 @@ export default function SignInForm({ serverError }: Props) {
         }
       />
 
-      <ServerError message={serverError} />
+      {serverError && <Notice variant="error">{serverError}</Notice>}
 
       <SubmitButton pendingText="Signing in..." icon={<LogIn className="size-4" />}>
         Sign in

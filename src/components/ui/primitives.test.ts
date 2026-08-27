@@ -15,10 +15,11 @@ const SRC_DIR = fileURLToPath(new URL("../..", import.meta.url));
 
 const readUi = (name: string) => readFileSync(join(UI_DIR, name), "utf8");
 
-// Scoped to the three primitives this increment adds. LibBadge.astro and the
-// pre-existing parts of button.tsx are legacy consumers the increment does not
-// touch, and criterion 9 governs what this increment ships, not a retroactive
-// sweep of files it was told not to change.
+// Scoped to the three primitives the paper-ui-primitives increment added. The
+// pre-existing parts of button.tsx are a legacy consumer that increment did not
+// touch, and criterion 9 governs what it shipped, not a retroactive sweep of files
+// it was told not to change. (LibBadge.astro was named here too, until the
+// bg-cosmic-cleanup increment deleted it for having no consumer at all.)
 const NEW_PRIMITIVES = ["Notice.tsx", "EmptyState.tsx", "PageHeader.tsx", "Section.tsx", "Field.tsx"];
 
 describe("criterion 1 — Notice role/aria-live mapping", () => {
@@ -148,17 +149,50 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // bespoke red notice paragraph — left with the glass, and the Paper replacements
   // (Button, Notice) carry their radius under src/components/ui/ instead. The two
   // new page-local components introduce no radius at all.
-  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 36", () => {
+  // 28 = 29 minus 1 from the same increment's Phase 3: ui/LibBadge.astro, a starter badge
+  // with no consumer in src/ or tests/, was deleted outright rather than given an invented
+  // one. Its surface carried the last legacy-scale radius in src/components/ui/.
+  //
+  // 29 = 34 minus 5 net from the same increment's Phase 2: the four screens shed the
+  // legacy-scale radii that belonged to the glass recipe — Welcome.astro's feature cards
+  // and pill, and the three auth pages' cards — while AuthCard.astro carries the Paper
+  // radius instead, which this counter does not include.
+  // 34 = 36 minus 2 net from the bg-cosmic-cleanup increment's Phase 1: SubmitButton
+  // shed the legacy-scale radius it carried in the second recipe layered over <Button>,
+  // and ServerError.tsx — an error paragraph in hardcoded reds with a radius of its own —
+  // was deleted in favour of the registry's Notice, which carries its radius under
+  // src/components/ui/. Note this counter reads every file under src/ including this one,
+  // so a comment here may not spell the utility names out literally.
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 28", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(36);
+    expect(count).toBe(28);
   });
 
-  it("rounded-paper appears only under src/components/ui/", () => {
+  // The invariant this guards is "the transitional Paper radius does not spread by
+  // accident", not "src/components/ui/ is the only folder allowed to have a card". The
+  // bg-cosmic-cleanup increment adds one deliberate second consumer: auth/AuthCard.astro,
+  // the shell the three auth screens share. It is page-local to the auth family by
+  // decision — three consumers, all in one folder — so promoting it into the registry to
+  // satisfy a path check would assert a generality it does not have, and giving it the
+  // legacy radius instead would contradict the geometry it is being migrated to. The
+  // allowlist is therefore explicit rather than a widened path prefix: a third file
+  // reaching for this token still fails, which is the whole point. Increment 10 deletes
+  // --radius-paper and every one of its usages together.
+  //
+  // Test files are exempt for the reason every guard in this repo is: a guard has to name
+  // what it forbids in order to forbid it. auth-paper.test.ts quotes AuthCard's shell
+  // class list verbatim, and that quotation is the assertion — not a third consumer.
+  const PAPER_RADIUS_CONSUMERS = [join("components", "ui"), join("components", "auth", "AuthCard.astro")];
+
+  it("the Paper radius appears only in its two recorded consumers", () => {
     const offenders = srcFiles.filter(
-      (f) => !f.includes(join("components", "ui")) && /rounded-paper\b/.test(readFileSync(f, "utf8")),
+      (f) =>
+        !f.includes(".test.") &&
+        !PAPER_RADIUS_CONSUMERS.some((allowed) => f.includes(allowed)) &&
+        readFileSync(f, "utf8").includes("rounded-paper"),
     );
     expect(offenders).toEqual([]);
   });

@@ -86,21 +86,6 @@ describe("AC2 and Q2 — the page paints its own Paper ground at the reading mea
   });
 });
 
-describe("AC3 — bg-cosmic is removed from dashboard.astro and nowhere else", () => {
-  const SURVIVORS = [
-    ["styles/global.css", join(SRC_DIR, "styles", "global.css")],
-    ["layouts/Layout.astro", join(SRC_DIR, "layouts", "Layout.astro")],
-    ["components/Welcome.astro", join(SRC_DIR, "components", "Welcome.astro")],
-    ["pages/auth/signin.astro", join(SRC_DIR, "pages", "auth", "signin.astro")],
-    ["pages/auth/signup.astro", join(SRC_DIR, "pages", "auth", "signup.astro")],
-    ["pages/auth/confirm-email.astro", join(SRC_DIR, "pages", "auth", "confirm-email.astro")],
-  ] as const;
-
-  it.each(SURVIVORS)("%s still carries bg-cosmic — the next increment removes it", (_name, path) => {
-    expect(readFileSync(path, "utf8")).toMatch(/bg-cosmic/);
-  });
-});
-
 describe("AC4 and Q3 — the lead recipe, with a quiet eyebrow above a loud statement", () => {
   const EYEBROW_CLASSES = 'class="text-meta text-muted-foreground font-sans tracking-wide uppercase"';
 

@@ -3,7 +3,7 @@ import { Mail, Lock, UserPlus } from "lucide-react";
 import { FormField } from "@/components/auth/FormField";
 import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
-import { ServerError } from "@/components/auth/ServerError";
+import { Notice } from "@/components/ui/Notice";
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -56,7 +56,7 @@ export default function SignUpForm({ serverError }: Props) {
 
   const passwordHint =
     !errors.password && password.length > 0 && password.length < MIN_PASSWORD_LENGTH ? (
-      <p className="mt-1 text-xs text-blue-100/50">
+      <p className="text-meta text-muted-foreground mt-1">
         {MIN_PASSWORD_LENGTH - password.length} more character
         {MIN_PASSWORD_LENGTH - password.length !== 1 ? "s" : ""} needed
       </p>
@@ -74,6 +74,7 @@ export default function SignUpForm({ serverError }: Props) {
           clearError("email");
         }}
         placeholder="you@example.com"
+        autocomplete="email"
         error={errors.email}
         icon={<Mail className="size-4" />}
       />
@@ -88,6 +89,7 @@ export default function SignUpForm({ serverError }: Props) {
           clearError("password");
         }}
         placeholder="Min. 6 characters"
+        autocomplete="new-password"
         error={errors.password}
         hint={passwordHint}
         icon={<Lock className="size-4" />}
@@ -112,6 +114,7 @@ export default function SignUpForm({ serverError }: Props) {
           clearError("confirmPassword");
         }}
         placeholder="Re-enter your password"
+        autocomplete="new-password"
         error={errors.confirmPassword}
         icon={<Lock className="size-4" />}
         endContent={
@@ -124,7 +127,7 @@ export default function SignUpForm({ serverError }: Props) {
         }
       />
 
-      <ServerError message={serverError} />
+      {serverError && <Notice variant="error">{serverError}</Notice>}
 
       <SubmitButton pendingText="Creating account..." icon={<UserPlus className="size-4" />}>
         Create account

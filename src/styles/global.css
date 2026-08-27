@@ -270,10 +270,18 @@
    * no fallback branch at all. Re-test the build output before changing this. */
   --shadow-raised: 0 8px 24px -8px oklch(0.19 0.008 85 / 0.18), 0 2px 6px -2px oklch(0.19 0.008 85 / 0.12);
 
-  /* Transitional. Paper's geometry, consumed only by primitives in src/components/ui/.
+  /* Transitional. Paper's geometry, consumed by the primitives in src/components/ui/ and by
+   * auth/AuthCard.astro, the two consumers primitives.test.ts records by name.
    * Legacy markup keeps reading --radius (0.625rem) via rounded-sm/md/lg/xl, so introducing
-   * this restyles nothing. REMOVAL CONDITION: when the last screen migrates, --radius becomes
-   * 0.375rem and this token and every `rounded-paper` usage are deleted in the same commit. */
+   * this restyles nothing. REMOVAL CONDITION: the increment after the legacy body gradient
+   * was deleted — --radius becomes 0.375rem, and this token and every `rounded-paper` usage
+   * are deleted in the same commit.
+   *
+   * The trigger used to read "when the last screen migrates". That is the increment which
+   * deleted the body gradient, and it deliberately did not flip --radius: flipping it
+   * restyles every legacy rounded-sm/md/lg/xl consumer at once, and that blast radius has
+   * nothing to do with removing a background. Restated so the condition stops firing
+   * ambiguously, one increment early. */
   --radius-paper: 0.375rem;
 }
 
@@ -312,17 +320,6 @@
   --color-info-surface: var(--info-surface);
   --color-surface-draft: var(--surface-draft);
   --color-surface-draft-border: var(--surface-draft-border);
-}
-
-/* Do not delete this utility, and do not remove `class="bg-cosmic"` from the ten
- * files that apply it, until the last screen-migration increment removes it in
- * the same commit that removes the last `text-white`. `body` already carries
- * `@apply bg-background text-foreground`, overridden by this utility; deleting it
- * while 331 hardcoded colour classes remain renders near-white text on a paper
- * background across every screen. The tokens above ship consumed by nothing, and
- * that inertness is the feature. */
-@utility bg-cosmic {
-  background-image: linear-gradient(to bottom, #0a0e1a, #0f1529, #0a0e1a);
 }
 
 @layer base {
