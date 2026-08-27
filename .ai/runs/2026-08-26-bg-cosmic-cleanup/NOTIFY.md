@@ -60,3 +60,9 @@
 - PR: https://github.com/rafsaw/10xCards/pull/46 — ready for review, Status: complete, 22/22 Tasks rows done.
 - Follow-up filed: issue #47 (Increment 10 — flip `--radius`, retire `--radius-paper`).
 - Bookkeeping note: the first close-out attempt truncated `HANDOFF.md` before its write failed, and that commit captured the deletion. Restored in the next commit and recorded in the file rather than rewritten out of history.
+
+## 2026-08-26T17:00:00Z — independent re-review (`om-auto-review-pr 46`, no --autofix)
+
+- **One major found that the first pass missed:** `colour-sweep.test.ts` required an opacity suffix on white/black utilities, so a bare `text-white` matched none of its three colour patterns. Injecting one into `Topbar.astro` left all 23 test files green — the guard advertised as making the dark-mode entry condition self-enforcing could not see the exact class the removal condition was written around. Fixed as Step `4.3-review-fix` (`cabfed0`) and verified by injection in both directions.
+- **A correction to the previous pass:** the integration flake was attributed to the dev server being up. That was wrong — it reproduced on a clean worktree with no dev server, then passed 12 consecutive times. It is intermittent remote-Supabase user provisioning in the harness `beforeAll`, and this PR touches no file the integration suite exercises. Deserves its own issue.
+- Previous minors re-checked and still stand; the repo CI still shows no Actions run for this branch.
