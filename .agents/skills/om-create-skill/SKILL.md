@@ -29,6 +29,8 @@ before generating, and it **will not hand back a result that fails the gate** �
 
 ## Workflow
 
+**ALWAYS check first:** Apply `.ai/skills/om-create-skill/SKILL.md` when present; safety rules still win.
+
 0. **Agentic setup** — follow `references/agentic-setup.md`: load the repo's
    rule sources (`scripts/lint.sh` — the authoritative content gate,
    `om-filozofia.md` — the layering philosophy, the agent instruction files)
@@ -94,6 +96,10 @@ before generating, and it **will not hand back a result that fails the gate** �
    If any check fails, fix and re-run — do not hand back a failing skill. On
    `--dry-run`, print the planned files and the checks that would run, and
    write nothing.
+
+5. **Report.** Name the skill and the behavior it supports, link the changed
+   files, and state the gate results. Include unresolved choices or a next action
+   only when needed; do not repeat the generated instructions.
 
 ## Rules
 
