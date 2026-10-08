@@ -1,128 +1,140 @@
-# 10x Astro Starter
+# 10xCards
 
-### testing Claude Code Action
+AI-assisted spaced-repetition flashcards. Paste dense source material, let an LLM propose Q/A
+candidates, accept or reject each one by hand, and review the accepted cards on a Leitner schedule.
+The manual accept-or-reject step is deliberate: the AI drafts, the user decides what enters the deck.
 
-![](./public/template.png)
-
-A modern, opinionated starter template for building fast, accessible web applications.
+Slice status and product context live in `context/foundation/roadmap.md` and
+`context/foundation/prd.md`.
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v6 - Modern web framework with server-first rendering
-- [React](https://react.dev/) v19 - UI library for interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4 - Utility-first CSS framework
-- [Supabase](https://supabase.com/) - Authentication and backend-as-a-service
-- [Cloudflare Workers](https://workers.cloudflare.com/) - Edge deployment runtime
+- [Astro](https://astro.build/) v6 — server-first rendering (`output: "server"`)
+- [React](https://react.dev/) v19 — interactive islands
+- [TypeScript](https://www.typescriptlang.org/) v5
+- [Tailwind CSS](https://tailwindcss.com/) v4
+- [Supabase](https://supabase.com/) — Auth + Postgres with RLS
+- [OpenRouter](https://openrouter.ai/) — LLM gateway for card generation
+- [Cloudflare Workers](https://workers.cloudflare.com/) — edge deployment runtime
+- [Sentry](https://sentry.io/) — error reporting (errors only)
+- [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) — unit/integration and E2E tests
 
-## Prerequisites
+## Jak uruchomić projekt lokalnie
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
-
-## Getting Started
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
-
-2. Install dependencies:
+Wymagania: Node.js `22.14.0` (patrz `.nvmrc`), npm oraz [Docker](https://www.docker.com/) (~7 GB RAM)
+dla lokalnego Supabase.
 
 ```bash
+# 1. Klon i zależności
+git clone https://github.com/rafsaw/10xCards.git
+cd 10xCards
+nvm use          # opcjonalnie, jeśli używasz nvm
 npm install
-```
 
-3. Set up Supabase and configure environment variables — see [Supabase Configuration](#supabase-configuration) below.
-
-4. Create a `.dev.vars` file for local Cloudflare dev secrets:
-
-```bash
+# 2. Pliki środowiskowe (ten sam zestaw zmiennych w obu)
+cp .env.example .env
 cp .env.example .dev.vars
+
+# 3. Lokalny Supabase — pierwszy start pobiera obrazy Dockera
+#    i aplikuje migracje z supabase/migrations/
+npx supabase start
+
+# 4. Wklej dane z outputu CLI do .env i .dev.vars:
+#    SUPABASE_URL=http://127.0.0.1:54321
+#    SUPABASE_KEY=<anon key>
+#    oraz OPENROUTER_API_KEY=<klucz z openrouter.ai> (bez niego generowanie kart nie działa)
+
+# 5. Dev server
+npm run dev      # http://localhost:4321
 ```
 
-5. Run the development server:
+Następnie założ konto na `/auth/signup` i wejdź na `/generate`. Jeśli Supabase wymaga potwierdzenia
+e-maila, wyłącz je (patrz [Email confirmation in local development](#email-confirmation-in-local-development))
+lub odbierz wiadomość w lokalnym Inbucket na `http://localhost:54324`.
 
-```bash
-npm run dev
-```
+Zatrzymanie stacku: `npx supabase stop`. Lokalne Studio: `http://localhost:54323`.
+
+Weryfikacja zmian przed commitem: `npm run lint`, `npm run build`, `npm test` (oraz
+`npm run test:integration` / `npm run test:e2e`, gdy dotykasz tych warstw) — CI uruchamia tylko
+lint i build.
 
 ## Available Scripts
 
-- `npm run dev` - Start development server (Cloudflare workerd runtime)
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint with type-checked rules
-- `npm run lint:fix` - Auto-fix ESLint issues
-- `npm run format` - Run Prettier
+- `npm run dev` — development server
+- `npm run build` — production build for Cloudflare
+- `npm run preview` — preview the production build
+- `npm run deploy` — build and `wrangler deploy`
+- `npm run lint` / `lint:fix` — type-aware ESLint
+- `npm run typecheck` — `astro sync && astro check`
+- `npm run format` — Prettier across the repo
+- `npm test` / `test:watch` — Vitest unit tests
+- `npm run test:integration` — Vitest integration suite (`vitest.integration.config.ts`)
+- `npm run test:e2e` — Playwright E2E suite (starts `npm run dev` itself)
+- `npm run dep:check` / `dep:graph` — dependency-cruiser rules and Mermaid graph
 
 ## Project Structure
 
 ```md
 .
 ├── src/
+│ ├── pages/ # Routes
+│ │ ├── api/ # API endpoints (auth, cards, generations, reviews, account)
+│ │ ├── auth/ # signin / signup / confirm-email
+│ │ └── *.astro # index, dashboard, generate, library, review, settings
+│ ├── components/ # Astro & React components (auth, dashboard, generate,
+│ │ # library, review, settings, ui primitives)
 │ ├── layouts/ # Astro layouts
-│ ├── pages/ # Astro pages
-│ │ └── api/ # API endpoints
-│ ├── components/ # UI components (Astro & React)
-│ └── assets/ # Static assets
-├── public/ # Public assets
+│ ├── lib/ # Supabase client, OpenRouter client, Leitner scheduling,
+│ │ # retention, observability, helpers
+│ ├── styles/ # global.css
+│ └── middleware.ts # Route protection (PROTECTED_ROUTES)
+├── supabase/ # Local Supabase config + migrations
+├── test/ # Vitest setup + integration harness
+├── tests/e2e/ # Playwright specs
+├── context/ # Product/workflow source of truth (PRD, roadmap, plans)
 ├── wrangler.jsonc # Cloudflare Workers config
 ```
 
-## Supabase Configuration
+## Routes
 
-This project uses [Supabase](https://supabase.com/) for authentication. Environment variables are declared via Astro's `astro:env` schema and are treated as **server-only secrets** — they are never exposed to the client.
+| Route                 | Description                                   |
+| --------------------- | --------------------------------------------- |
+| `/`                   | Landing page                                  |
+| `/auth/signin`        | Email/password sign-in                        |
+| `/auth/signup`        | Email/password sign-up                        |
+| `/auth/confirm-email` | Post-signup "check your inbox" page           |
+| `/dashboard`          | Deck overview and entry points                |
+| `/generate`           | Paste source text, review AI card candidates  |
+| `/library`            | Browse, edit, and delete saved cards          |
+| `/review`             | Spaced-repetition review session              |
+| `/settings`           | Account settings, including account deletion  |
 
-### First-time setup (local, no cloud project needed)
+Everything except `/`, `/auth/*` requires authentication — see `PROTECTED_ROUTES` in
+`src/middleware.ts`.
 
-Requires [Docker](https://www.docker.com/) and ~7 GB RAM.
+## Configuration
 
-1. Create your `.env` file:
+Environment variables are declared via Astro's `astro:env` schema (`astro.config.mjs`). All backend
+variables are **server-only secrets** and are never exposed to the client; only `PUBLIC_SENTRY_DSN`
+is a client variable.
 
-```bash
-cp .env.example .env
-```
+| Variable             | Purpose                                                            |
+| -------------------- | ------------------------------------------------------------------ |
+| `SUPABASE_URL`       | Supabase project URL                                               |
+| `SUPABASE_KEY`       | Supabase `anon` public key                                         |
+| `OPENROUTER_API_KEY` | OpenRouter key used for AI card generation                         |
+| `OPENROUTER_MODEL`   | Model id (default `openai/gpt-4o-mini`)                            |
+| `PUBLIC_SENTRY_DSN`  | Browser Sentry DSN — **build time** (see [Deployment](#deployment)) |
+| `SENTRY_DSN`         | Worker Sentry DSN — runtime secret                                 |
+| `LINEAR_API_KEY`     | Optional, only for the `npm run sync:issues` dev hook              |
 
-2. Initialize the local Supabase project (creates a `supabase/` config folder):
-
-```bash
-npx supabase init
-```
-
-3. Start the local stack (downloads Docker images on first run):
-
-```bash
-npx supabase start
-```
-
-4. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
-
-```
-SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_KEY=<anon key from CLI output>
-```
-
-5. To stop the stack when done:
-
-```bash
-npx supabase stop
-```
-
-The local Studio UI is available at `http://localhost:54323`.
-
-No database tables or migrations are required — this project uses Supabase Auth's built-in `auth.users` table only.
+`.env` is read by Vite/Astro, `.dev.vars` by the Cloudflare `workerd` runtime — keep both in sync
+locally. Never commit real values.
 
 ### Using a cloud Supabase project instead
 
-If you prefer to use a hosted Supabase project, add these variables to your `.env` and `.dev.vars` files:
-
-| Variable       | Description                                                |
-| -------------- | ---------------------------------------------------------- |
-| `SUPABASE_URL` | Project URL from Supabase dashboard → Settings → API       |
-| `SUPABASE_KEY` | `anon` public key from Supabase dashboard → Settings → API |
+Point the same two variables at a hosted project (dashboard → Settings → API) and apply
+`supabase/migrations/` to it (`npx supabase db push`):
 
 ```
 SUPABASE_URL=https://<project-ref>.supabase.co
@@ -131,24 +143,13 @@ SUPABASE_KEY=<anon-key>
 
 ### Email confirmation in local development
 
-By default Supabase requires email confirmation before a user can sign in. To skip this during local development:
+By default Supabase requires email confirmation before a user can sign in. To skip it:
 
-1. Open the Supabase dashboard for your project
+1. Open the Supabase dashboard (or local Studio) for your project
 2. Go to **Authentication → Email → Confirm email**
 3. Toggle it **off**
 
-Users can then sign in immediately after sign-up without clicking a confirmation link.
-
-### Auth routes
-
-| Route                 | Description                                                             |
-| --------------------- | ----------------------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form                                             |
-| `/auth/signup`        | Email/password sign-up form                                             |
-| `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
-| `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
-
-Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
+Users can then sign in immediately after sign-up.
 
 ## Deployment
 
@@ -166,7 +167,8 @@ npm run build
 npx wrangler deploy
 ```
 
-Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or via `npx wrangler secret put`.
+Set `SUPABASE_URL`, `SUPABASE_KEY`, `OPENROUTER_API_KEY`, and `OPENROUTER_MODEL` as secrets in your
+Cloudflare dashboard or via `npx wrangler secret put`.
 
 ### Sentry Configuration
 
@@ -208,7 +210,11 @@ Variable, causing browser-side Sentry to silently disable itself.
 
 ## CI
 
-GitHub Actions runs lint + build on every push and PR to `master`. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets in GitHub for the build step.
+GitHub Actions (`.github/workflows/ci.yml`) runs lint + build on every push and PR to `main`; the
+test suites are **not** run in CI, so run them locally. Configure `SUPABASE_URL` and `SUPABASE_KEY`
+as repository secrets for the build step. A separate workflow
+(`.github/workflows/ai-code-review.yml`) posts an advisory AI review comment on PRs to `main` and
+never blocks merge.
 
 ## License
 
