@@ -19,44 +19,44 @@ Slice status and product context live in `context/foundation/roadmap.md` and
 - [Sentry](https://sentry.io/) — error reporting (errors only)
 - [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) — unit/integration and E2E tests
 
-## Jak uruchomić projekt lokalnie
+## Running the Project Locally
 
-Wymagania: Node.js `22.14.0` (patrz `.nvmrc`), npm oraz [Docker](https://www.docker.com/) (~7 GB RAM)
-dla lokalnego Supabase.
+Requirements: Node.js `22.14.0` (see `.nvmrc`), npm, and [Docker](https://www.docker.com/)
+(~7 GB RAM) for the local Supabase stack.
 
 ```bash
-# 1. Klon i zależności
+# 1. Clone and install
 git clone https://github.com/rafsaw/10xCards.git
 cd 10xCards
-nvm use          # opcjonalnie, jeśli używasz nvm
+nvm use          # optional, if you use nvm
 npm install
 
-# 2. Pliki środowiskowe (ten sam zestaw zmiennych w obu)
+# 2. Environment files (both take the same set of variables)
 cp .env.example .env
 cp .env.example .dev.vars
 
-# 3. Lokalny Supabase — pierwszy start pobiera obrazy Dockera
-#    i aplikuje migracje z supabase/migrations/
+# 3. Local Supabase — the first start pulls Docker images
+#    and applies the migrations from supabase/migrations/
 npx supabase start
 
-# 4. Wklej dane z outputu CLI do .env i .dev.vars:
+# 4. Paste the values printed by the CLI into .env and .dev.vars:
 #    SUPABASE_URL=http://127.0.0.1:54321
 #    SUPABASE_KEY=<anon key>
-#    oraz OPENROUTER_API_KEY=<klucz z openrouter.ai> (bez niego generowanie kart nie działa)
+#    plus OPENROUTER_API_KEY=<key from openrouter.ai> (card generation fails without it)
 
 # 5. Dev server
 npm run dev      # http://localhost:4321
 ```
 
-Następnie założ konto na `/auth/signup` i wejdź na `/generate`. Jeśli Supabase wymaga potwierdzenia
-e-maila, wyłącz je (patrz [Email confirmation in local development](#email-confirmation-in-local-development))
-lub odbierz wiadomość w lokalnym Inbucket na `http://localhost:54324`.
+Then sign up at `/auth/signup` and open `/generate`. If Supabase still requires email confirmation,
+either turn it off (see [Email confirmation in local development](#email-confirmation-in-local-development))
+or pick the message up from the local Inbucket at `http://localhost:54324`.
 
-Zatrzymanie stacku: `npx supabase stop`. Lokalne Studio: `http://localhost:54323`.
+Stop the stack with `npx supabase stop`. Local Studio: `http://localhost:54323`.
 
-Weryfikacja zmian przed commitem: `npm run lint`, `npm run build`, `npm test` (oraz
-`npm run test:integration` / `npm run test:e2e`, gdy dotykasz tych warstw) — CI uruchamia tylko
-lint i build.
+Before committing, verify with `npm run lint`, `npm run build`, and `npm test` (plus
+`npm run test:integration` / `npm run test:e2e` when you touch those layers) — CI runs only lint and
+build.
 
 ## Available Scripts
 
