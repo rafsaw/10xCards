@@ -81,7 +81,7 @@ describe("AC2 and Q2 — the page paints its own Paper ground at the reading mea
   });
 
   it("the header is PageHeader, and the accessible name Dashboard survives verbatim", () => {
-    expect(page).toMatch(/<PageHeader title="Dashboard" \/>/);
+    expect(page).toMatch(/<PageHeader title="Dashboard" quiet \/>/);
     expect(page).not.toMatch(/<h1\b/);
   });
 });
@@ -418,5 +418,18 @@ describe("the data layer is frozen — this increment rewrote markup only", () =
     expect(page).toMatch(
       /const libraryText = "libraryCount" in state && state\.libraryCount !== null \? librarySentence\(state\.libraryCount\) : null;/,
     );
+  });
+});
+
+describe("the dashboard title recedes behind its lead statement (#43)", () => {
+  const header = readFileSync(join(DASHBOARD_DIR, "..", "ui", "PageHeader.tsx"), "utf8");
+
+  it("dashboard.astro uses the quiet PageHeader variant", () => {
+    expect(page).toMatch(/<PageHeader title="Dashboard" quiet \/>/);
+  });
+
+  it("the quiet variant is smaller than the lead's text-title and drops text-display", () => {
+    expect(header).toMatch(/quiet\s*\?\s*"text-body text-muted-foreground/);
+    expect(header).toMatch(/"text-display text-foreground/);
   });
 });
