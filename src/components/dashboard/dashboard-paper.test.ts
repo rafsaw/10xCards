@@ -248,17 +248,13 @@ describe("AC7 and Q1 — the read-only state announces itself through Notice", (
 describe("AC8 — the load-error state announces itself and precedes its three links", () => {
   const errorBranch = /state\.kind === "error" && \(([\s\S]*?)\n {6}\}/.exec(page)?.[1] ?? "";
 
-  it("the message renders through Notice variant=error, which carries role=alert", () => {
-    expect(errorBranch).toMatch(/<Notice variant="error" title="Dashboard failed to load" titleAs="h2">/);
-    expect(errorBranch).toMatch(/We couldn't load your dashboard right now\. Try refreshing the page\./);
-  });
-
-  it("the title renders as a real h2, not a bare aria-live region", () => {
+  it("the message renders through Notice variant=error, which carries role=alert, with a real h2 title", () => {
     // Matches the read-only state's fix (AC7): a static SSR Notice with no `client:`
     // directive announces nothing via aria-live, since live regions only announce
     // changes after load. The heading is what makes this state reachable by heading
     // navigation (WCAG 2.2 §1.3.1).
     expect(errorBranch).toMatch(/<Notice variant="error" title="Dashboard failed to load" titleAs="h2">/);
+    expect(errorBranch).toMatch(/We couldn't load your dashboard right now\. Try refreshing the page\./);
   });
 
   it("the message precedes the three links in DOM order", () => {
