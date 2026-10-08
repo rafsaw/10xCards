@@ -99,7 +99,9 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
 
       {
         state.kind === "not-configured" && (
-          <Notice variant="error">Supabase is not configured — your dashboard cannot be loaded.</Notice>
+          <Notice variant="error" title="Dashboard unavailable" titleAs="h2">
+            Supabase is not configured — your dashboard cannot be loaded.
+          </Notice>
         )
       }
 
@@ -109,7 +111,9 @@ const libraryText = "libraryCount" in state && state.libraryCount !== null ? lib
             {/* The message precedes the links so it is read before the choices it qualifies.
                 Three plain links, as the brief specifies: no count survived the failure, so
                 nothing here outranks anything else and none of them is dressed as a primary. */}
-            <Notice variant="error">We couldn't load your dashboard right now. Try refreshing the page.</Notice>
+            <Notice variant="error" title="Dashboard failed to load" titleAs="h2">
+              We couldn't load your dashboard right now. Try refreshing the page.
+            </Notice>
             <div class="flex flex-wrap items-center gap-3">
               <a href="/review" class="text-link text-sm underline underline-offset-4">
                 Start review session
