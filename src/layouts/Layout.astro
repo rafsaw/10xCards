@@ -7,9 +7,10 @@ import { missingConfigs } from "@/lib/config-status";
 
 interface Props {
   title?: string;
+  hideRetentionBanner?: boolean;
 }
 
-const { title = "10x Astro Starter" } = Astro.props;
+const { title = "10x Astro Starter", hideRetentionBanner = false } = Astro.props;
 const { user, isReadOnly } = Astro.locals;
 ---
 
@@ -39,7 +40,7 @@ const { user, isReadOnly } = Astro.locals;
       ))
     }
     {user && <Topbar />}
-    {isReadOnly && <RetentionBanner />}
+    {isReadOnly && !hideRetentionBanner && <RetentionBanner />}
     <slot />
   </body>
 </html>
