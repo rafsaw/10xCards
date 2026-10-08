@@ -217,9 +217,7 @@
     ],
     "ask": [
       "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(git push *)",
-      "Bash(git push)"
+      "Bash(wget *)"
     ]
   },
   "outputStyle": "Concise"
