@@ -296,7 +296,7 @@ describe("AC9 — every user-visible sentence is byte-identical to what main ren
       "Check generated cards",
       "Generate more cards",
       "Create your first cards",
-      "Or add a card by hand",
+      "Add a card by hand",
       "Browse library",
       "Generate cards",
     ]) {
