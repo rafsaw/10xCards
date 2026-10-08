@@ -27,6 +27,8 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
+// Cezar task worktrees have no local cache (git-ignored), so --check would block every turn there.
+if (process.argv.includes("--check") && process.cwd().includes("/.ai/cezar/worktrees/")) process.exit(0);
 
 const DONE_FAMILY = new Set([
   "implemented",
