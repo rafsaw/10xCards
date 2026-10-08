@@ -420,3 +420,23 @@ describe("the data layer is frozen — this increment rewrote markup only", () =
     );
   });
 });
+
+/**
+ * Decision (#43, option 1): /dashboard keeps the standard PageHeader. Its 32px title
+ * outweighs the 20px lead sentence, but five screens share one PageHeader treatment and
+ * shell consistency wins over making /dashboard the exception. A quieter-title variant
+ * was tried (PR #54) and rejected after preview. Revisit only together with a quiet
+ * heading variant for Section.
+ */
+describe("the dashboard keeps the standard PageHeader (#43 decision)", () => {
+  const header = readFileSync(join(DASHBOARD_DIR, "..", "ui", "PageHeader.tsx"), "utf8");
+
+  it("dashboard.astro renders the unmodified PageHeader", () => {
+    expect(page).toMatch(/<PageHeader title="Dashboard" \/>/);
+  });
+
+  it("PageHeader has no per-screen title variant and keeps text-display", () => {
+    expect(header).not.toMatch(/quiet/);
+    expect(header).toMatch(/text-display text-foreground/);
+  });
+});
