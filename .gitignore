@@ -74,3 +74,12 @@ pnpm-debug.log*
 .ai/qa/test-env-build-cache.json
 .ai/qa/test-env-app.*.log
 .ai/qa/test-env.lock/
+
+# Cezar - dane robocze
+.ai/cezar/runs/
+.ai/cezar/worktrees/
+.ai/cezar/tmp/
+.ai/cezar/runs.json
+.ai/cezar/todos.json
+.ai/cezar/ui-state.json
+.ai/cezar/launch-key
