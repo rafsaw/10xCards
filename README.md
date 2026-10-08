@@ -69,7 +69,8 @@ build.
 - `npm run format` — Prettier across the repo
 - `npm test` / `test:watch` — Vitest unit tests
 - `npm run test:integration` — Vitest integration suite (`vitest.integration.config.ts`)
-- `npm run test:e2e` — Playwright E2E suite (starts `npm run dev` itself)
+- `npm run test:e2e` — Playwright E2E suite (starts `npm run dev` itself; set `E2E_PORT` to
+  override the default port 4321 if something else on your machine already uses it)
 - `npm run dep:check` / `dep:graph` — dependency-cruiser rules and Mermaid graph
 
 ## Project Structure

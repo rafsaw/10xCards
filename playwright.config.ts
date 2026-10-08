@@ -1,8 +1,10 @@
 import "./tests/e2e/load-env";
 import { defineConfig, devices } from "@playwright/test";
 
-// Astro dev server default port.
-const PORT = 4321;
+// Astro dev server default port. Overridable via E2E_PORT: some machines (e.g. the
+// Cezar cockpit) already have something listening on 4321, which would make
+// reuseExistingServer below silently reuse that unrelated service instead of Astro.
+const PORT = Number(process.env.E2E_PORT) || 4321;
 const STORAGE_STATE = "tests/e2e/.auth/user.json";
 
 export default defineConfig({
@@ -35,7 +37,7 @@ export default defineConfig({
   // Boots the real app so internal boundaries (auth, routing, API, Supabase)
   // stay real. Astro loads .env itself for `astro:env/server`.
   webServer: {
-    command: "npm run dev",
+    command: `npm run dev -- --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
