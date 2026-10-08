@@ -81,7 +81,7 @@ describe("AC2 and Q2 — the page paints its own Paper ground at the reading mea
   });
 
   it("the header is PageHeader, and the accessible name Dashboard survives verbatim", () => {
-    expect(page).toMatch(/<PageHeader title="Dashboard" quiet \/>/);
+    expect(page).toMatch(/<PageHeader title="Dashboard" \/>/);
     expect(page).not.toMatch(/<h1\b/);
   });
 });
@@ -421,15 +421,22 @@ describe("the data layer is frozen — this increment rewrote markup only", () =
   });
 });
 
-describe("the dashboard title recedes behind its lead statement (#43)", () => {
+/**
+ * Decision (#43, option 1): /dashboard keeps the standard PageHeader. Its 32px title
+ * outweighs the 20px lead sentence, but five screens share one PageHeader treatment and
+ * shell consistency wins over making /dashboard the exception. A quieter-title variant
+ * was tried (PR #54) and rejected after preview. Revisit only together with a quiet
+ * heading variant for Section.
+ */
+describe("the dashboard keeps the standard PageHeader (#43 decision)", () => {
   const header = readFileSync(join(DASHBOARD_DIR, "..", "ui", "PageHeader.tsx"), "utf8");
 
-  it("dashboard.astro uses the quiet PageHeader variant", () => {
-    expect(page).toMatch(/<PageHeader title="Dashboard" quiet \/>/);
+  it("dashboard.astro renders the unmodified PageHeader", () => {
+    expect(page).toMatch(/<PageHeader title="Dashboard" \/>/);
   });
 
-  it("the quiet variant is smaller than the lead's text-title and drops text-display", () => {
-    expect(header).toMatch(/quiet\s*\?\s*"text-body text-muted-foreground/);
-    expect(header).toMatch(/"text-display text-foreground/);
+  it("PageHeader has no per-screen title variant and keeps text-display", () => {
+    expect(header).not.toMatch(/quiet/);
+    expect(header).toMatch(/text-display text-foreground/);
   });
 });
