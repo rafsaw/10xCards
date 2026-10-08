@@ -13,9 +13,11 @@ import { describe, expect, it } from "vitest";
 
 const PAGES_DIR = fileURLToPath(new URL(".", import.meta.url));
 const SETTINGS_DIR = fileURLToPath(new URL("../components/settings", import.meta.url));
+const LAYOUTS_DIR = fileURLToPath(new URL("../layouts", import.meta.url));
 
 const readPage = (name: string) => readFileSync(join(PAGES_DIR, name), "utf8");
 const readSettingsComponent = (name: string) => readFileSync(join(SETTINGS_DIR, name), "utf8");
+const readLayout = (name: string) => readFileSync(join(LAYOUTS_DIR, name), "utf8");
 
 const MIGRATED_FILES: [string, string][] = [
   ["settings.astro", readPage("settings.astro")],
@@ -90,5 +92,17 @@ describe("RetentionNotice.tsx — composes Notice and CancelDeletionButton in on
   it("keeps the same retention copy unchanged", () => {
     expect(source).toMatch(/scheduled for deletion on/);
     expect(source).toMatch(/Until then it/);
+  });
+});
+
+describe("settings.astro — pending-deletion messaging is not duplicated (issue #37)", () => {
+  it("tells Layout to hide the sitewide RetentionBanner while read-only, since RetentionNotice already covers it", () => {
+    const source = readPage("settings.astro");
+    expect(source).toMatch(/<Layout title="Settings" hideRetentionBanner=\{isReadOnly\}>/);
+  });
+
+  it("Layout.astro only renders RetentionBanner when not told to hide it", () => {
+    const source = readLayout("Layout.astro");
+    expect(source).toMatch(/\{isReadOnly && !hideRetentionBanner && <RetentionBanner \/>\}/);
   });
 });
