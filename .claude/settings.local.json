@@ -210,15 +210,14 @@
       "Read(//c/Users/rafal/AppData/Local/Temp/claude/wt-qa40/**)",
       "Bash(BASE_URL=http://127.0.0.1:4321 node .ai/qa/artifacts_pr40qa/qa.mjs)",
       "Bash(cd *)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(curl *)",
+      "Bash(wget *)"
     ],
     "deny": [
       "Bash(rm -rf *)"
     ],
-    "ask": [
-      "Bash(curl *)",
-      "Bash(wget *)"
-    ]
+    "ask": []
   },
   "outputStyle": "Concise"
 }
