@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { OPENROUTER_API_KEY, OPENROUTER_MODEL } from "astro:env/server";
 import { createClient } from "@/lib/supabase";
 import { readOnlyGuard } from "@/lib/account-retention";
+import { canonicalizeTag, parseTag } from "@/lib/card-tag";
 import { generateCandidateCards, OpenRouterError } from "@/lib/openrouter";
 
 const MIN_SOURCE_LENGTH = 200;
@@ -41,6 +42,13 @@ export const POST: APIRoute = async (context) => {
     return json({ error: "invalid_source", message: "Source text must be between 200 and 8000 characters." }, 400);
   }
 
+  // Validate the tag before the OpenRouter call so a bad tag never spends a generation.
+  const rawTag = typeof payload === "object" && payload !== null && "tag" in payload ? payload.tag : undefined;
+  const parsedTag = parseTag(rawTag);
+  if (!parsedTag.ok) {
+    return json({ error: "invalid_tag", message: "Tag must be at most 40 characters." }, 400);
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
@@ -72,11 +80,21 @@ export const POST: APIRoute = async (context) => {
     return json({ error: "supabase_unconfigured", message: "Database is not configured." }, 503);
   }
 
+  let tag: string | null = null;
+  if (parsedTag.tag !== null) {
+    try {
+      tag = await canonicalizeTag(supabase, parsedTag.tag);
+    } catch {
+      return json({ error: "db_error", message: "Could not save drafts." }, 500);
+    }
+  }
+
   const insertPayload = cards.map((c) => ({
     user_id: user.id,
     front: c.front,
     back: c.back,
     status: "draft",
+    ...(tag !== null && { tag }),
   }));
 
   const { data, error } = await supabase.from("cards").insert(insertPayload).select("id, front, back, created_at");

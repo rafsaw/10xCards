@@ -3,6 +3,7 @@ import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/Field";
 import { Notice } from "@/components/ui/Notice";
+import { TagField } from "@/components/ui/TagField";
 import { parseErrorBody } from "@/lib/parse-error";
 
 interface CreateError {
@@ -14,11 +15,13 @@ const FALLBACK_MESSAGES: Record<string, string> = {
   invalid_card: "Both front and back are required.",
   unauthorized: "Your session expired. Please sign in again.",
   supabase_unconfigured: "Database is not configured. Ask the admin to check the setup.",
+  invalid_tag: "Tag must be at most 40 characters.",
   db_error: "Could not save the card. Please try again.",
   bad_request: "Something went wrong with the request. Please try again.",
 };
 
-export default function CreateCardForm() {
+export default function CreateCardForm({ tags = [] }: { tags?: string[] }) {
+  const [tag, setTag] = useState("");
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -39,7 +42,7 @@ export default function CreateCardForm() {
       const response = await fetch("/api/cards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ front, back }),
+        body: JSON.stringify({ front, back, tag }),
       });
 
       if (response.ok) {
@@ -84,6 +87,8 @@ export default function CreateCardForm() {
         rows={2}
         placeholder="The answer…"
       />
+
+      <TagField id="card-tag" value={tag} onChange={setTag} suggestions={tags} disabled={submitting} />
 
       <Button type="submit" className="w-full" disabled={submitting || !canSubmit}>
         {submitting ? (

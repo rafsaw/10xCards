@@ -12,6 +12,7 @@ export interface DueCard {
   id: string;
   front: string;
   back: string;
+  tag: string | null;
   repetition_count: number;
 }
 
@@ -209,6 +210,11 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
           <div className="border-border border-t pt-3">
             <p className="text-meta text-muted-foreground tracking-wide uppercase">Back</p>
             <p className="text-foreground text-title mt-1 font-serif break-words">{card.back}</p>
+            {card.tag && (
+              <p className="text-meta text-muted-foreground mt-2">
+                <span className="tracking-wide uppercase">Lesson:</span> {card.tag}
+              </p>
+            )}
           </div>
         )}
       </div>

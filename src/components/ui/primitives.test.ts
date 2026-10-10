@@ -149,6 +149,7 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // bespoke red notice paragraph — left with the glass, and the Paper replacements
   // (Button, Notice) carry their radius under src/components/ui/ instead. The two
   // new page-local components introduce no radius at all.
+  // 29 = 28 plus 1 from the card-lesson-tag increment: TagField.tsx repeats Field's control recipe once.
   // 28 = 29 minus 1 from the same increment's Phase 3: ui/LibBadge.astro, a starter badge
   // with no consumer in src/ or tests/, was deleted outright rather than given an invented
   // one. Its surface carried the last legacy-scale radius in src/components/ui/.
@@ -163,12 +164,12 @@ describe("criterion 5 — rounded-paper is confined to src/components/ui/", () =
   // was deleted in favour of the registry's Notice, which carries its radius under
   // src/components/ui/. Note this counter reads every file under src/ including this one,
   // so a comment here may not spell the utility names out literally.
-  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 28", () => {
+  it("rounded-(md|lg|xl) occurrences across src/ are accounted for at 29", () => {
     const count = srcFiles.reduce((total, file) => {
       const matches = readFileSync(file, "utf8").match(/rounded-(md|lg|xl)\b/g) ?? [];
       return total + matches.length;
     }, 0);
-    expect(count).toBe(28);
+    expect(count).toBe(29);
   });
 
   // The invariant this guards is "the transitional Paper radius does not spread by

@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { readOnlyGuard } from "@/lib/account-retention";
+import { canonicalizeTag, parseTag } from "@/lib/card-tag";
 
 // Shape returned by the insert .select(). No generated Supabase types in this
 // codebase, so the loosely-typed result is narrowed here and applied via
@@ -9,6 +10,7 @@ interface SavedCard {
   id: string;
   front: string;
   back: string;
+  tag: string | null;
 }
 
 function json(body: unknown, status: number): Response {
@@ -53,13 +55,35 @@ export const POST: APIRoute = async (context) => {
     return json({ error: "invalid_card", message: "Both front and back are required." }, 400);
   }
 
+  // `tag` is optional: omitted from the insert entirely when the body has none.
+  const rawTag = typeof payload === "object" && payload !== null && "tag" in payload ? payload.tag : undefined;
+  const parsedTag = parseTag(rawTag);
+  if (!parsedTag.ok) {
+    return json({ error: "invalid_tag", message: "Tag must be at most 40 characters." }, 400);
+  }
+  let tag: string | null | undefined;
+  if (rawTag !== undefined) {
+    try {
+      tag = parsedTag.tag === null ? null : await canonicalizeTag(supabase, parsedTag.tag);
+    } catch {
+      return json({ error: "db_error", message: "Could not save the card." }, 500);
+    }
+  }
+
   // A manually-created card enters the SR lifecycle immediately: status='saved'
   // AND next_due_at=now() so the review query surfaces it. interval_days and
   // repetition_count keep their column defaults (0).
   const { data, error } = await supabase
     .from("cards")
-    .insert({ user_id: user.id, front, back, status: "saved", next_due_at: new Date().toISOString() })
-    .select("id, front, back")
+    .insert({
+      user_id: user.id,
+      front,
+      back,
+      status: "saved",
+      next_due_at: new Date().toISOString(),
+      ...(tag !== undefined && { tag }),
+    })
+    .select("id, front, back, tag")
     .single()
     .overrideTypes<SavedCard, { merge: false }>();
 
