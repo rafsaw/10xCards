@@ -75,7 +75,7 @@ describe("generate.astro — the primary submit is resolved server-side", () => 
   const source = readPage("generate.astro");
 
   it("passes primary={drafts.length === 0} to PasteAndGenerateForm", () => {
-    expect(source).toMatch(/<PasteAndGenerateForm client:load primary=\{drafts\.length === 0\} \/>/);
+    expect(source).toMatch(/<PasteAndGenerateForm client:load primary=\{drafts\.length === 0\} tags=\{tags\} \/>/);
   });
 });
 
