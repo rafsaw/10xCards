@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
+import { listTags } from "@/lib/card-tag";
 import CreateCardForm from "@/components/library/CreateCardForm";
 import CardList from "@/components/library/CardList";
 import LibrarySearch from "@/components/library/LibrarySearch.astro";
@@ -18,6 +19,7 @@ interface SavedCard {
   id: string;
   front: string;
   back: string;
+  tag: string | null;
 }
 
 const rawPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10);
@@ -37,6 +39,7 @@ const buildHref = (p: number) => {
 const orFilter = safeQ ? `front.ilike.%${safeQ}%,back.ilike.%${safeQ}%` : null;
 
 let cards: SavedCard[] = [];
+let tags: string[] = [];
 let loadError = false;
 let totalCount = 0;
 
@@ -61,7 +64,7 @@ const shouldFixPageUrl = !loadError && supabase && page > lastPage;
 
 if (supabase && !loadError) {
   const offset = (effectivePage - 1) * PAGE_SIZE;
-  let query = supabase.from("cards").select("id, front, back").eq("status", "saved");
+  let query = supabase.from("cards").select("id, front, back, tag").eq("status", "saved");
   if (orFilter) {
     query = query.or(orFilter);
   }
@@ -74,6 +77,10 @@ if (supabase && !loadError) {
   } else {
     cards = data;
   }
+}
+
+if (supabase && !loadError) {
+  tags = await listTags(supabase).catch(() => []);
 }
 
 const hasPrev = effectivePage > 1;
@@ -103,7 +110,7 @@ const hasNext = effectivePage < totalPages;
               Your account is pending deletion and is read-only. Cancel the deletion to create cards.
             </Notice>
           ) : (
-            <CreateCardForm client:load />
+            <CreateCardForm client:load tags={tags} />
           )
         }
       </Section>
@@ -112,7 +119,7 @@ const hasNext = effectivePage < totalPages;
         cards.length > 0 ? (
           <Section title={`Saved cards (${totalCount})`}>
             <LibrarySearch q={q} />
-            <CardList client:load cards={cards} readOnly={isReadOnly} />
+            <CardList client:load cards={cards} readOnly={isReadOnly} tags={tags} />
             {totalPages > 1 && (
               <nav class="flex items-center justify-between pt-2 text-sm" aria-label="Library pagination">
                 {hasPrev ? (

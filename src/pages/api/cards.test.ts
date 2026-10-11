@@ -37,7 +37,7 @@ type SupabaseClientType = NonNullable<ReturnType<CreateClient>>;
  * fixed result through the route's .insert().select().single().overrideTypes()
  * chain. The chain is awaitable (thenable) and every builder returns itself.
  */
-function fakeClient(result: { data?: unknown; error?: unknown }) {
+function fakeClient(result: { data?: unknown; error?: unknown }, tags: string[] | { error: unknown } = []) {
   const recorded: { insertArg: unknown } = { insertArg: undefined };
   const chain: Record<string, unknown> = {};
   chain.select = vi.fn(() => chain);
@@ -50,7 +50,10 @@ function fakeClient(result: { data?: unknown; error?: unknown }) {
     return chain;
   });
   const from = vi.fn(() => ({ insert }));
-  return { client: { from } as unknown as SupabaseClientType, recorded };
+  const rpc = vi
+    .fn()
+    .mockResolvedValue(Array.isArray(tags) ? { data: tags, error: null } : { data: null, error: tags.error });
+  return { client: { from, rpc } as unknown as SupabaseClientType, recorded, rpc };
 }
 
 /** Build a hand-built Astro context; `locals` defaults to an authenticated, writable user. */
@@ -133,6 +136,54 @@ describe("POST /api/cards — empty/invalid input is rejected (FR-009)", () => {
     expect(res.status).toBe(400);
     expect(await errorOf(res)).toBe("invalid_card");
     // Validation fails closed: no write is attempted on bad input.
+    expect(fc.recorded.insertArg).toBeUndefined();
+  });
+});
+
+describe("POST /api/cards — lesson tag", () => {
+  const row = { id: "card-1", front: "Q1", back: "A1" };
+  const post = (tag: unknown) => POST(ctx({ body: JSON.stringify({ front: "Q1", back: "A1", tag }) }));
+
+  it("stores a new tag as typed (trimmed)", async () => {
+    const fc = fakeClient({ data: { ...row, tag: "Lesson 6" } });
+    vi.mocked(createClient).mockReturnValue(fc.client);
+    const res = await post("  Lesson 6 ");
+    expect(res.status).toBe(201);
+    expect((fc.recorded.insertArg as Record<string, unknown>).tag).toBe("Lesson 6");
+  });
+
+  it("canonicalizes to the existing spelling", async () => {
+    const fc = fakeClient({ data: row }, ["Lesson 5"]);
+    vi.mocked(createClient).mockReturnValue(fc.client);
+    await post("lesson 5");
+    expect((fc.recorded.insertArg as Record<string, unknown>).tag).toBe("Lesson 5");
+  });
+
+  it("stores empty/whitespace/null as NULL without calling the RPC", async () => {
+    for (const blank of ["", "   ", null]) {
+      const fc = fakeClient({ data: row });
+      vi.mocked(createClient).mockReturnValue(fc.client);
+      await post(blank);
+      expect((fc.recorded.insertArg as Record<string, unknown>).tag).toBeNull();
+      expect(fc.rpc).not.toHaveBeenCalled();
+    }
+  });
+
+  it("rejects a 41-character tag with 400 invalid_tag and never inserts", async () => {
+    const fc = fakeClient({ data: row });
+    vi.mocked(createClient).mockReturnValue(fc.client);
+    const res = await post("t".repeat(41));
+    expect(res.status).toBe(400);
+    expect(await errorOf(res)).toBe("invalid_tag");
+    expect(fc.recorded.insertArg).toBeUndefined();
+  });
+
+  it("fails closed with 500 db_error when the RPC errors", async () => {
+    const fc = fakeClient({ data: row }, { error: { message: "boom" } });
+    vi.mocked(createClient).mockReturnValue(fc.client);
+    const res = await post("x");
+    expect(res.status).toBe(500);
+    expect(await errorOf(res)).toBe("db_error");
     expect(fc.recorded.insertArg).toBeUndefined();
   });
 });

@@ -5,6 +5,7 @@ import { setupTwoUsers, type TwoUserFixture } from "../../../../test/integration
 // returns the acting user's REAL scoped client (real RLS runs). Must precede the
 // route import below so the mock is in place before @/lib/supabase resolves.
 import { setActingUser } from "../../../../test/integration/scoped-supabase-mock";
+import { listTags } from "@/lib/card-tag";
 import { PATCH, DELETE } from "@/pages/api/cards/[id]";
 
 // Phase-2 R2 isolation (real RLS): user B cannot edit or delete user A's card by
@@ -109,6 +110,31 @@ describe("PATCH/DELETE /api/cards/[id] — R2 cross-user isolation (real RLS)", 
 
     const after = await readContent(fx.b.scopedClient(), fx.b.seededCardId);
     expect(after).toEqual({ front: "edited-front", back: "edited-back" });
+  });
+
+  it("card_tags() never exposes A's tags to B, and PATCH tag canonicalization ignores them", async () => {
+    const tagA = `IsoTag-${Date.now()}`;
+    setActingUser(fx.a.scopedClient());
+    const setA = await PATCH(cardCtx({ id: fx.a.id }, fx.a.seededCardId, { front: "fa", back: "ba", tag: tagA }));
+    expect(setA.status).toBe(200);
+
+    const tagsA = await listTags(fx.a.scopedClient());
+    expect(tagsA).toContain(tagA);
+    const tagsB = await listTags(fx.b.scopedClient());
+    expect(tagsB).not.toContain(tagA);
+
+    // B setting the lower-cased variant stores it as typed — A's spelling is not reused.
+    setActingUser(fx.b.scopedClient());
+    const lower = tagA.toLowerCase();
+    const setB = await PATCH(cardCtx({ id: fx.b.id }, fx.b.seededCardId, { front: "fb", back: "bb", tag: lower }));
+    expect(setB.status).toBe(200);
+    const { data: rows } = await fx.b
+      .scopedClient()
+      .from("cards")
+      .select("tag")
+      .eq("id", fx.b.seededCardId)
+      .overrideTypes<{ tag: string | null }[], { merge: false }>();
+    expect(rows?.[0].tag).toBe(lower);
   });
 
   it("applies a delete when B deletes B's own card (positive control)", async () => {

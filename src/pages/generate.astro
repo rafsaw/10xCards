@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
+import { listTags } from "@/lib/card-tag";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Notice } from "@/components/ui/Notice";
 import { Section } from "@/components/ui/Section";
@@ -19,6 +20,7 @@ interface DraftRow {
 
 let drafts: DraftRow[] = [];
 let loadError = false;
+let tags: string[] = [];
 
 if (supabase) {
   const { data, error } = await supabase
@@ -31,6 +33,7 @@ if (supabase) {
     loadError = true;
   } else {
     drafts = data;
+    tags = await listTags(supabase).catch(() => []);
   }
 }
 ---
@@ -55,7 +58,7 @@ if (supabase) {
           <>
             {drafts.length > 0 && <DraftReviewList client:load drafts={drafts} />}
 
-            <PasteAndGenerateForm client:load primary={drafts.length === 0} />
+            <PasteAndGenerateForm client:load primary={drafts.length === 0} tags={tags} />
           </>
         )
       }

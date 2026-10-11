@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { readOnlyGuard } from "@/lib/account-retention";
+import { canonicalizeTag, parseTag } from "@/lib/card-tag";
 
 // No generated Supabase types in this codebase; narrow the .select() result
 // locally and apply via .overrideTypes (consistent with save.ts).
@@ -55,13 +56,28 @@ export const PATCH: APIRoute = async (context) => {
     return json({ error: "invalid_card", message: "Both front and back are required." }, 400);
   }
 
-  // Update only front/back. The cards_set_updated_at trigger bumps updated_at;
+  // `tag`: absent = unchanged, null/"" = clear, string = set (canonicalized).
+  const rawTag = typeof payload === "object" && payload !== null && "tag" in payload ? payload.tag : undefined;
+  const parsedTag = parseTag(rawTag);
+  if (!parsedTag.ok) {
+    return json({ error: "invalid_tag", message: "Tag must be at most 40 characters." }, 400);
+  }
+  let tag: string | null | undefined;
+  if (rawTag !== undefined) {
+    try {
+      tag = parsedTag.tag === null ? null : await canonicalizeTag(supabase, parsedTag.tag);
+    } catch {
+      return json({ error: "db_error", message: "Could not update the card." }, 500);
+    }
+  }
+
+  // Update only front/back (and tag when supplied). The cards_set_updated_at trigger bumps updated_at;
   // schedule fields (next_due_at, repetition_count, interval_days) are left
   // untouched so editing a typo does not reset review progress. RLS confines to
   // the owner; the status guard prevents editing drafts via this surface.
   const { data, error } = await supabase
     .from("cards")
-    .update({ front, back })
+    .update({ front, back, ...(tag !== undefined && { tag }) })
     .eq("id", id)
     .eq("status", "saved")
     .select("id")

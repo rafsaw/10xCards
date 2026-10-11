@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Loader2, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/Field";
 import { Notice } from "@/components/ui/Notice";
+import { TagField } from "@/components/ui/TagField";
 import { parseErrorBody } from "@/lib/parse-error";
 
 interface SavedCard {
   id: string;
   front: string;
   back: string;
+  tag: string | null;
 }
 
 interface RowError {
@@ -17,6 +19,7 @@ interface RowError {
 }
 
 const FALLBACK_MESSAGES: Record<string, string> = {
+  invalid_tag: "Tag must be at most 40 characters.",
   invalid_card: "Both front and back are required.",
   unauthorized: "Your session expired. Please sign in again.",
   supabase_unconfigured: "Database is not configured. Ask the admin to check the setup.",
@@ -30,10 +33,19 @@ async function parseError(response: Response): Promise<RowError> {
   return { code, message: message || FALLBACK_MESSAGES[code] };
 }
 
-export default function CardRow({ card, readOnly = false }: { card: SavedCard; readOnly?: boolean }) {
+export default function CardRow({
+  card,
+  readOnly = false,
+  tags = [],
+}: {
+  card: SavedCard;
+  readOnly?: boolean;
+  tags?: string[];
+}) {
   const [editing, setEditing] = useState(false);
   const [front, setFront] = useState(card.front);
   const [back, setBack] = useState(card.back);
+  const [tag, setTag] = useState(card.tag ?? "");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<RowError | null>(null);
 
@@ -42,6 +54,7 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
   function startEdit() {
     setFront(card.front);
     setBack(card.back);
+    setTag(card.tag ?? "");
     setError(null);
     setEditing(true);
   }
@@ -62,7 +75,7 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
       const response = await fetch(`/api/cards/${card.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ front, back }),
+        body: JSON.stringify({ front, back, tag }),
       });
       if (response.ok) {
         window.location.assign("/library");
@@ -120,6 +133,7 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
             rows={2}
           />
           <Field id={`card-back-${card.id}`} label="Back" value={back} onChange={setBack} disabled={pending} rows={2} />
+          <TagField id={`card-tag-${card.id}`} value={tag} onChange={setTag} suggestions={tags} disabled={pending} />
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -147,6 +161,11 @@ export default function CardRow({ card, readOnly = false }: { card: SavedCard; r
           <div className="min-w-0">
             <p className="text-foreground text-title font-serif break-words">{card.front}</p>
             <p className="text-muted-foreground text-title mt-1 font-serif break-words">{card.back}</p>
+            {card.tag && (
+              <p className="text-meta text-muted-foreground bg-muted mt-2 inline-block rounded-full px-2 py-0.5">
+                {card.tag}
+              </p>
+            )}
           </div>
           {!readOnly && (
             <div className="-ml-3 flex shrink-0 items-center gap-2 sm:ml-0">

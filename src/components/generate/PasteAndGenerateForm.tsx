@@ -4,6 +4,7 @@ import { parseErrorBody } from "@/lib/parse-error";
 import { Notice } from "@/components/ui/Notice";
 import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/button";
+import { TagField } from "@/components/ui/TagField";
 
 const MIN_LENGTH = 200;
 const MAX_LENGTH = 8000;
@@ -19,11 +20,13 @@ const FALLBACK_MESSAGES: Record<string, string> = {
   ai_timeout: "AI generation timed out. Please try again.",
   ai_parse_error: "Could not read the AI response. Please try again.",
   ai_provider_error: "The AI provider returned an error. Ask the admin to check the model.",
+  invalid_tag: "Tag must be at most 40 characters.",
   db_error: "Could not save the generated drafts. Please try again.",
   bad_request: "Something went wrong with the request. Please try again.",
 };
 
-export default function PasteAndGenerateForm({ primary }: { primary: boolean }) {
+export default function PasteAndGenerateForm({ primary, tags = [] }: { primary: boolean; tags?: string[] }) {
+  const [tag, setTag] = useState("");
   const [source, setSource] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<GenerationError | null>(null);
@@ -58,7 +61,7 @@ export default function PasteAndGenerateForm({ primary }: { primary: boolean }) 
       const response = await fetch("/api/generations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source }),
+        body: JSON.stringify({ source, tag }),
       });
 
       if (response.ok) {
@@ -104,6 +107,8 @@ export default function PasteAndGenerateForm({ primary }: { primary: boolean }) 
             {source.length} / {MAX_LENGTH}
           </div>
         </div>
+
+        <TagField id="generate-tag" value={tag} onChange={setTag} suggestions={tags} disabled={submitting} />
 
         <Button
           type="submit"

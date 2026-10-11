@@ -311,3 +311,65 @@ describe("POST /api/generations — R1 persistence-gap characterisation", () => 
     expect((payload[0].front as string).length).toBe(600);
   });
 });
+
+describe("POST /api/generations — lesson tag", () => {
+  /** fakeClient extended with an rpc("card_tags") stub. */
+  function taggedClient(existing: string[], rpcError?: unknown) {
+    const fc = fakeClient({ data: [{ id: 1, front: "Q1", back: "A1" }] });
+    const rpc = vi.fn().mockResolvedValue({ data: rpcError ? null : existing, error: rpcError ?? null });
+    return { ...fc, client: { ...(fc.client as object), rpc } as unknown as SupabaseClientType, rpc };
+  }
+
+  it("rejects an over-long tag with 400 invalid_tag before calling OpenRouter", async () => {
+    providerResolves(cardsEnvelope([{ front: "Q1", back: "A1" }]));
+    const { POST } = await loadRoute();
+    const fetchSpy = vi.mocked(globalThis.fetch);
+    fetchSpy.mockClear();
+    const res = await POST(ctx({ body: JSON.stringify({ source: VALID_SOURCE, tag: "t".repeat(41) }) }));
+    expect(res.status).toBe(400);
+    expect((await readJson(res)).error).toBe("invalid_tag");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("writes the same canonical tag on every draft", async () => {
+    providerResolves(
+      cardsEnvelope([
+        { front: "Q1", back: "A1" },
+        { front: "Q2", back: "A2" },
+      ]),
+    );
+    const { POST, createClient } = await loadRoute();
+    const fc = taggedClient(["Lesson 5"]);
+    createClient.mockReturnValue(fc.client);
+
+    const res = await POST(ctx({ body: JSON.stringify({ source: VALID_SOURCE, tag: " lesson 5 " }) }));
+    expect(res.status).toBe(200);
+    const payload = fc.recorded.insertArg as Record<string, unknown>[];
+    expect(payload.map((r) => r.tag)).toEqual(["Lesson 5", "Lesson 5"]);
+  });
+
+  it("omits tag from the insert when blank", async () => {
+    providerResolves(cardsEnvelope([{ front: "Q1", back: "A1" }]));
+    const { POST, createClient } = await loadRoute();
+    const fc = taggedClient([]);
+    createClient.mockReturnValue(fc.client);
+
+    const res = await POST(ctx({ body: JSON.stringify({ source: VALID_SOURCE, tag: "   " }) }));
+    expect(res.status).toBe(200);
+    const payload = fc.recorded.insertArg as Record<string, unknown>[];
+    expect(payload[0]).not.toHaveProperty("tag");
+    expect(fc.rpc).not.toHaveBeenCalled();
+  });
+
+  it("fails closed with 500 db_error when card_tags fails, writing nothing", async () => {
+    providerResolves(cardsEnvelope([{ front: "Q1", back: "A1" }]));
+    const { POST, createClient } = await loadRoute();
+    const fc = taggedClient([], { message: "boom" });
+    createClient.mockReturnValue(fc.client);
+
+    const res = await POST(ctx({ body: JSON.stringify({ source: VALID_SOURCE, tag: "x" }) }));
+    expect(res.status).toBe(500);
+    expect((await readJson(res)).error).toBe("db_error");
+    expect(fc.recorded.insertArg).toBeUndefined();
+  });
+});
