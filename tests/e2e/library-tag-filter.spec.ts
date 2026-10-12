@@ -28,9 +28,14 @@ test.describe("library — lesson tag filter", () => {
   async function createCard(page: Page, front: string, tag?: string) {
     markers.push(front);
     await page.goto("/library");
-    await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
-    await page.getByRole("textbox", { name: "Back", exact: true }).fill("filter answer");
-    if (tag) await page.getByLabel("Lesson tag (optional)").fill(tag);
+    // Re-fill until the React island is hydrated: filling a pre-hydration SSR input is
+    // discarded on hydrate and leaves the submit button disabled.
+    await expect(async () => {
+      await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
+      await page.getByRole("textbox", { name: "Back", exact: true }).fill("filter answer");
+      if (tag) await page.getByLabel("Lesson tag (optional)").fill(tag);
+      await expect(page.getByRole("button", { name: "Create card" })).toBeEnabled({ timeout: 1000 });
+    }).toPass({ timeout: 20000 });
     await page.getByRole("button", { name: "Create card" }).click();
     await expect(page.getByRole("listitem").filter({ hasText: front })).toBeVisible();
   }
