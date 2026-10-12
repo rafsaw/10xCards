@@ -215,9 +215,9 @@ describe("AC12 — a saved row and a draft row are visibly different surfaces (p
 });
 
 describe("AC10 — each empty branch renders one region, and the empty library has no search row", () => {
-  it("the empty-search branch pairs LibrarySearch with LibraryEmpty, outside any Section", () => {
+  it("the empty-search/filter branch pairs LibrarySearch and LibraryFilter with LibraryEmpty, outside any Section", () => {
     expect(page).toMatch(
-      /\) : q \? \(\s*\n\s*<div class="space-y-4">\s*\n\s*<LibrarySearch q=\{q\} \/>\s*\n\s*<LibraryEmpty q=\{q\} \/>/,
+      /\) : isFiltered \? \(\s*\n\s*<div class="space-y-4">\s*\n\s*<LibrarySearch [^>]*\/>\s*\n\s*<LibraryFilter [^>]*\/>\s*\n\s*<LibraryEmpty [^>]*\/>/,
     );
   });
 
@@ -236,19 +236,22 @@ describe("AC10 — each empty branch renders one region, and the empty library h
       /Cards you save appear here\. Create one above, or generate a batch from a passage of text\./,
     );
     expect(libraryEmpty).toMatch(/<a href="\/generate">Generate cards<\/a>/);
-    expect((libraryEmpty.match(/<Button asChild variant="outline" size="sm">/g) ?? []).length).toBe(2);
+    expect((libraryEmpty.match(/<Button asChild variant="outline" size="sm">/g) ?? []).length).toBe(3);
+    expect(libraryEmpty).toMatch(/title="No cards match this filter"/);
   });
 });
 
 describe("the data layer is frozen — this increment rewrote markup only", () => {
   it("the page size, the query filter and the search sanitiser survive verbatim", () => {
     expect(page).toMatch(/const PAGE_SIZE = 20;/);
-    expect(page).toMatch(/const safeQ = q\.replace\(\/\[,\(\)"\]\/g, " "\)\.trim\(\);/);
-    expect(page).toMatch(/const orFilter = safeQ \? `front\.ilike\.%\$\{safeQ\}%,back\.ilike\.%\$\{safeQ\}%` : null;/);
+    // The search sanitiser and `.or()` filter moved verbatim into the shared filter helper.
+    const filterLib = readFileSync(join(SRC_DIR, "lib", "library-filter.ts"), "utf8");
+    expect(filterLib).toMatch(/const safeQ = q\.replace\(\/\[,\(\)"\]\/g, " "\)\.trim\(\);/);
+    expect(filterLib).toMatch(/\.or\(`front\.ilike\.%\$\{filter\.safeQ\}%,back\.ilike\.%\$\{filter\.safeQ\}%`\)/);
   });
 
   it("buildHref and the out-of-range URL rewrite survive verbatim", () => {
-    expect(page).toMatch(/const buildHref = \(p: number\) => \{/);
+    expect(page).toMatch(/const buildHref = \(p: number\) => buildLibraryHref\(filter, p\);/);
     expect(page).toMatch(/window\.history\.replaceState\(null, "", href\);/);
     expect(page).toMatch(/const shouldFixPageUrl = !loadError && supabase && page > lastPage;/);
   });

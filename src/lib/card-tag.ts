@@ -37,3 +37,22 @@ export async function listTags(supabase: SupabaseClient): Promise<string[]> {
   const data: unknown = res.data;
   return Array.isArray(data) ? (data as string[]) : [];
 }
+
+/**
+ * Distinct tags of the caller's SAVED cards, earliest first. Unlike `listTags`
+ * (which includes drafts for autocomplete/canonicalization), this feeds the
+ * library filter so it never offers a tag that matches no visible card.
+ * RLS scopes the rows to the owner. Throws on query error.
+ */
+export async function listSavedTags(supabase: SupabaseClient): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("cards")
+    .select("tag")
+    .eq("status", "saved")
+    .not("tag", "is", null)
+    .order("created_at", { ascending: true });
+  if (error) throw new Error("saved tags query failed");
+  const seen = new Set<string>();
+  for (const row of data as { tag: string | null }[]) if (row.tag !== null) seen.add(row.tag);
+  return [...seen];
+}

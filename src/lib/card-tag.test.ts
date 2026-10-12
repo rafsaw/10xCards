@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
-import { canonicalizeTag, parseTag } from "./card-tag";
+import { canonicalizeTag, listSavedTags, parseTag } from "./card-tag";
 
 describe("parseTag", () => {
   it("treats undefined, null, empty and whitespace as no tag", () => {
@@ -57,5 +57,33 @@ describe("canonicalizeTag", () => {
   it("propagates an RPC error", async () => {
     const { client } = rpcClient({ error: { message: "boom" } });
     await expect(canonicalizeTag(client, "x")).rejects.toThrow();
+  });
+});
+
+describe("listSavedTags", () => {
+  function savedClient(result: { data?: { tag: string | null }[]; error?: unknown }) {
+    const calls: unknown[][] = [];
+    const chain = {
+      select: (...a: unknown[]) => (calls.push(["select", ...a]), chain),
+      eq: (...a: unknown[]) => (calls.push(["eq", ...a]), chain),
+      not: (...a: unknown[]) => (calls.push(["not", ...a]), chain),
+      order: (...a: unknown[]) => (
+        calls.push(["order", ...a]),
+        Promise.resolve({ data: result.data ?? null, error: result.error ?? null })
+      ),
+    };
+    return { client: { from: (t: string) => (calls.push(["from", t]), chain) } as unknown as SupabaseClient, calls };
+  }
+
+  it("queries saved cards only (never drafts) and dedupes in first-used order", async () => {
+    const { client, calls } = savedClient({ data: [{ tag: "B" }, { tag: "A" }, { tag: "B" }] });
+    await expect(listSavedTags(client)).resolves.toEqual(["B", "A"]);
+    expect(calls).toContainEqual(["eq", "status", "saved"]);
+    expect(calls).toContainEqual(["not", "tag", "is", null]);
+  });
+
+  it("throws on query error", async () => {
+    const { client } = savedClient({ error: { message: "x" } });
+    await expect(listSavedTags(client)).rejects.toThrow();
   });
 });
