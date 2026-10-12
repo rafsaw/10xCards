@@ -26,10 +26,10 @@ Non-goals: migration, write path, review changes, per-tag review, `q` matching t
 
 ### Phase 1: Filter logic
 
-- [ ] 1.1 Shared library filter builder + saved-only tag list, with unit tests
-- [ ] 1.2 Wire filter into library.astro queries, buildHref and search form
+- [x] 1.1 Shared library filter builder + saved-only tag list, with unit tests — 7aa2457
+- [x] 1.2 Wire filter into library.astro queries, buildHref and search form — 7aa2457
 
 ### Phase 2: UI and E2E
 
-- [ ] 2.1 Filter UI (All / No tag / each saved tag) and filtered empty state
-- [ ] 2.2 E2E: filter by unique tag, "No tag" excludes it; draft-only tags not offered
+- [x] 2.1 Filter UI (All / No tag / each saved tag) and filtered empty state — 7aa2457
+- [x] 2.2 E2E: filter by unique tag, "No tag" excludes it; draft-only tags not offered — 7aa2457
