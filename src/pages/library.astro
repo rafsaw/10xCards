@@ -1,9 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
-import { listTags } from "@/lib/card-tag";
+import { listSavedTags, listTags } from "@/lib/card-tag";
+import { applyLibraryFilter, buildLibraryHref, parseLibraryFilter } from "@/lib/library-filter";
 import CreateCardForm from "@/components/library/CreateCardForm";
 import CardList from "@/components/library/CardList";
+import LibraryFilter from "@/components/library/LibraryFilter.astro";
 import LibrarySearch from "@/components/library/LibrarySearch.astro";
 import { LibraryEmpty } from "@/components/library/LibraryEmpty";
 import { Notice } from "@/components/ui/Notice";
@@ -24,32 +26,24 @@ interface SavedCard {
 
 const rawPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10);
 const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
-const q = (Astro.url.searchParams.get("q") ?? "").trim();
-// Strip characters that would break the PostgREST `.or()` filter string.
-const safeQ = q.replace(/[,()"]/g, " ").trim();
+const filter = parseLibraryFilter(Astro.url.searchParams);
+const { q, tag, noTag } = filter;
+const isFiltered = Boolean(q) || tag !== null || noTag;
 
-const buildHref = (p: number) => {
-  const params = new URLSearchParams();
-  if (q) params.set("q", q);
-  if (p > 1) params.set("page", String(p));
-  const qs = params.toString();
-  return qs ? `/library?${qs}` : "/library";
-};
-
-const orFilter = safeQ ? `front.ilike.%${safeQ}%,back.ilike.%${safeQ}%` : null;
+const buildHref = (p: number) => buildLibraryHref(filter, p);
 
 let cards: SavedCard[] = [];
 let tags: string[] = [];
+let filterTags: string[] = [];
 let loadError = false;
 let totalCount = 0;
 
 if (supabase) {
   // Count first so we can clamp out-of-range page requests to the last page.
-  let countQuery = supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "saved");
-  if (orFilter) {
-    countQuery = countQuery.or(orFilter);
-  }
-  const { count, error: countError } = await countQuery;
+  const { count, error: countError } = await applyLibraryFilter(
+    supabase.from("cards").select("id", { count: "exact", head: true }),
+    filter,
+  );
   if (countError) {
     loadError = true;
   } else {
@@ -64,11 +58,7 @@ const shouldFixPageUrl = !loadError && supabase && page > lastPage;
 
 if (supabase && !loadError) {
   const offset = (effectivePage - 1) * PAGE_SIZE;
-  let query = supabase.from("cards").select("id, front, back, tag").eq("status", "saved");
-  if (orFilter) {
-    query = query.or(orFilter);
-  }
-  const { data, error } = await query
+  const { data, error } = await applyLibraryFilter(supabase.from("cards").select("id, front, back, tag"), filter)
     .order("created_at", { ascending: false })
     .range(offset, offset + PAGE_SIZE - 1)
     .overrideTypes<SavedCard[], { merge: false }>();
@@ -81,6 +71,8 @@ if (supabase && !loadError) {
 
 if (supabase && !loadError) {
   tags = await listTags(supabase).catch(() => []);
+  // Filter options come from saved cards only; `tags` (autocomplete) also includes drafts.
+  filterTags = await listSavedTags(supabase).catch(() => []);
 }
 
 const hasPrev = effectivePage > 1;
@@ -118,7 +110,8 @@ const hasNext = effectivePage < totalPages;
       {
         cards.length > 0 ? (
           <Section title={`Saved cards (${totalCount})`}>
-            <LibrarySearch q={q} />
+            <LibrarySearch q={q} tag={tag} noTag={noTag} />
+            <LibraryFilter tags={filterTags} tag={tag} noTag={noTag} q={q} />
             <CardList client:load cards={cards} readOnly={isReadOnly} tags={tags} />
             {totalPages > 1 && (
               <nav class="flex items-center justify-between pt-2 text-sm" aria-label="Library pagination">
@@ -146,10 +139,11 @@ const hasNext = effectivePage < totalPages;
               </nav>
             )}
           </Section>
-        ) : q ? (
+        ) : isFiltered ? (
           <div class="space-y-4">
-            <LibrarySearch q={q} />
-            <LibraryEmpty q={q} />
+            <LibrarySearch q={q} tag={tag} noTag={noTag} />
+            <LibraryFilter tags={filterTags} tag={tag} noTag={noTag} q={q} />
+            <LibraryEmpty q={q} tag={tag} noTag={noTag} />
           </div>
         ) : (
           <LibraryEmpty />

@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 
 interface Props {
   q: string;
+  tag?: string | null;
+  noTag?: boolean;
 }
 
-const { q } = Astro.props;
+const { q, tag = null, noTag = false } = Astro.props;
 ---
 
 {
@@ -22,6 +24,8 @@ const { q } = Astro.props;
     placeholder="Search front or back…"
     class="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-ring w-full resize-y rounded-lg border px-3 py-2 text-sm focus:outline-none disabled:opacity-50"
   />
+  {noTag && <input type="hidden" name="no_tag" value="1" />}
+  {!noTag && tag !== null && <input type="hidden" name="tag" value={tag} />}
   <Button type="submit" variant="outline" size="sm">Search</Button>
   {
     q && (

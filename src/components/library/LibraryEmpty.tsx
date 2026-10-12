@@ -7,7 +7,21 @@ import { EmptyState } from "@/components/ui/EmptyState";
  * Astro template cannot build one in an attribute value — the same reason
  * `LibrarySearch.astro` exists for the search row.
  */
-export function LibraryEmpty({ q }: { q?: string }) {
+export function LibraryEmpty({ q, tag, noTag }: { q?: string; tag?: string | null; noTag?: boolean }) {
+  if (!q && (noTag || tag)) {
+    return (
+      <EmptyState
+        title="No cards match this filter"
+        body={noTag ? "You have no saved cards without a tag." : `No saved cards are tagged “${tag}”.`}
+        action={
+          <Button asChild variant="outline" size="sm">
+            <a href="/library">Show all cards</a>
+          </Button>
+        }
+      />
+    );
+  }
+
   if (q) {
     return (
       <EmptyState

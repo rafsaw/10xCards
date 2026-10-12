@@ -1,0 +1,51 @@
+---
+import { buildLibraryHref } from "@/lib/library-filter";
+
+interface Props {
+  /** Distinct tags of saved cards only. */
+  tags: string[];
+  tag: string | null;
+  noTag: boolean;
+  q: string;
+}
+
+const { tags, tag, noTag, q } = Astro.props;
+
+// An active tag may no longer exist among saved cards (e.g. a stale bookmark); keep it visible.
+const options = tag !== null && !tags.includes(tag) ? [...tags, tag] : tags;
+const linkClass = "rounded-full border px-3 py-1 text-sm";
+const active = "border-foreground bg-muted text-foreground";
+const idle = "border-input text-muted-foreground hover:text-foreground";
+const showFilter = options.length > 0 || noTag;
+---
+
+{
+  showFilter && (
+    <nav aria-label="Filter by lesson tag" class="flex flex-wrap items-center gap-2">
+      <span class="text-muted-foreground text-sm">Lesson tag:</span>
+      <a
+        href={buildLibraryHref({ q, tag: null, noTag: false })}
+        aria-current={tag === null && !noTag ? "true" : undefined}
+        class:list={[linkClass, tag === null && !noTag ? active : idle]}
+      >
+        All
+      </a>
+      <a
+        href={buildLibraryHref({ q, tag: null, noTag: true })}
+        aria-current={noTag ? "true" : undefined}
+        class:list={[linkClass, noTag ? active : idle]}
+      >
+        No tag
+      </a>
+      {options.map((t) => (
+        <a
+          href={buildLibraryHref({ q, tag: t, noTag: false })}
+          aria-current={!noTag && tag === t ? "true" : undefined}
+          class:list={[linkClass, !noTag && tag === t ? active : idle]}
+        >
+          {t}
+        </a>
+      ))}
+    </nav>
+  )
+}
