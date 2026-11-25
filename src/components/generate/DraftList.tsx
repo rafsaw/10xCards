@@ -17,8 +17,8 @@ interface SaveError {
 }
 
 const FALLBACK_MESSAGES: Record<string, string> = {
-  invalid_selection: "Your selection looked malformed. Refresh and review again.",
-  incomplete_selection: "Your draft list changed. Refresh and review again.",
+  invalid_selection: "Your selection looked malformed. Reload the page and decide again.",
+  incomplete_selection: "Your draft list changed. Reload the page and decide again.",
   unauthorized: "Your session expired. Please sign in again.",
   supabase_unconfigured: "Database is not configured. Ask the admin to check the setup.",
   db_error: "Could not save your selection. Please try again.",
@@ -27,7 +27,7 @@ const FALLBACK_MESSAGES: Record<string, string> = {
 
 type Decision = "accept" | "reject";
 
-export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
+export default function DraftList({ drafts }: { drafts: Draft[] }) {
   const [decisions, setDecisions] = useState<Record<string, Decision>>(() => {
     const init: Record<string, Decision> = {};
     for (const d of drafts) init[d.id] = "accept";
@@ -54,16 +54,17 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
   }
 
   function rejectAll() {
-    // Bulk reject is destructive intent — confirm before marking every draft to discard.
+    // Bulk reject is destructive intent — confirm before rejecting every draft.
     // This only sets the selection; permanent removal happens at handleSave (own count confirm).
-    if (!window.confirm(`Mark all ${drafts.length} drafts to discard? You'll still need to "Save to deck" to apply.`))
-      return;
+    if (!window.confirm(`Reject all ${drafts.length} drafts? Nothing is deleted until you press "Save".`)) return;
     setAll("reject");
   }
 
   async function handleSave() {
     if (
-      !window.confirm(`Save ${acceptCount} to your deck and permanently discard ${rejectCount}? This can't be undone.`)
+      !window.confirm(
+        `Save ${acceptCount} accepted as cards and permanently delete ${rejectCount} rejected? This can't be undone.`,
+      )
     ) {
       return;
     }
@@ -95,15 +96,11 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
   }
 
   return (
-    <Section
-      title={`Review draft batch (${drafts.length})`}
-      description={`${acceptCount} to save · ${rejectCount} to discard`}
-    >
+    <Section title={`Your drafts (${drafts.length})`} description={`${acceptCount} accepted · ${rejectCount} rejected`}>
       {error && <Notice variant="error">{error.message}</Notice>}
 
-      {/* Bulk selection setters — they only mark every card's Keep/Discard decision;
-          nothing persists until "Save to deck" below. Kept separate from the immediate
-          "Discard all drafts" action above so the deferred intent reads clearly. */}
+      {/* Bulk selection setters — they only set every draft's Accept/Reject decision;
+          nothing persists until "Save" below. */}
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="text-muted-foreground">Set all:</span>
         <button
@@ -113,7 +110,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           className="border-success bg-success-surface text-success focus-visible:border-ring focus-visible:ring-ring flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Check className="size-4" />
-          Keep all
+          Accept all
         </button>
         <button
           type="button"
@@ -122,7 +119,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
           className="border-destructive bg-destructive-surface text-destructive focus-visible:border-ring focus-visible:ring-ring flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors outline-none hover:opacity-80 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Trash2 className="size-4" />
-          Discard all
+          Reject all
         </button>
       </div>
 
@@ -155,12 +152,12 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
                 {rejected ? (
                   <>
                     <Trash2 className="size-4" />
-                    Discard
+                    Rejected
                   </>
                 ) : (
                   <>
                     <Check className="size-4" />
-                    Keep
+                    Accepted
                   </>
                 )}
               </button>
@@ -179,7 +176,7 @@ export default function DraftReviewList({ drafts }: { drafts: Draft[] }) {
         className="w-full transition-colors"
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-        {submitting ? "Saving…" : "Save changes"}
+        {submitting ? "Saving…" : "Save"}
       </Button>
     </Section>
   );

@@ -49,13 +49,13 @@ For v1 the persona is literally one user — dogfooding. The product is intentio
 - **Given** a logged-in user is on the dashboard
 - **When** they paste a passage of source text into the generation form and submit it
 - **Then** the app returns a set of candidate cards (front/back) and the user can accept or reject each one independently
-- **And** accepted candidates are saved to the user's library and disappear from the candidate list; rejected candidates are discarded with no save
+- **And** when the user saves their decisions, accepted candidates are added to the user's library and rejected candidates are deleted with no save
 
 #### Acceptance Criteria
 - Generation produces at least 1 candidate for a passage of ≥ 200 words.
 - Each candidate displays front and back text plus two actions: accept / reject.
-- Accept saves the candidate to the library and removes it from the candidate list.
-- Reject discards the candidate and removes it from the list; nothing is saved.
+- Accept and reject are provisional decisions; nothing changes until the user saves.
+- Saving applies all decisions at once: accepted candidates enter the library, rejected candidates are permanently deleted.
 - If AI generation fails for any reason, the original source text remains in the form and the user can retry without re-pasting.
 - After all candidates are resolved (accepted or rejected), the user returns to the dashboard or can paste a new passage.
 
@@ -99,7 +99,7 @@ For v1 the persona is literally one user — dogfooding. The product is intentio
   > Socratic: Counter considered — progressive generation (cards appear as produced) or file upload would improve UX. Resolution: stands. Request-response is simpler for v1; paste is the universal entry. File imports are explicitly excluded by the non-MVP list.
 - FR-005: User can view AI-generated candidate cards (front/back) before saving. Priority: must-have
   > Socratic: Counter considered — auto-save all generated cards and let the user delete bad ones later. Resolution: stands. Per-candidate review IS the product wedge; remove it and the product becomes a generic AI-dumps-cards-into-deck tool. The core insight is at stake.
-- FR-006: User can accept a candidate card, saving it to their library. Priority: must-have
+- FR-006: User can accept a candidate card; accepted cards are added to their library when the user saves their decisions. Priority: must-have
   > Socratic: Counter considered — implicit acceptance (anything not rejected gets saved). Resolution: stands. Explicit per-candidate accept makes user intent clear and prevents accidental saves; matches the curation insight.
 - FR-007: User can reject a candidate card, discarding it without saving. Priority: must-have
   > Socratic: Counter considered — batch reject or soft-reject with restore. Resolution: stands. Per-candidate hard reject is the simplest model; discarded cards leave no trace; matches the curation insight.

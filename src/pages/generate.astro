@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Notice } from "@/components/ui/Notice";
 import { Section } from "@/components/ui/Section";
 import PasteAndGenerateForm from "@/components/generate/PasteAndGenerateForm";
-import DraftReviewList from "@/components/generate/DraftReviewList";
+import DraftList from "@/components/generate/DraftList";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 const { isReadOnly } = Astro.locals;
@@ -56,7 +56,7 @@ if (supabase) {
           </Section>
         ) : (
           <>
-            {drafts.length > 0 && <DraftReviewList client:load drafts={drafts} />}
+            {drafts.length > 0 && <DraftList client:load drafts={drafts} />}
 
             <PasteAndGenerateForm client:load primary={drafts.length === 0} tags={tags} />
           </>

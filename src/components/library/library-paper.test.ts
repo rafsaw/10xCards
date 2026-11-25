@@ -196,7 +196,7 @@ describe("AC12 — a saved row and a draft row are visibly different surfaces (p
   // A draft is therefore both filled and more heavily outlined than a saved card,
   // which is what keeps "AI proposes, the human decides" visible rather than merely
   // implemented. Colour is not the only carrier: /generate also labels its drafts.
-  const draftList = readFileSync(join(SRC_DIR, "components", "generate", "DraftReviewList.tsx"), "utf8");
+  const draftList = readFileSync(join(SRC_DIR, "components", "generate", "DraftList.tsx"), "utf8");
 
   it("the draft row carries the draft fill and the draft border", () => {
     expect(draftList).toMatch(/border-surface-draft-border bg-surface-draft/);

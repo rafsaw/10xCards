@@ -79,7 +79,10 @@ export const POST: APIRoute = async (context) => {
     submittedSet.size === draftIds.size &&
     submitted.every((id) => draftIds.has(id));
   if (!exactlyCoversDrafts) {
-    return json({ error: "incomplete_selection", message: "Your draft list changed. Refresh and review again." }, 400);
+    return json(
+      { error: "incomplete_selection", message: "Your draft list changed. Reload the page and decide again." },
+      400,
+    );
   }
 
   // rpc() is loosely typed without generated Supabase types; cast the awaited
