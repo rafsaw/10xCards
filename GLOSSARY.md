@@ -30,6 +30,10 @@ _Avoid_: Saved draft
 One rating of one due Card (right or wrong), which sets when that Card is due next. Deciding on Drafts is never a Review.
 _Avoid_: Draft review
 
+**Box**:
+The step of the schedule a Card currently sits in, which alone decides how long until it is due again. A right Review moves the Card up one Box, a wrong Review sends it back to the first; it counts consecutive successes, not Reviews.
+_Avoid_: Repetition count, level, stage
+
 **Review session**:
 One pass through the Cards that are due right now, made up of one Review per Card.
 _Avoid_: Study session, quiz

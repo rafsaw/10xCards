@@ -13,7 +13,7 @@ export interface DueCard {
   front: string;
   back: string;
   tag: string | null;
-  repetition_count: number;
+  box: number;
 }
 
 interface RateError {
@@ -70,7 +70,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         const response = await fetch("/api/reviews", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cardId: card.id, rating, currentBox: card.repetition_count }),
+          body: JSON.stringify({ cardId: card.id, rating, currentBox: card.box }),
         });
 
         if (response.ok) {
