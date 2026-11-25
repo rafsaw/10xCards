@@ -31,7 +31,7 @@ One rating of one due Card (right or wrong), which sets when that Card is due ne
 _Avoid_: Draft review
 
 **Box**:
-The step of the schedule a Card currently sits in, which alone decides how long until it is due again. A right Review moves the Card up one Box, a wrong Review sends it back to the first; it counts consecutive successes, not Reviews.
+The step of the schedule a Card currently sits in, which alone decides how long until it is due again. A right Review moves the Card up one Box, except in the last Box, where it stays; a wrong Review sends it back to Box 0.
 _Avoid_: Repetition count, level, stage
 
 **Review session**:
