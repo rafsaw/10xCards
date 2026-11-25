@@ -22,7 +22,7 @@ const readUiComponent = (name: string) => readFileSync(join(UI_DIR, name), "utf8
 const MIGRATED_FILES: [string, string][] = [
   ["generate.astro", readPage("generate.astro")],
   ["PasteAndGenerateForm.tsx", readGenerateComponent("PasteAndGenerateForm.tsx")],
-  ["DraftReviewList.tsx", readGenerateComponent("DraftReviewList.tsx")],
+  ["DraftList.tsx", readGenerateComponent("DraftList.tsx")],
   ["Section.tsx", readUiComponent("Section.tsx")],
 ];
 
@@ -95,8 +95,8 @@ describe("PasteAndGenerateForm.tsx — errors render through Notice, submit is p
   });
 });
 
-describe("DraftReviewList.tsx — errors render through Notice, draft rows use the surface-draft tokens", () => {
-  const source = readGenerateComponent("DraftReviewList.tsx");
+describe("DraftList.tsx — errors render through Notice, draft rows use the surface-draft tokens", () => {
+  const source = readGenerateComponent("DraftList.tsx");
 
   it("imports Notice from the ui primitives", () => {
     expect(source).toMatch(/import\s*\{\s*Notice\s*\}\s*from\s*"@\/components\/ui\/Notice"/);
@@ -123,26 +123,26 @@ describe("focus-visible ring regression — transition-all must not delay the Bu
   // transition group (as SubmitButton's `transition-colors` does) gets a ring
   // that fades in instead of appearing immediately. Guard the className string
   // directly, since this repo has no jsdom/RTL harness to assert real timing.
-  const draftReviewSource = readGenerateComponent("DraftReviewList.tsx");
+  const draftListSource = readGenerateComponent("DraftList.tsx");
   const pasteFormSource = readGenerateComponent("PasteAndGenerateForm.tsx");
 
-  it("DraftReviewList's Save changes Button overrides transition-all with transition-colors", () => {
-    expect(draftReviewSource).toMatch(/className="w-full transition-colors"/);
+  it("DraftList's Save Button overrides transition-all with transition-colors", () => {
+    expect(draftListSource).toMatch(/className="w-full transition-colors"/);
   });
 
   it("PasteAndGenerateForm's Generate Button overrides transition-all with transition-colors", () => {
     expect(pasteFormSource).toMatch(/className="w-full transition-colors"/);
   });
 
-  it("Keep all, Discard all, and the per-draft toggle carry the Paper focus-ring contract", () => {
+  it("Accept all, Reject all, and the per-draft toggle carry the Paper focus-ring contract", () => {
     // Match each <button>'s className block independently — order-agnostic, since
     // prettier-plugin-tailwindcss is free to re-sort the class list — and covers
     // both the plain string ("...") and template-literal ({`...`}) forms in this file.
-    const quotedClassAttr = [...draftReviewSource.matchAll(/className="([^"]*)"/g)].map((m) => m[1]);
-    const templateClassAttr = [...draftReviewSource.matchAll(/className=\{`([\s\S]*?)`\}/g)].map((m) => m[1]);
+    const quotedClassAttr = [...draftListSource.matchAll(/className="([^"]*)"/g)].map((m) => m[1]);
+    const templateClassAttr = [...draftListSource.matchAll(/className=\{`([\s\S]*?)`\}/g)].map((m) => m[1]);
     const buttonClassBlocks = [...quotedClassAttr, ...templateClassAttr];
     const ringBlocks = buttonClassBlocks.filter((block) => block.includes("focus-visible:ring-ring"));
-    // Keep all, Discard all, and the per-draft toggle: three raw <button>s carrying the ring contract.
+    // Accept all, Reject all, and the per-draft toggle: three raw <button>s carrying the ring contract.
     expect(ringBlocks.length).toBe(3);
     for (const block of ringBlocks) {
       expect(block).toMatch(/\boutline-none\b/);
@@ -152,6 +152,6 @@ describe("focus-visible ring regression — transition-all must not delay the Bu
   });
 
   it("the two-state toggle semantics are untouched by the focus-ring fix", () => {
-    expect(draftReviewSource).toMatch(/aria-pressed=\{!rejected\}/);
+    expect(draftListSource).toMatch(/aria-pressed=\{!rejected\}/);
   });
 });
