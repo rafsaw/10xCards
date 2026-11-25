@@ -9,7 +9,6 @@ import { POST as cardsPost } from "@/pages/api/cards";
 import { PATCH as cardPatch, DELETE as cardDelete } from "@/pages/api/cards/[id]";
 import { POST as generationsPost } from "@/pages/api/generations";
 import { POST as savePost } from "@/pages/api/generations/save";
-import { POST as discardPost } from "@/pages/api/generations/discard";
 import { POST as reviewsPost } from "@/pages/api/reviews";
 import { POST as cancelPost } from "@/pages/api/account/cancel";
 import { POST as deletePost } from "@/pages/api/account/delete";
@@ -91,10 +90,7 @@ function ctx(opts: { body?: string; params?: Record<string, string>; isReadOnly:
   const headers = new Headers({ "Content-Type": "application/json" });
   const request = new Request("http://test/api/route", { method: "POST", headers, body: opts.body });
   const locals = { user: { id: "u1" }, isReadOnly: opts.isReadOnly, retentionUntil: null };
-  // A minimal redirect stand-in: generations/discard redirects on its writable
-  // path, the only mutating route with no post-guard validation to fail fast on.
-  const redirect = (url: string): Response => new Response(null, { status: 302, headers: { Location: url } });
-  return { request, locals, cookies: {}, params: opts.params ?? {}, redirect } as unknown as APIContext;
+  return { request, locals, cookies: {}, params: opts.params ?? {} } as unknown as APIContext;
 }
 
 async function errorOf(res: Response): Promise<string | undefined> {
@@ -107,16 +103,13 @@ afterEach(() => {
 
 // Each writable body/params is chosen to fail a validation that sits AFTER the
 // guard but BEFORE the mutation, so the positive control proves "past the guard"
-// without performing (or needing a real) write. discard is the exception: it has
-// no post-guard validation, so its writable path reaches the (faked) delete and
-// redirects — still a clean !==403 signal.
+// without performing (or needing a real) write.
 const writeRoutes: { name: string; handler: APIRoute; body?: string; params?: Record<string, string> }[] = [
   { name: "cards POST", handler: cardsPost, body: "{}" },
   { name: "cards/[id] PATCH", handler: cardPatch, body: "{}", params: { id: "card-1" } },
   { name: "cards/[id] DELETE", handler: cardDelete },
   { name: "generations POST", handler: generationsPost, body: "{}" },
   { name: "generations/save POST", handler: savePost, body: JSON.stringify({ accept: 123 }) },
-  { name: "generations/discard POST", handler: discardPost },
   { name: "reviews POST", handler: reviewsPost, body: "{}" },
 ];
 

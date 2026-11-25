@@ -23,7 +23,7 @@ The full surface, all under `src/pages/api/`:
 | `/api/cards` | POST |
 | `/api/cards/[id]` | PATCH, DELETE |
 | `/api/generations` | POST |
-| `/api/generations/save`, `/api/generations/discard` | POST |
+| `/api/generations/save` | POST |
 | `/api/reviews` | POST |
 | `/api/account/delete`, `/api/account/cancel` | POST |
 
