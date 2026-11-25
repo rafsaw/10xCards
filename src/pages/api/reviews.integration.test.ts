@@ -15,7 +15,7 @@ import { POST } from "./reviews";
 // load-bearing assertion is A's row unchanged, not the response shape.
 //
 // Why currentBox:0 is the real signal: A's seeded card has status 'saved' and
-// repetition_count 0, so the route's status/box guards would BOTH match it. RLS
+// box 0, so the route's status/box guards would BOTH match it. RLS
 // is therefore the only thing standing between B's write and A's row — drop the
 // policy and this test mutates A (the manual signal check in the plan).
 
@@ -25,7 +25,7 @@ import { POST } from "./reviews";
 type FixtureClient = ReturnType<TwoUserFixture["a"]["scopedClient"]>;
 
 interface SrColumns {
-  repetition_count: number;
+  box: number;
   interval_days: number;
   next_due_at: string | null;
   last_reviewed_at: string | null;
@@ -34,7 +34,7 @@ interface SrColumns {
 async function readScheduleColumns(client: FixtureClient, cardId: string): Promise<SrColumns> {
   const { data, error } = await client
     .from("cards")
-    .select("repetition_count, interval_days, next_due_at, last_reviewed_at")
+    .select("box, interval_days, next_due_at, last_reviewed_at")
     .eq("id", cardId)
     .overrideTypes<SrColumns[], { merge: false }>();
   expect(error).toBeNull();

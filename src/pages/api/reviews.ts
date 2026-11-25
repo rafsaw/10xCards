@@ -54,20 +54,20 @@ export const POST: APIRoute = async (context) => {
 
   // Single-row, owner-scoped, box-guarded write. The cards_update_own RLS policy
   // scopes this to auth.uid(), so a stale/draft/foreign id simply matches no row.
-  // The repetition_count guard makes the write idempotent: a double-POST or retry
+  // The box guard makes the write idempotent: a double-POST or retry
   // of the same rating (same currentBox) matches 0 rows on replay -> applied:false,
   // so the box is never double-promoted. Mirrors finalize_drafts' fail-closed guard.
   const { data, error } = await supabase
     .from("cards")
     .update({
-      repetition_count: next.repetition_count,
+      box: next.box,
       interval_days: next.interval_days,
       next_due_at: next.next_due_at,
       last_reviewed_at: next.last_reviewed_at,
     })
     .eq("id", cardId)
     .eq("status", "saved")
-    .eq("repetition_count", currentBox)
+    .eq("box", currentBox)
     .select("id")
     .overrideTypes<{ id: string }[], { merge: false }>();
 

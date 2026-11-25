@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 //
 // Oracle (research §R5; src/lib/leitner.ts box spec; BOX_INTERVALS_DAYS):
 //   - the write carries only the four SR columns the scheduler produces
-//     (repetition_count, interval_days, next_due_at, last_reviewed_at) — never an
+//     (box, interval_days, next_due_at, last_reviewed_at) — never an
 //     ownership/status field lifted from the body;
 //   - "right" promotes one box (box 0 -> box 1), and the new box's fixed interval
 //     sets interval_days (box 1 = 2 days). These come from the Leitner domain rule,
@@ -92,18 +92,13 @@ describe("POST /api/reviews — R5 server authority over the update payload", ()
     const payload = fc.recorded.updateArg as Record<string, unknown>;
     // The write is exactly the four scheduler-produced SR columns — no body-supplied
     // ownership/status can ride along.
-    expect(Object.keys(payload).sort()).toEqual([
-      "interval_days",
-      "last_reviewed_at",
-      "next_due_at",
-      "repetition_count",
-    ]);
+    expect(Object.keys(payload).sort()).toEqual(["box", "interval_days", "last_reviewed_at", "next_due_at"]);
     expect(payload).not.toHaveProperty("user_id");
     expect(payload).not.toHaveProperty("status");
 
     // Leitner oracle: "right" from box 0 promotes to box 1; box 1's fixed interval
     // (BOX_INTERVALS_DAYS[1]) sets interval_days.
-    expect(payload.repetition_count).toBe(1);
+    expect(payload.box).toBe(1);
     expect(payload.interval_days).toBe(BOX_INTERVALS_DAYS[1]);
 
     // The query is owner/box-scoped: id + status="saved" + the current box index.
@@ -111,7 +106,7 @@ describe("POST /api/reviews — R5 server authority over the update payload", ()
     // pin that the route does not widen the scope.
     expect(fc.recorded.eqCalls).toContainEqual(["id", "card-1"]);
     expect(fc.recorded.eqCalls).toContainEqual(["status", "saved"]);
-    expect(fc.recorded.eqCalls).toContainEqual(["repetition_count", 0]);
+    expect(fc.recorded.eqCalls).toContainEqual(["box", 0]);
   });
 
   it("resets to box 0 on a 'wrong' rating (Leitner reset rule)", async () => {
@@ -122,7 +117,7 @@ describe("POST /api/reviews — R5 server authority over the update payload", ()
     expect(res.status).toBe(200);
 
     const payload = fc.recorded.updateArg as Record<string, unknown>;
-    expect(payload.repetition_count).toBe(0);
+    expect(payload.box).toBe(0);
     expect(payload.interval_days).toBe(BOX_INTERVALS_DAYS[0]);
   });
 });

@@ -156,7 +156,7 @@ describe("the interaction layer is frozen", () => {
   });
 
   it("the /api/reviews payload is unchanged", () => {
-    expect(session).toMatch(/JSON\.stringify\(\{ cardId: card\.id, rating, currentBox: card\.repetition_count \}\)/);
+    expect(session).toMatch(/JSON\.stringify\(\{ cardId: card\.id, rating, currentBox: card\.box \}\)/);
   });
 
   it("every accessible name the E2E suites assert is preserved", () => {
