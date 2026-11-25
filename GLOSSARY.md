@@ -9,7 +9,7 @@ An AI-generated question-answer pair waiting for the user's decision. A Draft is
 _Avoid_: Candidate, candidate card, proposal
 
 **Accept**:
-The user's decision that a Draft should become a Card. It is provisional: nothing changes until Save, and the decision is lost if the user leaves or reloads the page first.
+The user's decision that a Draft should become a Card, and the one every Draft starts with, so no Draft is ever undecided at Save. It is provisional: nothing changes until Save, and the decision is lost if the user leaves or reloads the page first.
 _Avoid_: Keep, approve
 
 **Reject**:
