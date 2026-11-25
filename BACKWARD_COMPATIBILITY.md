@@ -1,6 +1,6 @@
 # Backward compatibility
 
-What counts as a **protected contract surface** in 10xCards, what breaking one means, and the required path for changing it. `om-code-review` checks every touched surface against this file; implementing skills warn before shipping a violation.
+What counts as a **protected contract surface** in 10xCards, what breaking one means, and the required path for changing it. Every review checks the touched surfaces against this file; flag a violation before it ships.
 
 ## Context that sets the bar
 

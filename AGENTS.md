@@ -8,7 +8,6 @@
 - CI (`@.github/workflows/ci.yml`) runs `lint` + `build` on push/PR to `main`. It does not run the test suites (`npm test`, `test:integration`, `test:e2e`) — verify those locally.
 - `@.github/workflows/ai-code-review.yml` posts an advisory AI review comment on every PR to `main` (never blocks merge); re-run it by re-adding the `ai-cr:review` label.
 - Never overwrite `context/` — the 10x-workflow source of truth (PRD, tech-stack, plans). `context/archive/**` and `context/foundation/archive/**` are immutable.
-- Edits inside `CLAUDE.md`'s `<!-- BEGIN/END @przeprogramowani/10x-cli -->` markers are lost on the next `10x get` — put durable guidance above the first marker.
 
 ## Project Structure & Module Organization
 
@@ -42,7 +41,7 @@ Name React components `PascalCase.tsx`, route files with lowercase paths, and ut
 
 Vitest is the runner: unit/integration specs are colocated as `*.test.ts` / `*.integration.test.ts` next to source (e.g. `src/pages/api/reviews.test.ts`), with a shared harness, two-user fixture, and scoped Supabase mock under `test/integration/`. Playwright drives end-to-end specs in `tests/e2e/` (auth setup/teardown included; see `tests/e2e/AGENTS.md`). Stryker (`@stryker-mutator/vitest-runner`) is available for mutation testing.
 
-Validate changes with `npm run lint`, `npm run build`, the relevant test suite (`npm test`, `npm run test:integration`, and/or `npm run test:e2e`), and manual checks of affected routes (`/auth/*`, `/dashboard`, `/library`, `/generate`, `/review`). New tests: colocate `*.test.ts`/`*.test.tsx`; integration specs use the `test/integration/` harness, E2E specs follow `/10x-e2e`.
+Validate changes with `npm run lint`, `npm run build`, the relevant test suite (`npm test`, `npm run test:integration`, and/or `npm run test:e2e`), and manual checks of affected routes (`/auth/*`, `/dashboard`, `/library`, `/generate`, `/review`). New tests: colocate `*.test.ts`/`*.test.tsx`; integration specs use the `test/integration/` harness, E2E specs follow the rules in `tests/e2e/AGENTS.md` and are modelled on `tests/e2e/seed.spec.ts`.
 
 ## Commit & Pull Request Guidelines
 

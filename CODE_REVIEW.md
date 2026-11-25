@@ -1,6 +1,6 @@
 # Code review rules
 
-Repo-local review rules for 10xCards. `om-code-review` (and therefore `om-auto-review-pr` and `om-review-prs`) reads this file automatically and applies it **in addition to** its built-in checklist. Human reviewers use the same list. Severities are the pipeline's: **blocker / major / minor / nit**; any blocker means request changes.
+Repo-local review rules for 10xCards. Human reviewers and any AI reviewer work from this list; point a reviewing agent at this file so it applies these checks in addition to its own. Severities: **blocker / major / minor / nit**; any blocker means request changes.
 
 Stack the rules below are derived from: Astro 6 (`output: "server"`, Cloudflare adapter), React 19 islands, TypeScript, Tailwind 4, Supabase (Auth + Postgres with RLS), Vitest, Playwright.
 
@@ -11,7 +11,7 @@ Stack the rules below are derived from: Astro 6 (`output: "server"`, Cloudflare 
 3. **Contract stability** — HTTP routes, response shapes, DB schema (see `BACKWARD_COMPATIBILITY.md`).
 4. **Correctness of the change itself**, then maintainability. Formatting is Prettier's job, not the reviewer's.
 
-Per `AGENTS.md`: do not approve a change only because tests pass — check whether the tests cover the actual risk.
+Per `CLAUDE.md` → Code review rules: do not approve a change only because tests pass — check whether the tests cover the actual risk.
 
 ## Repo-specific checks
 
@@ -60,7 +60,7 @@ Per `AGENTS.md`: do not approve a change only because tests pass — check wheth
 
 - **CI does not run any test suite.** `.github/workflows/ci.yml` runs `astro sync` + `lint` + `build` only. A green CI badge is not evidence that tests pass; the reviewer must confirm the author ran the validation gate locally and, when the change touches Supabase behavior or the browser, the relevant extra suite.
 - Unit/integration specs are colocated (`*.test.ts`, `*.integration.test.ts`); integration specs use the two-user fixture and scoped Supabase mock in `test/integration/`. A change to data-scoping logic with no cross-user integration test is a major finding — that fixture exists precisely to prove isolation.
-- E2E specs live in `tests/e2e/` and follow the `/10x-e2e` rules: `getByRole`/`getByLabel`/`getByText` before `getByTestId`, never CSS/XPath, never `page.waitForTimeout()`, each test independent with its own setup and cleanup and unique ids. Violations are major — they are the failure modes that make a suite rot.
+- E2E specs live in `tests/e2e/` and follow the rules in `tests/e2e/AGENTS.md`: `getByRole`/`getByLabel`/`getByText` before `getByTestId`, never CSS/XPath, never `page.waitForTimeout()`, each test independent with its own setup and cleanup and unique ids. Violations are major — they are the failure modes that make a suite rot.
 
 ### Frontend (minor unless it breaks a11y or a hook rule)
 
