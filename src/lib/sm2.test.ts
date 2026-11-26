@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { schedule, type Rating, type Sm2State } from "@/lib/sm2";
 
 // Oracle discipline: every expected number below is worked out by hand from the
-// published SM-2 algorithm (Woźniak, 1990) as restated in the spec (#76):
+// published SM-2 algorithm (Woźniak, 1990) as restated in docs/sm2-algorithm.md
+// and the spec (#76):
 //   I(1) = 1, I(2) = 6, I(n) = I(n-1) * EF, rounded UP to whole days, no ceiling;
 //   EF' = EF + (0.1 - (5-q)*(0.08 + (5-q)*0.02))  =>  hard -0.14, good 0, easy +0.10;
 //   the rating's effect on EF lands BEFORE the interval is stretched, so I(n)

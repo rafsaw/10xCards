@@ -151,9 +151,10 @@ describe("POST /api/reviews — R2 cross-user isolation (real RLS)", () => {
     // here is the silent failure this test exists to make loud.
     expect(((await res.json()) as ReviewResponse).applied).toBe(true);
 
-    // The stored columns, worked out by hand from ADR 0002: Good leaves the ease
-    // factor alone, the repetition advances to 3, and the interval is the stored
-    // one stretched by that factor, rounded up — ceil(6 x 2.36) = ceil(14.16) = 15.
+    // The stored columns, worked out by hand from docs/sm2-algorithm.md: Good
+    // leaves the ease factor alone, the repetition advances to 3, and the
+    // interval is the stored one stretched by that factor, rounded up —
+    // ceil(6 x 2.36) = ceil(14.16) = 15.
     const after = await readScheduleColumns(fx.a.scopedClient(), fx.a.seededCardId);
     expect(after.repetition).toBe(3);
     expect(after.efactor).toBe(2.36);
