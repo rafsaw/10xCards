@@ -14,10 +14,13 @@ import { POST } from "./reviews";
 // because the cards_update_own policy scopes the UPDATE to auth.uid(). The
 // load-bearing assertion is A's row unchanged, not the response shape.
 //
-// Why currentBox:0 is the real signal: A's seeded card has status 'saved' and
-// box 0, so the route's status/box guards would BOTH match it. RLS
-// is therefore the only thing standing between B's write and A's row — drop the
-// policy and this test mutates A (the manual signal check in the plan).
+// Why the echoed state below is the real signal: A's seeded card takes every
+// scheduler column from its default — status 'saved', repetition 0, efactor 2.50,
+// interval_days 0 — so the route's status guard and all three state guards would
+// match it. RLS is therefore the only thing standing between B's write and A's
+// row — drop the policy and this test mutates A (the manual signal check in the
+// plan). efactor arrives from PostgREST as a JSON number for numeric(4,2), and
+// Postgres compares numeric exactly, so 2.5 is the value that matches.
 
 // A fresh client per call (the fixture's), used to snapshot the owner's row
 // before/after the foreign write. Reads go through the same serialization both
@@ -25,7 +28,8 @@ import { POST } from "./reviews";
 type FixtureClient = ReturnType<TwoUserFixture["a"]["scopedClient"]>;
 
 interface SrColumns {
-  box: number;
+  repetition: number;
+  efactor: number;
   interval_days: number;
   next_due_at: string | null;
   last_reviewed_at: string | null;
@@ -34,7 +38,7 @@ interface SrColumns {
 async function readScheduleColumns(client: FixtureClient, cardId: string): Promise<SrColumns> {
   const { data, error } = await client
     .from("cards")
-    .select("box, interval_days, next_due_at, last_reviewed_at")
+    .select("repetition, efactor, interval_days, next_due_at, last_reviewed_at")
     .eq("id", cardId)
     .overrideTypes<SrColumns[], { merge: false }>();
   expect(error).toBeNull();
@@ -49,6 +53,9 @@ function reviewCtx(user: { id: string }, body: unknown): APIContext {
   const locals = { user, isReadOnly: false, retentionUntil: null };
   return { request, locals, cookies: {} } as unknown as APIContext;
 }
+
+/** The seeded card's scheduler state, every field straight from its column default. */
+const SEEDED_STATE = { currentRepetition: 0, currentEfactor: 2.5, currentIntervalDays: 0 };
 
 interface ReviewResponse {
   applied?: boolean;
@@ -69,7 +76,7 @@ describe("POST /api/reviews — R2 cross-user isolation (real RLS)", () => {
     const before = await readScheduleColumns(fx.a.scopedClient(), fx.a.seededCardId);
 
     setActingUser(fx.b.scopedClient());
-    const res = await POST(reviewCtx({ id: fx.b.id }, { cardId: fx.a.seededCardId, rating: "right", currentBox: 0 }));
+    const res = await POST(reviewCtx({ id: fx.b.id }, { cardId: fx.a.seededCardId, rating: "good", ...SEEDED_STATE }));
 
     expect(res.status).toBe(200);
     expect(((await res.json()) as ReviewResponse).applied).toBe(false);
@@ -81,7 +88,7 @@ describe("POST /api/reviews — R2 cross-user isolation (real RLS)", () => {
 
   it("applies a review when B reviews B's own card (positive control)", async () => {
     setActingUser(fx.b.scopedClient());
-    const res = await POST(reviewCtx({ id: fx.b.id }, { cardId: fx.b.seededCardId, rating: "right", currentBox: 0 }));
+    const res = await POST(reviewCtx({ id: fx.b.id }, { cardId: fx.b.seededCardId, rating: "good", ...SEEDED_STATE }));
 
     expect(res.status).toBe(200);
     expect(((await res.json()) as ReviewResponse).applied).toBe(true);

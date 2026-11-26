@@ -15,7 +15,7 @@ let loadError = false;
 if (supabase) {
   const { data, error } = await supabase
     .from("cards")
-    .select("id, front, back, tag, box")
+    .select("id, front, back, tag, repetition, efactor, interval_days")
     .eq("status", "saved")
     .lte("next_due_at", new Date().toISOString())
     .order("next_due_at", { ascending: true })

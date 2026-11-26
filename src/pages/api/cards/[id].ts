@@ -72,7 +72,7 @@ export const PATCH: APIRoute = async (context) => {
   }
 
   // Update only front/back (and tag when supplied). The cards_set_updated_at trigger bumps updated_at;
-  // schedule fields (next_due_at, box, interval_days) are left
+  // schedule fields (next_due_at, repetition, efactor, interval_days) are left
   // untouched so editing a typo does not reset review progress. RLS confines to
   // the owner; the status guard prevents editing drafts via this surface.
   const { data, error } = await supabase
