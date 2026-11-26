@@ -1,9 +1,8 @@
 # E2E Testing Rules (read before generating or editing any spec here)
 
-These rules govern every Playwright spec in `tests/e2e/`. They are the project's
-second E2E quality lever, alongside the seed exemplar `seed.spec.ts`. Source of
-truth: `.claude/skills/10x-e2e/references/` (rules, five anti-patterns, seed
-pattern, prompt template). Model every new test on `seed.spec.ts`.
+These rules govern every Playwright spec in `tests/e2e/`. Together with the seed
+exemplar `seed.spec.ts` they are the project's source of truth for E2E quality.
+Model every new test on `seed.spec.ts`.
 
 ## The rules block
 

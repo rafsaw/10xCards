@@ -41,10 +41,7 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# local cache for .claude/hooks/github-issue-sync.mjs (rebuilt by `npm run sync:issues -- --apply`)
-.claude/.gh-issue-sync-cache.json
-
-# local settings for .claude/settings.json temporary not tracked by git
+# local Claude Code settings, never tracked
 .claude/settings.local.json
 
 # my notes
@@ -59,21 +56,6 @@ pnpm-debug.log*
 /blob-report/
 /tests/e2e/.auth/
 .playwright-cli/
-
-# om agent pipeline: per-run QA artifacts and local test-env state (.ai/scripts/ stays committed)
-.ai/qa/artifacts_*/
-.ai/qa/test-env.json
-.ai/qa/test-env.env
-
-# om agent pipeline: per-run isolated worktrees (om-auto-fix-issue, om-auto-fix-pr,
-# om-auto-review-pr, om-auto-continue-pr). Each carries its own node_modules, and
-# cleanup can fail on Windows long paths — never let one reach `git add -A`.
-.ai/tmp/
-
-# om-prepare-test-env: per-run environment state (scripts in .ai/scripts/ stay committed)
-.ai/qa/test-env-build-cache.json
-.ai/qa/test-env-app.*.log
-.ai/qa/test-env.lock/
 
 # Cezar - dane robocze
 .ai/cezar/runs/

@@ -2,7 +2,7 @@
 //       user-created card; what the user enters must be persisted faithfully and
 //       survive a full SSR reload, not merely live in client state.
 // seed: this IS the seed — the exemplar every generated E2E test is modeled on
-//       (see .claude/skills/10x-e2e/references/seed-test-pattern.md).
+//       (see tests/e2e/AGENTS.md for the rules it encodes).
 //
 // It demonstrates the five conventions every generated test MUST imitate
 // (encoded in tests/e2e/AGENTS.md):

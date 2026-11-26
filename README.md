@@ -127,7 +127,6 @@ is a client variable.
 | `OPENROUTER_MODEL`   | Model id (default `openai/gpt-4o-mini`)                            |
 | `PUBLIC_SENTRY_DSN`  | Browser Sentry DSN — **build time** (see [Deployment](#deployment)) |
 | `SENTRY_DSN`         | Worker Sentry DSN — runtime secret                                 |
-| `LINEAR_API_KEY`     | Optional, only for the `npm run sync:issues` dev hook              |
 
 `.env` is read by Vite/Astro, `.dev.vars` by the Cloudflare `workerd` runtime — keep both in sync
 locally. Never commit real values.
