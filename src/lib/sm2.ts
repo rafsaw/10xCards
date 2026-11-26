@@ -1,6 +1,7 @@
 // SM-2 scheduler (Woźniak, 1990), written in-house. Pure function, edge-safe
 // (Date / toISOString are V8 globals — no nodejs_compat dependency).
-// See ADR 0002 and spec #76 for the decisions behind it.
+// See docs/sm2-algorithm.md for the algorithm (and the oracle the tests are
+// worked out from), ADR 0002 and spec #76 for the decisions behind it.
 
 const DAY_MS = 86_400_000;
 export const EFACTOR_FLOOR = 1.3;

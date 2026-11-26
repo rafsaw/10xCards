@@ -16,8 +16,8 @@
 // oracle: a freshly created card is at the scheduler's initial state
 //       (repetition 0, ease factor 2.50, interval 0 days), where SM-2 gives
 //       every rating a 1-day interval: Again resets to 1, and a first success is
-//       I(1) = 1 regardless of grade (ADR 0002). So the NUMBER here cannot
-//       distinguish the four ratings — the LABEL is what proves the line follows
+//       I(1) = 1 regardless of grade (docs/sm2-algorithm.md). So the NUMBER
+//       here cannot distinguish the four ratings — the LABEL is what proves the line follows
 //       the rating being inspected. Distinguishing intervals (15 / 15 / 16 for a
 //       mature card) needs a card this suite cannot reach without writing
 //       scheduler state directly, and is covered at seam 1 instead.

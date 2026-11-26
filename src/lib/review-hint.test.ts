@@ -10,15 +10,14 @@ import type { Sm2State } from "@/lib/sm2";
  * asserting the four hints at a MATURE state, where the four answers differ.
  *
  * Oracle discipline: the expected intervals below are worked out by hand from
- * ADR 0002 / spec #76, not read off the implementation. For repetition 2, ease
- * factor 2.50, interval 6 days, with the rating's delta landing BEFORE the
- * stretch (ADR 0002):
+ * docs/sm2-algorithm.md / spec #76, not read off the implementation. For
+ * repetition 2, ease factor 2.50, interval 6 days, with the rating's delta
+ * landing BEFORE the stretch (docs/sm2-algorithm.md):
  *   Hard  EF 2.50 - 0.14 = 2.36 -> ceil(6 x 2.36) = ceil(14.16) = 15
  *   Good  EF 2.50          = 2.50 -> ceil(6 x 2.50) = 15
  *   Easy  EF 2.50 + 0.10 = 2.60 -> ceil(6 x 2.60) = ceil(15.6)  = 16
  *   Again failure branch -> 1 (and the repetition resets)
- * ADR 0002 states the same three numbers in prose: "the three passing ratings
- * therefore give 15 / 15 / 16 days".
+ * docs/sm2-algorithm.md tabulates the same three numbers.
  */
 
 /** A mature Card: two successful recalls behind it, sitting on the fixed I(2). */

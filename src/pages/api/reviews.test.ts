@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // the claim is about the payload + query the route HANDS to the client, observed
 // via a recording factory mock (the §6.2 sanctioned internal exception).
 //
-// Oracle (ADR 0002; the published SM-2 algorithm, Woźniak 1990):
+// Oracle (docs/sm2-algorithm.md; the published SM-2 algorithm, Woźniak 1990):
 //   - the write carries only the five scheduler columns the scheduler produces
 //     (repetition, efactor, interval_days, next_due_at, last_reviewed_at) —
 //     never an ownership/status field lifted from the body;
@@ -16,8 +16,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 //     the repetition to 3 and stretches the interval by the EF the Card arrived
 //     with (6 x 2.50 = 15 d), while the rating moves the EF itself by -0.14 (hard),
 //     0 (good) or +0.10 (easy); Again goes back to repetition 0 and 1 day with the
-//     EF untouched. These come from the algorithm as restated in ADR 0002, not from
-//     reading reviews.ts or sm2.ts, so the assertions cannot mirror a bug (check 4.3);
+//     EF untouched. These come from the algorithm as restated in
+//     docs/sm2-algorithm.md, not from reading reviews.ts or sm2.ts, so the
+//     assertions cannot mirror a bug (check 4.3);
 //   - the arithmetic itself is pinned in src/lib/sm2.test.ts; the cases here are
 //     one per rating branch, for the wiring;
 //   - cardId/rating/the three echoed state fields are validated before any write.
