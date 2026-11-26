@@ -6,14 +6,17 @@ import { resolveReviewShortcut, type ShortcutTarget } from "@/lib/review-shortcu
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Notice } from "@/components/ui/Notice";
-import type { ReviewRating } from "@/lib/leitner";
+import type { Rating } from "@/lib/sm2";
 
 export interface DueCard {
   id: string;
   front: string;
   back: string;
   tag: string | null;
-  box: number;
+  // The scheduler state the server guards the write on, echoed back on rating.
+  repetition: number;
+  efactor: number;
+  interval_days: number;
 }
 
 interface RateError {
@@ -42,7 +45,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [pendingRating, setPendingRating] = useState<ReviewRating | null>(null);
+  const [pendingRating, setPendingRating] = useState<Rating | null>(null);
   const [error, setError] = useState<RateError | null>(null);
   // Synchronous re-entrancy guard: `submitting` is async state, so the
   // disabled button doesn't block a same-frame double-click. This ref does,
@@ -58,7 +61,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   // shortcut effect below depends on it — the buttons in the render call this
   // exact function, so keyboard and mouse share one submission path.
   const handleRate = useCallback(
-    async (rating: ReviewRating) => {
+    async (rating: Rating) => {
       if (!card) return;
       if (lockRef.current) return; // drop a same-frame second click before it fires a duplicate POST
       lockRef.current = true;
@@ -70,7 +73,13 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         const response = await fetch("/api/reviews", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cardId: card.id, rating, currentBox: card.box }),
+          body: JSON.stringify({
+            cardId: card.id,
+            rating,
+            currentRepetition: card.repetition,
+            currentEfactor: card.efactor,
+            currentIntervalDays: card.interval_days,
+          }),
         });
 
         if (response.ok) {
@@ -121,7 +130,8 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         setRevealed(true);
         return;
       }
-      void handleRate(action === "rate-wrong" ? "wrong" : "right");
+      // This slice keeps the two-button row: Wrong is an Again, Right is a Good.
+      void handleRate(action === "rate-wrong" ? "again" : "good");
     }
 
     document.addEventListener("keydown", onKeyDown);
@@ -248,10 +258,10 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
             aria-keyshortcuts="1"
             disabled={submitting}
             onClick={() => {
-              void handleRate("wrong");
+              void handleRate("again");
             }}
           >
-            {submitting && pendingRating === "wrong" ? (
+            {submitting && pendingRating === "again" ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <X className="size-4" />
@@ -265,10 +275,10 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
             aria-keyshortcuts="2"
             disabled={submitting}
             onClick={() => {
-              void handleRate("right");
+              void handleRate("good");
             }}
           >
-            {submitting && pendingRating === "right" ? (
+            {submitting && pendingRating === "good" ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <Check className="size-4" />

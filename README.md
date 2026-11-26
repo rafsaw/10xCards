@@ -1,7 +1,7 @@
 # 10xCards
 
 AI-assisted spaced-repetition flashcards. Paste dense source material, let an LLM propose Q/A
-candidates, accept or reject each one by hand, and review the accepted cards on a Leitner schedule.
+candidates, accept or reject each one by hand, and review the accepted cards on an SM-2 schedule.
 The manual accept-or-reject step is deliberate: the AI drafts, the user decides what enters the deck.
 
 Slice status and product context live in `context/foundation/roadmap.md` and
@@ -85,7 +85,7 @@ build.
 │ ├── components/ # Astro & React components (auth, dashboard, generate,
 │ │ # library, review, settings, ui primitives)
 │ ├── layouts/ # Astro layouts
-│ ├── lib/ # Supabase client, OpenRouter client, Leitner scheduling,
+│ ├── lib/ # Supabase client, OpenRouter client, SM-2 scheduling,
 │ │ # retention, observability, helpers
 │ ├── styles/ # global.css
 │ └── middleware.ts # Route protection (PROTECTED_ROUTES)

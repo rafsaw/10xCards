@@ -155,8 +155,12 @@ describe("the interaction layer is frozen", () => {
     expect(session).toMatch(/resolveReviewShortcut\(/);
   });
 
-  it("the /api/reviews payload is unchanged", () => {
-    expect(session).toMatch(/JSON\.stringify\(\{ cardId: card\.id, rating, currentBox: card\.box \}\)/);
+  it("the /api/reviews payload echoes the card's SM-2 scheduler state", () => {
+    // The endpoint guards its write on all three columns (ADR 0002), so the body
+    // must carry all three — dropping one turns every rating into applied:false.
+    expect(session).toMatch(
+      /JSON\.stringify\(\{\s*cardId: card\.id,\s*rating,\s*currentRepetition: card\.repetition,\s*currentEfactor: card\.efactor,\s*currentIntervalDays: card\.interval_days,\s*\}\)/,
+    );
   });
 
   it("every accessible name the E2E suites assert is preserved", () => {
