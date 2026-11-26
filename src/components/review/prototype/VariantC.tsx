@@ -5,8 +5,9 @@
 // on every button, so the row stays quiet and the scheduler stays peekable.
 //   Interval on buttons: ON DEMAND — one fixed-height line above the row shows the
 //                        interval for whichever rating is hovered or keyboard-focused.
-//   Keyboard: Space reveals; 1-4 ALSO reveal when the answer is still hidden, so a
-//             mistimed digit never rates a card you have not seen. Second press rates.
+//   Keyboard: Space reveals and nothing else does; 1-4 rate, and only once the answer
+//             is revealed — a digit pressed early is simply dropped. (Chosen over
+//             digit-also-reveals: the two-press flow felt sluggish when clicked.)
 //   Layout: card stays hero, Again is detached on the left (it is a different kind of
 //           act: "I did not know this"), hard/good/easy form one segmented control.
 import { useEffect, useState } from "react";
@@ -27,20 +28,19 @@ export function VariantC({ card, index, total, revealed, submitting, pendingRati
       const tag = ((event.target as { tagName?: string } | null)?.tagName ?? "").toUpperCase();
       if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) return;
 
-      const slot = Number(event.key);
-      const isDigit = slot >= 1 && slot <= 4;
-
-      if (!revealed) {
-        if (event.key === " " && ["BUTTON", "A", "SUMMARY"].includes(tag)) return;
-        if (event.key !== " " && !isDigit) return;
+      if (event.key === " ") {
+        // Space is the only key that reveals, and only while the answer is hidden.
+        if (revealed || ["BUTTON", "A", "SUMMARY"].includes(tag)) return;
         event.preventDefault();
-        // A digit pressed too early reveals instead of rating a card you cannot see.
         onReveal();
-        if (isDigit) setHinted(RATINGS[slot - 1]);
         return;
       }
 
-      if (submitting || !isDigit) return;
+      // Digits do nothing until the answer is on screen: a card you have not seen
+      // cannot be rated, and an early keystroke is dropped rather than queued.
+      if (!revealed || submitting) return;
+      const slot = Number(event.key);
+      if (slot < 1 || slot > 4) return;
       event.preventDefault();
       onRate(RATINGS[slot - 1]);
     }
@@ -67,7 +67,7 @@ export function VariantC({ card, index, total, revealed, submitting, pendingRati
             aria-keyshortcuts="Space"
             className="text-muted-foreground hover:text-foreground border-border w-full rounded-md border border-dashed py-3 text-sm"
           >
-            Reveal answer <span className="font-mono">(Space, or any of 1–4)</span>
+            Reveal answer <span className="font-mono">(Space)</span>
           </button>
         )}
       </div>
@@ -113,6 +113,9 @@ export function VariantC({ card, index, total, revealed, submitting, pendingRati
                 <RotateCw className="size-4" />
               )}
               Again
+              {/* Same key-hint treatment as the hard/good/easy segments — the hint belongs
+                  to every rating; only the grouping sets Again apart. */}
+              <span className="font-mono text-xs opacity-60">1</span>
             </button>
 
             {/* One control, three segments: these three all mean "I knew it", and the
