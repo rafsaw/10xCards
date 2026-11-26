@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Eye, Check, X, PartyPopper, Loader2, RotateCcw } from "lucide-react";
+import { Eye, PartyPopper, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseErrorBody } from "@/lib/parse-error";
-import { resolveReviewShortcut, type ShortcutTarget } from "@/lib/review-shortcuts";
+import { resolveReviewShortcut, type ReviewShortcutAction, type ShortcutTarget } from "@/lib/review-shortcuts";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Notice } from "@/components/ui/Notice";
@@ -33,12 +33,30 @@ const FALLBACK_MESSAGES: Record<string, string> = {
   network_error: "Network error — please try again.",
 };
 
+// What the resolver's rating actions mean. Keeps the keyboard on the SAME
+// handleRate call the buttons make — there is no second rating path.
+const RATING_BY_ACTION: Record<Exclude<ReviewShortcutAction, "reveal">, Rating> = {
+  "rate-again": "again",
+  "rate-hard": "hard",
+  "rate-good": "good",
+  "rate-easy": "easy",
+};
+
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <kbd className="border-border bg-muted text-muted-foreground text-meta rounded-lg border px-1.5 py-0.5 font-mono">
       {children}
     </kbd>
   );
+}
+
+// The digit hint printed inside a rating button, so the shortcut is not
+// sighted-only knowledge. Identical on all four buttons — including Again —
+// because only the grouping is allowed to set Again apart. `opacity-70` rather
+// than a muted colour token so it reads the same on the filled Good button as
+// on the three unfilled ones.
+function KeyHint({ children }: { children: React.ReactNode }) {
+  return <span className="opacity-70">{children}</span>;
 }
 
 export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCard[]; loadError: boolean }) {
@@ -102,7 +120,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
     [card],
   );
 
-  // Keyboard shortcuts (Space reveals, 1/2 rate). The listener is on `document`
+  // Keyboard shortcuts (Space reveals, 1-4 rate). The listener is on `document`
   // because the session has no single focusable host to hang it off, and the
   // shortcuts are meant to work without the user hunting for focus first. All of
   // the "should this key do anything?" logic lives in the pure resolver, which is
@@ -130,8 +148,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         setRevealed(true);
         return;
       }
-      // This slice keeps the two-button row: Wrong is an Again, Right is a Good.
-      void handleRate(action === "rate-wrong" ? "again" : "good");
+      void handleRate(RATING_BY_ACTION[action]);
     }
 
     document.addEventListener("keydown", onKeyDown);
@@ -243,14 +260,23 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
           Reveal answer
         </Button>
       ) : (
-        /* Principle 6's "shape, not colour" fix. The two are different tiers of the
-           house button system, not a red button and a green button: semantic
+        /* Principle 6's "shape, not colour" fix. The four ratings are different
+           tiers of the house button system, not red and green buttons: semantic
            destructive/success are reserved for deletion and confirmation, and a
-           self-assessment rating is neither. Principle 5 requires exactly one filled
-           button per view and forbids a destructive-analogue action being primary, so
-           Right is default and Wrong is outline. Icons inherit their button's text
-           colour (Direction A §10) — no colour class on either glyph. */
-        <div className="flex gap-3">
+           self-assessment rating is neither. Principle 5 requires exactly one
+           filled button per view and forbids a failure action being primary, so
+           Good is default and the other three are outline.
+
+           Again is a different kind of statement ("I did not know this"), while
+           Hard / Good / Easy are a dial on one statement ("I knew it") — so Again
+           is detached by the row gap and the other three are flush inside a
+           labelled group. The layout says which kind each button is, and Again
+           can never be mis-clicked as "a bit hard".
+
+           Every button is the Button primitive's default h-9 and the row never
+           wraps, so this slot is exactly as tall as the Reveal button it replaces
+           and the card face above it does not shift when the row renders. */
+        <div className="flex items-stretch gap-6">
           <Button
             type="button"
             variant="outline"
@@ -261,45 +287,62 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               void handleRate("again");
             }}
           >
-            {submitting && pendingRating === "again" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <X className="size-4" />
-            )}
-            Wrong
+            {submitting && pendingRating === "again" ? <Loader2 className="size-4 animate-spin" /> : null}
+            Again <KeyHint>1</KeyHint>
           </Button>
-          <Button
-            type="button"
-            variant="default"
-            className="flex-1"
-            aria-keyshortcuts="2"
-            disabled={submitting}
-            onClick={() => {
-              void handleRate("good");
-            }}
-          >
-            {submitting && pendingRating === "good" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Check className="size-4" />
-            )}
-            Right
-          </Button>
+          <div className="flex flex-[3] items-stretch" role="group" aria-label="I knew it — how easily?">
+            {/* Flush segments: only the group's outer corners stay rounded, which
+                is what reads as one control rather than three buttons. */}
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 rounded-r-none"
+              aria-keyshortcuts="2"
+              disabled={submitting}
+              onClick={() => {
+                void handleRate("hard");
+              }}
+            >
+              {submitting && pendingRating === "hard" ? <Loader2 className="size-4 animate-spin" /> : null}
+              Hard <KeyHint>2</KeyHint>
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              className="flex-1 rounded-none"
+              aria-keyshortcuts="3"
+              disabled={submitting}
+              onClick={() => {
+                void handleRate("good");
+              }}
+            >
+              {submitting && pendingRating === "good" ? <Loader2 className="size-4 animate-spin" /> : null}
+              Good <KeyHint>3</KeyHint>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 rounded-l-none"
+              aria-keyshortcuts="4"
+              disabled={submitting}
+              onClick={() => {
+                void handleRate("easy");
+              }}
+            >
+              {submitting && pendingRating === "easy" ? <Loader2 className="size-4 animate-spin" /> : null}
+              Easy <KeyHint>4</KeyHint>
+            </Button>
+          </div>
         </div>
       )}
 
-      {/* AC7: the shortcuts are discoverable without documentation. Both rows are
-          always rendered so the hint never reflows the card as the state flips;
-          the row that isn't active right now is dimmed rather than removed. */}
+      {/* AC7: the shortcuts are discoverable without documentation. The rating
+          digits are no longer repeated down here — each one is printed inside its
+          own button — but this line is always rendered, and dimmed rather than
+          removed, so the hint never reflows the card as the state flips. */}
       <p className="text-meta text-muted-foreground flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
         <span className={cn("flex items-center gap-1.5", revealed && "opacity-40")}>
           <Kbd>Space</Kbd> Reveal
-        </span>
-        <span className={cn("flex items-center gap-1.5", !revealed && "opacity-40")}>
-          <Kbd>1</Kbd> Wrong
-        </span>
-        <span className={cn("flex items-center gap-1.5", !revealed && "opacity-40")}>
-          <Kbd>2</Kbd> Right
         </span>
       </p>
     </section>

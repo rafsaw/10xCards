@@ -1,11 +1,12 @@
 // risk: context/foundation/test-plan.md R6 — review progress isn't persisted.
-//       After rating a due card "Right", the new schedule (next_due_at) must
+//       After rating a due card "Good", the new schedule (next_due_at) must
 //       survive a full session restart. If it doesn't, the card stays due and
 //       resurfaces, silently breaking spaced repetition.
 //       Risk Response Guidance #6: "After rating, next-due updates and survives
 //       a session restart." The rate endpoint is POST /api/reviews (owner-scoped,
-//       box-guarded); a manually created card is due immediately (cards.ts sets
-//       next_due_at=now), so creating one card seeds exactly one due card.
+//       and guarded on the card's SM-2 state — repetition, ease factor and
+//       interval; ADR 0002); a manually created card is due immediately (cards.ts
+//       sets next_due_at=now), so creating one card seeds exactly one due card.
 // seed: modeled on tests/e2e/seed.spec.ts — the exemplar every generated E2E test
 //       imitates: role/label/text locators, wait-for-state, Date.now() unique
 //       data, a full self-contained setup -> action -> assertion -> cleanup cycle,
@@ -34,7 +35,7 @@ test.describe("review — rated card is rescheduled and stays so across a restar
     marker = null;
   });
 
-  test("a card rated Right is no longer due after a session restart", async ({ page }) => {
+  test("a card rated Good is no longer due after a session restart", async ({ page }) => {
     // Unique marker: no other worker (or a re-run) can see this card's front, so
     // the due-state assertions below speak only about THIS card. Held in a const
     // as well as the describe-scoped `marker`: TypeScript drops the narrowing of
@@ -65,7 +66,7 @@ test.describe("review — rated card is rescheduled and stays so across a restar
       await expect(page.getByText(front)).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 20000 });
 
-    // Action — reveal, then rate the card "Right". Wait on the /api/reviews
+    // Action — reveal, then rate the card "Good". Wait on the /api/reviews
     // response so the assertions run only after the server has recorded the
     // rating (the write under test). This endpoint does not navigate, so the
     // response body is safe to read.
@@ -73,10 +74,12 @@ test.describe("review — rated card is rescheduled and stays so across a restar
     const rateResponse = page.waitForResponse(
       (res) => res.url().includes("/api/reviews") && res.request().method() === "POST",
     );
-    await page.getByRole("button", { name: "Right" }).click();
+    // The button's accessible name is "Good 3" (the digit hint is printed inside
+    // it), which this non-exact name match still resolves.
+    await page.getByRole("button", { name: "Good" }).click();
     const rated = await rateResponse;
     expect(rated.status()).toBe(200);
-    // applied:true proves the box-guarded update matched the row and persisted
+    // applied:true proves the state-guarded update matched the row and persisted
     // the new schedule server-side — not just advanced the client index.
     const ratedBody = (await rated.json()) as { applied?: boolean };
     expect(ratedBody.applied).toBe(true);
