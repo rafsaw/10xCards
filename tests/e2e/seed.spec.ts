@@ -47,13 +47,20 @@ test.describe("library — created card persistence (R5)", () => {
     // Action — fill the create-card form with role/label locators. exact: true
     // because the library search box ("Search front or back…") also matches the
     // substrings "Front"/"Back" by accessible name.
-    await page.getByRole("textbox", { name: "Front", exact: true }).fill(marker);
-    await page.getByRole("textbox", { name: "Back", exact: true }).fill("seed answer");
+    // Re-fill until the React island is hydrated: filling a pre-hydration SSR input is
+    // discarded on hydrate and leaves the submit button disabled (library-tag-filter.spec.ts).
+    await expect(async () => {
+      await page.getByRole("textbox", { name: "Front", exact: true }).fill(marker);
+      await page.getByRole("textbox", { name: "Back", exact: true }).fill("seed answer");
+      await expect(page.getByRole("button", { name: "Create card" })).toBeEnabled({ timeout: 1000 });
+    }).toPass({ timeout: 20000 });
 
     // Submit; the form returns to /library on success. Wait for STATE — the new
-    // card rendered — not for time.
+    // card's ROW, not any text matching the front: the textarea just filled above
+    // matches it too, and a wait that returns before the reload leaves the next
+    // step racing a navigation.
     await page.getByRole("button", { name: "Create card" }).click();
-    await expect(page.getByText(marker)).toBeVisible();
+    await expect(page.getByRole("listitem").filter({ hasText: marker })).toBeVisible();
 
     // The risk made concrete: did the card actually PERSIST server-side, or did
     // it only live in client state? A full reload re-runs the SSR query — the

@@ -71,8 +71,8 @@ export const POST: APIRoute = async (context) => {
   }
 
   // A manually-created card enters the SR lifecycle immediately: status='saved'
-  // AND next_due_at=now() so the review query surfaces it. interval_days and
-  // box keep their column defaults (0).
+  // AND next_due_at=now() so the review query surfaces it. interval_days,
+  // repetition and efactor keep their column defaults (0, 0 and 2.5).
   const { data, error } = await supabase
     .from("cards")
     .insert({

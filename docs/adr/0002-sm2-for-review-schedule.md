@@ -1,0 +1,32 @@
+# SM-2 for the review schedule
+
+_Supersedes [ADR 0001](./0001-leitner-boxes-for-review-schedule.md)._
+
+Reviews are scheduled with SM-2 (Woźniak, 1990), written in-house as one pure function rather than taken from a library: a Card carries its own Repetition and Ease factor, a successful Review advances the repetition and stretches the interval by the ease factor (`I(1) = 1`, `I(2) = 6`, then `I(n) = I(n-1) × EF`, rounded up to whole days), and an Again Review sets the interval back to 1 day. Hard lowers the ease factor by 0.14, Easy raises it by 0.10, Good leaves it alone, Again leaves it alone, and it never falls below 1.3. We chose it because graded ratings make per-Card adaptivity usable, which is the whole point of the change, and because SM-2 has no parameters to tune, so it gives adaptivity without inviting a tuning project.
+
+ADR 0001 rejected SM-2 for one reason only: with binary rating, the ease factor would barely move, so the adaptivity would go unused. Graded ratings retire that objection, which is why the decision is reopened here rather than reversed on taste.
+
+**The rating's effect on the ease factor lands before the interval is stretched**, so `I(n)` uses the ease factor the rating just produced, not the one the Card arrived with. Stated explicitly because the published algorithm's step numbering reads the other way, and the two readings differ materially: under the other one, Hard and Good produce an identical interval and Hard's effect only shows up at the _following_ Review. We want "Hard lengthens less than Good" to be true of the interval the reviewer is actually given, which is the accepted weakness recorded below. For a mature Card (repetition 2, ease factor 2.50, interval 6 days) the three passing ratings therefore give 15 / 15 / 16 days — Hard and Good tie here only because rounding up swallows the difference between 14.16 and 15.0; by 100 days they are 236 against 250.
+
+**The stretch is computed in hundredths of an ease-factor point**, as `ceil(I × round(EF × 100) / 100)` rather than `ceil(I × EF)`. Binary floating point cannot represent 1.35, so `180 × 1.35` evaluates to 243.00000000000003 and rounding up adds a day that the arithmetic does not call for; multiplying by the integer 135 first keeps a mathematically whole product whole. The ease factor is fixed-point in the column and rounded to two decimals in code, so no precision is lost by going through hundredths. Recorded here because it is a deliberate choice that reads like an accident, and because a test pins the example above.
+
+**Again resets the repetition to 0, not 1.** The next success then gives 1 day and the one after 6. This is stated explicitly because the two readings of the algorithm differ by a five-day interval.
+
+## Considered Options
+
+- **Leitner Boxes + four ratings** (keeping ADR 0001 and only widening the rating): rejected, because it delivers graded ratings with zero adaptivity — six fixed intervals for every Card and every user, which is the limitation this change exists to remove.
+- **FSRS**: rejected, because it costs about six new columns and has no closed-form interval in FSRS-7, while its payoff is per-user weight tuning, which is out of scope and whose optimiser cannot run on Workers anyway; seeding it would also force a choice between discarding existing progress and fabricating a memory state.
+- **The `supermemo` npm package**: rejected, because it updates the ease factor on a failed Review, which this model forbids. At roughly thirty lines of arithmetic, the dependency would mostly buy someone else's bug.
+
+## Consequences
+
+**One deliberate deviation from the published algorithm.** SM-2 says to repeat a session until every Card scores at least 4; we drop that rule, and an Again Card returns tomorrow instead. A single-pass review screen cannot loop a session, and we would rather deviate once, visibly, than build a house variant.
+
+**Four accepted weaknesses**, recorded so nobody "fixes" them without knowing they were chosen:
+
+- **Hard always lengthens an interval**, just less than Good. Hard is a pass, so the repetition advances, and with the ease factor floored at 1.3 the interval cannot shrink. The one-line fix — Hard does not advance the repetition — was rejected because a second deviation would make this "an SM-2-like scheduler of ours", eroding the honesty of having chosen it over Leitner + four ratings.
+- **Hard and Easy are asymmetric**: -0.14 against +0.10, straight from the formula.
+- **One lapse on a mature Card destroys the whole interval.** A Card held for a year drops to 1 day on a single Again.
+- **The 30-day cap is gone with no replacement ceiling**, which is the intent, not an oversight. "Unbounded" is loose, though: two implicit ceilings exist, and both are loud rather than silent. `interval_days` is `integer`, so about eighteen consecutive Easy ratings on one new Card overflow int4 and the write fails; further out still, `new Date(...).toISOString()` throws on a `next_due_at` outside the Date range, though int4 binds first by a wide margin. Neither is reachable, because every Review pushes `next_due_at` into the future and the endpoint only accepts due Cards — the eleventh Easy already schedules the Card 160 years out, so nobody reaches the twelfth. A sanity cap was rejected on the same grounds: it would turn a pathological Card into a 500 for no benefit.
+
+**We store no review history.** There is no `reviews` table and no aggregate counters: a Review leaves no trace beyond the schedule state it writes onto the Card, and `last_reviewed_at` stays the only on-Card record that it happened. SM-2 is self-contained in Card state and has nothing to tune, so the scheduling argument for history is empty, and no reader exists or is planned. The cost would be real: a new owner-scoped RLS surface — a new cross-user isolation surface — plus a slot in the deletion cascade, plus two-user test coverage, for rows nothing reads; and the write would stop being atomic, since adding an insert beside today's single guarded update means two untransacted writes. The trade-off accepted is that history is write-once, so the pre-decision log is unrecoverable. Adding it later is a pure addition: a new table, RLS and cascade, with no change to the algorithm or the API contract. **Revisit trigger: the first feature that reads history — statistics, undo of the last rating, or parameter tuning.**

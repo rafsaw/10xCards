@@ -1,5 +1,7 @@
 # Leitner Boxes for the review schedule
 
+_Superseded by [ADR 0002](./0002-sm2-for-review-schedule.md)._
+
 Reviews are scheduled with Leitner Boxes: a right Review moves a Card up one Box, a wrong Review sends it back to Box 0, and each Box has a fixed interval that grows with the Box. We chose it because it was the simplest option to build and to explain. The interval values live in code and are tunable without a new decision.
 
 ## Considered Options
@@ -10,4 +12,4 @@ Reviews are scheduled with Leitner Boxes: a right Review moves a Card up one Box
 
 ## Consequences
 
-This decision depends on binary rating. Adding graded ratings (e.g. again/hard/good/easy) is the trigger to revisit it.
+This decision depends on binary rating. Adding graded ratings (e.g. again/hard/good/easy) is the trigger to revisit it. That trigger fired: see [ADR 0002](./0002-sm2-for-review-schedule.md).

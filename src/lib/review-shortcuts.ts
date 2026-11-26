@@ -6,7 +6,7 @@
 // EXISTING reveal/handleRate flow; it never re-implements rating logic.
 
 /** What a keystroke maps to. `null` (from the resolver) means "not a shortcut — leave it alone". */
-export type ReviewShortcutAction = "reveal" | "rate-wrong" | "rate-right";
+export type ReviewShortcutAction = "reveal" | "rate-again" | "rate-hard" | "rate-good" | "rate-easy";
 
 /**
  * The structural slice of an event target this module needs. Declared instead of
@@ -39,6 +39,14 @@ const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 // focus — e.g. "Restart"), so Space defers to the focused control.
 const SPACE_ACTIVATED_TAGS = new Set(["BUTTON", "A", "SUMMARY"]);
 
+// The rating keys, in the order the buttons appear left to right on the screen.
+const RATING_KEYS: Record<string, ReviewShortcutAction | undefined> = {
+  "1": "rate-again",
+  "2": "rate-hard",
+  "3": "rate-good",
+  "4": "rate-easy",
+};
+
 /** True when the keystroke came from somewhere the user is typing. */
 export function isTextEntryTarget(target: ShortcutTarget | null): boolean {
   if (!target) return false;
@@ -55,8 +63,13 @@ export function isSpaceActivatedTarget(target: ShortcutTarget | null): boolean {
 /**
  * Decide which review action a keystroke triggers, or `null` for "ignore it".
  *
- * - `Space` reveals, and only while the answer is hidden.
- * - `1` / `2` rate Wrong / Right, and only after the answer is revealed.
+ * - `Space` reveals, and only while the answer is hidden. A second Space does
+ *   NOT rate: the most consequential rating must not be the easiest key to fire
+ *   by accident.
+ * - `1` / `2` / `3` / `4` rate Again / Hard / Good / Easy — the order they appear
+ *   left to right — and only after the answer is revealed. A digit pressed while
+ *   the answer is still hidden is DROPPED: this function is stateless, so there is
+ *   nowhere to queue it and revealing can never replay it.
  * - Nothing fires while a review submission is in flight, on an auto-repeating
  *   (held) key, with a modifier held, or from a text-entry element — the three
  *   ways a keyboard could otherwise produce a duplicate or unintended review.
@@ -73,7 +86,5 @@ export function resolveReviewShortcut(context: ReviewShortcutContext): ReviewSho
   }
 
   if (!revealed || submitting) return null;
-  if (key === "1") return "rate-wrong";
-  if (key === "2") return "rate-right";
-  return null;
+  return RATING_KEYS[key] ?? null;
 }

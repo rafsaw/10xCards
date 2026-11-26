@@ -69,7 +69,7 @@ Env var names declared in `astro.config.mjs` under `env.schema`: `SUPABASE_URL`,
 
 - `App.Locals` in `src/env.d.ts` (`user`, `isReadOnly`, `retentionUntil`) — every page, island, and API handler reads it. Removing or repurposing a field is breaking; adding one is not. Astro types regenerate with `npx astro sync`.
 - The `readOnlyGuard(locals)` contract in `src/lib/account-retention.ts` — a truthy return is a `Response` the caller must return. Changing that convention means auditing every mutating handler.
-- The SRS scheduling rules in `src/lib/leitner.ts` — changing intervals or the promotion/demotion rules silently reschedules every existing user's cards. Not a type-level break, but the highest-impact behavior change in the app: treat it as `risk-high`, and say in the PR body what happens to cards already in flight.
+- The SRS scheduling rules in `src/lib/sm2.ts` — changing the intervals, the ease-factor deltas or the failure branch silently reschedules every existing user's cards. Not a type-level break, but the highest-impact behavior change in the app: treat it as `risk-high`, and say in the PR body what happens to cards already in flight.
 - Accessible names and roles the E2E suite binds to — renaming a button label breaks `tests/e2e/` even though nothing type-checks it. Update the specs in the same PR.
 
 ## Not protected
