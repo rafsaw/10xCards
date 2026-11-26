@@ -22,6 +22,11 @@ const SRC_DIR = fileURLToPath(new URL("../..", import.meta.url));
 
 const session = readFileSync(join(REVIEW_DIR, "ReviewSession.tsx"), "utf8");
 const page = readFileSync(join(SRC_DIR, "pages", "review.astro"), "utf8");
+// The hint line's text moved out of the component into this pure helper so #82's
+// "matches what the server would schedule" could be unit-tested at a mature card
+// state (src/lib/review-hint.test.ts). The structural guards below follow it
+// there rather than being dropped.
+const hint = readFileSync(join(SRC_DIR, "lib", "review-hint.ts"), "utf8");
 
 const FILES: [name: string, source: string][] = [
   ["ReviewSession.tsx", session],
@@ -261,24 +266,45 @@ describe("#82 — the predicted interval lives in one fixed-height line, not on 
 
   it("no rating button prints an interval", () => {
     // The rejected prototype variant: three near-identical numbers on the row.
-    // The interval string must exist exactly once, and not inside a button.
+    // The interval string must exist exactly once across the two files that make
+    // the line, and not inside a button.
     const buttonBlocks = session.split("<Button").slice(1);
     for (const block of buttonBlocks) {
       expect(block.slice(0, block.indexOf("</Button>"))).not.toMatch(/back in|interval_days/);
     }
-    expect(session.split("back in").length - 1).toBe(1);
+    expect(session.split("back in").length - 1).toBe(0);
+    expect(hint.split("back in").length - 1).toBe(1);
   });
 
   it("the interval comes from the shared scheduler, not a second copy of it", () => {
     // AC6 ("matches what the server would schedule") is only structurally
     // guaranteed by calling the same pure function the endpoint calls, on the
-    // state the card echoed back, for the one rating being inspected.
-    expect(session).toMatch(/import \{ schedule, type Rating \} from "@\/lib\/sm2"/);
-    expect(session).toMatch(/schedule\(card, inspected, 0\)\.interval_days/);
-    expect(session.split("schedule(").length - 1).toBe(1);
-    // None of SM-2's constants may be restated on the client.
+    // state the card echoed back, for the one rating being inspected. The
+    // behaviour of that call — the four ratings giving four different answers at
+    // a mature state — is asserted in src/lib/review-hint.test.ts.
+    expect(session).toMatch(/import \{ ratingHint \} from "@\/lib\/review-hint"/);
+    expect(session).toMatch(/ratingHint\(card, inspected\)/);
+    expect(session.split("ratingHint(").length - 1).toBe(1);
+    expect(hint).toMatch(/import \{ schedule, type Rating, type Sm2State \} from "@\/lib\/sm2"/);
+    expect(hint).toMatch(/schedule\(state, rating, 0\)\.interval_days/);
+    expect(hint.split("schedule(").length - 1).toBe(1);
+    // None of SM-2's constants may be restated on the client, in either file.
     for (const constant of ["1.3", "0.14", "2.5", "Math.ceil"]) {
       expect(session).not.toContain(constant);
+      expect(hint).not.toContain(constant);
     }
+  });
+
+  it("the hint's rating labels are the same four names the buttons carry", () => {
+    // The helper spells the labels a second time, because the per-button guards
+    // in this file assert each label inside its own <Button> block. That is only
+    // honest while the two lists agree, so pin them to each other here.
+    const ROW = ["Again", "Hard", "Good", "Easy"];
+    for (const label of ROW) {
+      expect(hint).toContain(`: "${label}",`);
+      expect(session).toContain(label);
+    }
+    const labels = hint.match(/^ {2}\w+: "\w+",$/gm) ?? [];
+    expect(labels).toHaveLength(ROW.length);
   });
 });
