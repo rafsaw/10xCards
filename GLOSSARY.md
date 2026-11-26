@@ -35,8 +35,8 @@ How many times in a row a Card has been recalled correctly. An Again Review send
 _Avoid_: Box, repetition count, level, stage, streak
 
 **Ease factor**:
-How easy a Card has proven for the user, which stretches or tightens each next interval the Card gets. It starts at 2.5 and never falls below 1.3.
-_Avoid_: Easiness, difficulty, EF
+How easy a Card has proven for the user, which governs how far each next interval the Card gets is stretched. A high factor stretches an interval further; a low one stretches it less, but never tightens it — see ADR 0002, where Hard always lengthening an interval (just less than Good) is recorded as an accepted weakness. It starts at 2.5 and never falls below 1.3.
+_Avoid_: Easiness, difficulty, strength, ease (alone); `efactor` is the term's spelling in the schema and the code (the `cards.efactor` column, `EFACTOR_FLOOR`, `currentEfactor`), so use it there and the full term in prose
 
 **Review session**:
 One pass through the Cards that are due right now, made up of one Review per Card.

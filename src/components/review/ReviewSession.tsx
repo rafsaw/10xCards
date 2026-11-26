@@ -5,7 +5,8 @@ import { resolveReviewShortcut, type ReviewShortcutAction, type ShortcutTarget }
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Notice } from "@/components/ui/Notice";
-import { schedule, type Rating } from "@/lib/sm2";
+import { ratingHint } from "@/lib/review-hint";
+import type { Rating } from "@/lib/sm2";
 
 export interface DueCard {
   id: string;
@@ -39,16 +40,6 @@ const RATING_BY_ACTION: Record<Exclude<ReviewShortcutAction, "reveal">, Rating> 
   "rate-hard": "hard",
   "rate-good": "good",
   "rate-easy": "easy",
-};
-
-// Display names for the interval hint line. The buttons keep their own literal
-// labels; this map exists so the line can name the rating the user is inspecting
-// without the label becoming a second source of truth for the button row.
-const RATING_LABELS: Record<Rating, string> = {
-  again: "Again",
-  hard: "Hard",
-  good: "Good",
-  easy: "Easy",
 };
 
 // Shown in the hint line while nothing is hovered or focused, so the affordance
@@ -232,16 +223,18 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   // ratings — and their own digit hints — come on screen.
   //
   // The interval is the real scheduler's answer, not a second copy of the
-  // arithmetic: `schedule` is the same pure function POST /api/reviews runs
-  // server-side, fed the state the card echoed back, for the one rating being
-  // inspected. `now` is pinned to 0 because only `interval_days` is read here,
-  // which keeps the render a pure function of props and state.
+  // arithmetic: `ratingHint` calls the same pure `schedule` POST /api/reviews
+  // runs server-side, fed the state the card echoed back, for the one rating
+  // being inspected. The line's text lives in src/lib/review-hint.ts so that
+  // claim is unit-testable at a mature card state (src/lib/review-hint.test.ts),
+  // which the E2E spec cannot reach — a card it can create gives every rating
+  // 1 d.
   const hintLine = !revealed ? (
     <>
       <Kbd>Space</Kbd> Reveal
     </>
   ) : inspected ? (
-    `${RATING_LABELS[inspected]} → back in ${schedule(card, inspected, 0).interval_days} d`
+    ratingHint(card, inspected)
   ) : (
     HINT_PLACEHOLDER
   );
