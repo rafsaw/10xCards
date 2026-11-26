@@ -134,7 +134,9 @@ locally. Never commit real values.
 ### Using a cloud Supabase project instead
 
 Point the same two variables at a hosted project (dashboard → Settings → API) and apply
-`supabase/migrations/` to it (`npx supabase db push`):
+`supabase/migrations/` with the [migration deployment wizard](scripts/deploy-migrations.sh):
+run `./scripts/deploy-migrations.sh` to link, review pending migrations, approve the push,
+and run integration tests.
 
 ```
 SUPABASE_URL=https://<project-ref>.supabase.co
