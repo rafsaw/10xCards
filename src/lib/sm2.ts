@@ -53,15 +53,16 @@ export function schedule(state: Sm2State, rating: Rating, now: number = Date.now
   }
 
   const repetition = state.repetition + 1;
-  // I(1) = 1 and I(2) = 6 are fixed; beyond that the stored interval is
-  // stretched by the ease factor the Card arrived with (the grade's effect on
-  // EF lands after this interval, per the published step order) and rounded up.
-  const interval = repetition === 1 ? 1 : repetition === 2 ? 6 : stretch(state.interval_days, state.efactor);
   // Rounded to two decimals so the returned value is identical to the value the
   // numeric(4,2) column will store — the next Review echoes it back.
   // Clamped at the floor here rather than left to the column's CHECK, so a run
   // of Hard ratings cannot turn a legitimate rating into a 500.
   const efactor = Math.max(EFACTOR_FLOOR, Math.round((state.efactor + EFACTOR_DELTA[rating]) * 100) / 100);
+  // I(1) = 1 and I(2) = 6 are fixed; beyond that the stored interval is
+  // stretched by the ease factor this rating just produced, and rounded up. The
+  // grade therefore lands on *this* interval, which is what makes Hard lengthen
+  // less than Good rather than only from the following Review on (spec #76).
+  const interval = repetition === 1 ? 1 : repetition === 2 ? 6 : stretch(state.interval_days, efactor);
   return {
     repetition,
     efactor,

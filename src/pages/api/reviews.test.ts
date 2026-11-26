@@ -110,8 +110,8 @@ describe("POST /api/reviews — R5 server authority over the update payload", ()
     expect(payload).not.toHaveProperty("status");
 
     // SM-2 oracle: Good is a pass, so the repetition advances to 3 and the stored
-    // interval is stretched by the EF the Card arrived with (6 x 2.50 = 15 days);
-    // Good moves the EF by 0.
+    // interval is stretched by the EF this rating produces (Good moves the EF by
+    // 0, so 6 x 2.50 = 15 days).
     expect(payload.repetition).toBe(3);
     expect(payload.efactor).toBe(2.5);
     expect(payload.interval_days).toBe(15);
@@ -133,7 +133,7 @@ describe("POST /api/reviews — R5 server authority over the update payload", ()
     { rating: "again", repetition: 0, efactor: 2.5, interval_days: 1 },
     { rating: "hard", repetition: 3, efactor: 2.36, interval_days: 15 },
     { rating: "good", repetition: 3, efactor: 2.5, interval_days: 15 },
-    { rating: "easy", repetition: 3, efactor: 2.6, interval_days: 15 },
+    { rating: "easy", repetition: 3, efactor: 2.6, interval_days: 16 },
   ];
 
   it.each(branches)("schedules a mature card on $rating", async ({ rating, ...expected }) => {

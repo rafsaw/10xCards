@@ -6,6 +6,8 @@ Reviews are scheduled with SM-2 (Woźniak, 1990), written in-house as one pure f
 
 ADR 0001 rejected SM-2 for one reason only: with binary rating, the ease factor would barely move, so the adaptivity would go unused. Graded ratings retire that objection, which is why the decision is reopened here rather than reversed on taste.
 
+**The rating's effect on the ease factor lands before the interval is stretched**, so `I(n)` uses the ease factor the rating just produced, not the one the Card arrived with. Stated explicitly because the published algorithm's step numbering reads the other way, and the two readings differ materially: under the other one, Hard and Good produce an identical interval and Hard's effect only shows up at the _following_ Review. We want "Hard lengthens less than Good" to be true of the interval the reviewer is actually given, which is the accepted weakness recorded below. For a mature Card (repetition 2, ease factor 2.50, interval 6 days) the three passing ratings therefore give 15 / 15 / 16 days — Hard and Good tie here only because rounding up swallows the difference between 14.16 and 15.0; by 100 days they are 236 against 250.
+
 **Again resets the repetition to 0, not 1.** The next success then gives 1 day and the one after 6. This is stated explicitly because the two readings of the algorithm differ by a five-day interval.
 
 ## Considered Options

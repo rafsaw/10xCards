@@ -5,6 +5,8 @@ import { schedule, type Rating, type Sm2State } from "@/lib/sm2";
 // published SM-2 algorithm (Woźniak, 1990) as restated in the spec (#76):
 //   I(1) = 1, I(2) = 6, I(n) = I(n-1) * EF, rounded UP to whole days, no ceiling;
 //   EF' = EF + (0.1 - (5-q)*(0.08 + (5-q)*0.02))  =>  hard -0.14, good 0, easy +0.10;
+//   the rating's effect on EF lands BEFORE the interval is stretched, so I(n)
+//   uses EF' — this is what makes Hard lengthen by less than Good (spec #76);
 //   a failure (Again) restarts the repetitions without changing EF.
 // Nothing here is read off sm2.ts.
 
@@ -59,14 +61,37 @@ describe("schedule — I(n) = I(n-1) * EF, rounded up to whole days", () => {
     });
   });
 
-  it("stretches by the ease factor the Card arrived with, before this rating moves it", () => {
-    // Published order: the interval for this repetition uses the item's current
-    // EF (step 3); EF is only modified afterwards (step 5). 6 * 2.50 = 15, not
-    // 6 * 2.60 = 15.6 -> 16, even though Easy raises EF to 2.60.
+  it("stretches by the ease factor this rating produces, not the one the Card arrived with", () => {
+    // The grade lands on this interval: Easy raises EF 2.50 -> 2.60 first, so
+    // the interval is 6 * 2.60 = 15.6 -> 16, not 6 * 2.50 = 15.
     expect(schedule(state({ repetition: 2, interval_days: 6, efactor: 2.5 }), "easy", NOW)).toMatchObject({
-      interval_days: 15,
+      interval_days: 16,
       efactor: 2.6,
     });
+  });
+
+  it("makes Hard lengthen the interval, but by less than Good and Good by less than Easy", () => {
+    // The mature Card of spec #76: repetition 2, EF 2.50, interval 6 days.
+    // ceil(6 * 2.36) = 15, ceil(6 * 2.50) = 15, ceil(6 * 2.60) = 16 — the
+    // ordering is weak only because the ceiling swallows 14.16 and 15.0 alike.
+    const mature = state({ repetition: 2, interval_days: 6, efactor: 2.5 });
+    const hard = schedule(mature, "hard", NOW).interval_days;
+    const good = schedule(mature, "good", NOW).interval_days;
+    const easy = schedule(mature, "easy", NOW).interval_days;
+
+    expect([hard, good, easy]).toEqual([15, 15, 16]);
+    expect(hard).toBeGreaterThan(mature.interval_days);
+    expect(hard).toBeLessThanOrEqual(good);
+    expect(good).toBeLessThan(easy);
+  });
+
+  it("separates Hard from Good strictly once the interval is long enough to show it", () => {
+    // At 100 days the ceiling no longer hides the gap:
+    // ceil(100 * 2.36) = 236 against ceil(100 * 2.50) = 250.
+    const mature = state({ repetition: 4, interval_days: 100, efactor: 2.5 });
+    expect(schedule(mature, "hard", NOW).interval_days).toBe(236);
+    expect(schedule(mature, "good", NOW).interval_days).toBe(250);
+    expect(schedule(mature, "easy", NOW).interval_days).toBe(260);
   });
 });
 
