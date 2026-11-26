@@ -9,6 +9,16 @@
 - `@.github/workflows/ai-code-review.yml` posts an advisory AI review comment on every PR to `main` (never blocks merge); re-run it by re-adding the `ai-cr:review` label.
 - Never overwrite `context/` — the 10x-workflow source of truth (PRD, tech-stack, plans). `context/archive/**` and `context/foundation/archive/**` are immutable.
 
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub issues in `rafsaw/10xCards`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
 ## Project Structure & Module Organization
 
 - `src/pages/` — routes and API endpoints (`src/pages/api/auth/*.ts`).
