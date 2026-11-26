@@ -75,9 +75,11 @@ describe("AC2 — the card face is the hero, and its content sits at the token f
     expect(session).toMatch(/<section className="space-y-4">/);
   });
 
-  it("the progress counter and the shortcut hints sit at text-meta", () => {
+  it("the progress counter and the hint line sit at text-meta", () => {
     expect(session).toMatch(/<p className="text-meta text-muted-foreground">\s*\n\s*Card \{index \+ 1\} of/);
-    expect(session).toMatch(/text-meta text-muted-foreground flex flex-wrap/);
+    // #82 folded the shortcut-hint footer into the hint line above the row; the
+    // line it became still sits at text-meta.
+    expect(session).toMatch(/text-meta text-muted-foreground flex h-7 /);
   });
 });
 
@@ -217,6 +219,66 @@ describe("the interaction layer is frozen", () => {
     expect(page).toMatch(/title="Review session"/);
     for (const name of ["Reveal answer", "Restart session", "Restart", "Again", "Hard", "Good", "Easy", "Space"]) {
       expect(session).toContain(name);
+    }
+  });
+});
+
+describe("#82 — the predicted interval lives in one fixed-height line, not on the buttons", () => {
+  // Only the STRUCTURAL facts live here (spec #76, testing seam 6): the line
+  // exists, it is always rendered, and no interval string reaches a button. The
+  // hint's *behaviour* — hover and focus actually driving the text — is proven
+  // in tests/e2e/review-interval-hint.spec.ts, because hover and focus are only
+  // real in a browser and a grep would prove a pattern, not a behaviour.
+  const PLACEHOLDER = "hover or tab a rating to see when it comes back";
+
+  it("the discoverability placeholder is written out once, verbatim from the ticket", () => {
+    const occurrences = session.split(PLACEHOLDER).length - 1;
+    expect(occurrences).toBe(1);
+  });
+
+  it("the hint line is rendered unconditionally, above the button slot", () => {
+    // Inside the `revealed` branch the line would appear only once the ratings
+    // are on screen, pushing the row down as it mounted — the reflow AC4 forbids.
+    const hintAt = session.indexOf("{hintLine}");
+    const slotAt = session.indexOf("{!revealed ? (");
+    expect(hintAt).toBeGreaterThan(-1);
+    expect(slotAt).toBeGreaterThan(hintAt);
+  });
+
+  it("the line reserves exactly one text-meta line, in every state", () => {
+    // AC4's mechanism: a fixed `h-7` (1.75rem, above the tallest of the three
+    // states) plus `truncate`, so neither the longer placeholder nor a narrow
+    // viewport can wrap the line to two and push the rating row down.
+    expect(session).toMatch(/<p className="[^"]*\bflex h-7 items-center[^"]*\btruncate">/);
+  });
+
+  it("the Space shortcut hint survives the slot takeover", () => {
+    // #82 reuses the shortcut-hint slot. Space is the only key that does anything
+    // before the reveal, so the hint has to still be there while it is true.
+    expect(session).toMatch(/!revealed \? \(\s*<>\s*<Kbd>Space<\/Kbd> Reveal\s*<\/>/);
+    expect(session).toContain('aria-keyshortcuts="Space"');
+  });
+
+  it("no rating button prints an interval", () => {
+    // The rejected prototype variant: three near-identical numbers on the row.
+    // The interval string must exist exactly once, and not inside a button.
+    const buttonBlocks = session.split("<Button").slice(1);
+    for (const block of buttonBlocks) {
+      expect(block.slice(0, block.indexOf("</Button>"))).not.toMatch(/back in|interval_days/);
+    }
+    expect(session.split("back in").length - 1).toBe(1);
+  });
+
+  it("the interval comes from the shared scheduler, not a second copy of it", () => {
+    // AC6 ("matches what the server would schedule") is only structurally
+    // guaranteed by calling the same pure function the endpoint calls, on the
+    // state the card echoed back, for the one rating being inspected.
+    expect(session).toMatch(/import \{ schedule, type Rating \} from "@\/lib\/sm2"/);
+    expect(session).toMatch(/schedule\(card, inspected, 0\)\.interval_days/);
+    expect(session.split("schedule(").length - 1).toBe(1);
+    // None of SM-2's constants may be restated on the client.
+    for (const constant of ["1.3", "0.14", "2.5", "Math.ceil"]) {
+      expect(session).not.toContain(constant);
     }
   });
 });

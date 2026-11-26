@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Eye, PartyPopper, Loader2, RotateCcw } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { parseErrorBody } from "@/lib/parse-error";
 import { resolveReviewShortcut, type ReviewShortcutAction, type ShortcutTarget } from "@/lib/review-shortcuts";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Notice } from "@/components/ui/Notice";
-import type { Rating } from "@/lib/sm2";
+import { schedule, type Rating } from "@/lib/sm2";
 
 export interface DueCard {
   id: string;
@@ -42,6 +41,20 @@ const RATING_BY_ACTION: Record<Exclude<ReviewShortcutAction, "reveal">, Rating> 
   "rate-easy": "easy",
 };
 
+// Display names for the interval hint line. The buttons keep their own literal
+// labels; this map exists so the line can name the rating the user is inspecting
+// without the label becoming a second source of truth for the button row.
+const RATING_LABELS: Record<Rating, string> = {
+  again: "Again",
+  hard: "Hard",
+  good: "Good",
+  easy: "Easy",
+};
+
+// Shown in the hint line while nothing is hovered or focused, so the affordance
+// is discoverable rather than invisible (#82).
+const HINT_PLACEHOLDER = "hover or tab a rating to see when it comes back";
+
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <kbd className="border-border bg-muted text-muted-foreground text-meta rounded-lg border px-1.5 py-0.5 font-mono">
@@ -65,6 +78,12 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   const [submitting, setSubmitting] = useState(false);
   const [pendingRating, setPendingRating] = useState<Rating | null>(null);
   const [error, setError] = useState<RateError | null>(null);
+  // The rating whose consequence the hint line is currently reporting, split in
+  // two so hover and focus cannot clobber each other: the pointer wins, because
+  // a rating stays focused after a tab and the mouse must still be able to take
+  // the line over.
+  const [hoveredRating, setHoveredRating] = useState<Rating | null>(null);
+  const [focusedRating, setFocusedRating] = useState<Rating | null>(null);
   // Synchronous re-entrancy guard: `submitting` is async state, so the
   // disabled button doesn't block a same-frame double-click. This ref does,
   // preventing a second POST from advancing the card index twice (skipping a card).
@@ -104,6 +123,11 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
           // Success includes applied:false (stale/replay) — advance regardless.
           setIndex((prev) => prev + 1);
           setRevealed(false);
+          // The rated button unmounts without ever firing mouseleave/blur, so
+          // clear by hand — otherwise the next card's reveal would open with a
+          // hint nobody asked for.
+          setHoveredRating(null);
+          setFocusedRating(null);
           return;
         }
 
@@ -198,12 +222,58 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
   // render below.
   if (!card) return null;
 
+  // The pointer wins over the keyboard; see the state declarations above.
+  const inspected = hoveredRating ?? focusedRating;
+
+  // What the one fixed-height line below the card face says, in its three
+  // states. Before the reveal there is no rating to inspect and Space is the
+  // only key that does anything, so the line carries the shortcut hint #81 left
+  // in this slot; it hands the slot over to the interval hint exactly when the
+  // ratings — and their own digit hints — come on screen.
+  //
+  // The interval is the real scheduler's answer, not a second copy of the
+  // arithmetic: `schedule` is the same pure function POST /api/reviews runs
+  // server-side, fed the state the card echoed back, for the one rating being
+  // inspected. `now` is pinned to 0 because only `interval_days` is read here,
+  // which keeps the render a pure function of props and state.
+  const hintLine = !revealed ? (
+    <>
+      <Kbd>Space</Kbd> Reveal
+    </>
+  ) : inspected ? (
+    `${RATING_LABELS[inspected]} → back in ${schedule(card, inspected, 0).interval_days} d`
+  ) : (
+    HINT_PLACEHOLDER
+  );
+
   // Re-walk the same dueCards from the top. Pure client-state reset: ratings
   // already POSTed stay persisted, so the schedule is untouched (no refetch).
   function handleRestart() {
     setIndex(0);
     setRevealed(false);
     setError(null);
+    setHoveredRating(null);
+    setFocusedRating(null);
+  }
+
+  // Hover and focus feed one line (#82 AC1/AC2). A leave or blur only clears the
+  // line if it is still talking about ITS rating, so sliding the pointer from
+  // Hard straight onto Good cannot blank the hint on the way.
+  function inspectProps(rating: Rating) {
+    return {
+      onMouseEnter: () => {
+        setHoveredRating(rating);
+      },
+      onMouseLeave: () => {
+        setHoveredRating((prev) => (prev === rating ? null : prev));
+      },
+      onFocus: () => {
+        setFocusedRating(rating);
+      },
+      onBlur: () => {
+        setFocusedRating((prev) => (prev === rating ? null : prev));
+      },
+    };
   }
 
   return (
@@ -246,6 +316,16 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
         )}
       </div>
 
+      {/* One always-rendered line, above the button slot, so the schedule is
+          peekable on demand and silent otherwise (#82). `h-7` reserves one row
+          whatever the line holds — tall enough for the Kbd chip of the pre-reveal
+          state, which is the tallest of the three — and `truncate` keeps the text
+          to a single line on a narrow viewport, so the slot is exactly the same
+          height in every state and the rating row under it never moves. */}
+      <p className="text-meta text-muted-foreground flex h-7 items-center justify-center gap-1.5 truncate">
+        {hintLine}
+      </p>
+
       {!revealed ? (
         <Button
           type="button"
@@ -283,6 +363,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
             className="flex-1"
             aria-keyshortcuts="1"
             disabled={submitting}
+            {...inspectProps("again")}
             onClick={() => {
               void handleRate("again");
             }}
@@ -299,6 +380,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               className="flex-1 rounded-r-none"
               aria-keyshortcuts="2"
               disabled={submitting}
+              {...inspectProps("hard")}
               onClick={() => {
                 void handleRate("hard");
               }}
@@ -312,6 +394,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               className="flex-1 rounded-none"
               aria-keyshortcuts="3"
               disabled={submitting}
+              {...inspectProps("good")}
               onClick={() => {
                 void handleRate("good");
               }}
@@ -325,6 +408,7 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
               className="flex-1 rounded-l-none"
               aria-keyshortcuts="4"
               disabled={submitting}
+              {...inspectProps("easy")}
               onClick={() => {
                 void handleRate("easy");
               }}
@@ -335,16 +419,6 @@ export default function ReviewSession({ dueCards, loadError }: { dueCards: DueCa
           </div>
         </div>
       )}
-
-      {/* AC7: the shortcuts are discoverable without documentation. The rating
-          digits are no longer repeated down here — each one is printed inside its
-          own button — but this line is always rendered, and dimmed rather than
-          removed, so the hint never reflows the card as the state flips. */}
-      <p className="text-meta text-muted-foreground flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-        <span className={cn("flex items-center gap-1.5", revealed && "opacity-40")}>
-          <Kbd>Space</Kbd> Reveal
-        </span>
-      </p>
     </section>
   );
 }
