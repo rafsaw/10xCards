@@ -27,12 +27,16 @@ A question-answer pair in the user's study set, created either by saving an acce
 _Avoid_: Saved draft
 
 **Review**:
-One rating of one due Card (right or wrong), which sets when that Card is due next. Deciding on Drafts is never a Review.
-_Avoid_: Draft review
+One rating of one due Card — Again, Hard, Good or Easy — which sets when that Card is due next. Deciding on Drafts is never a Review.
+_Avoid_: Draft review, right/wrong
 
-**Box**:
-The step of the schedule a Card currently sits in, which alone decides how long until it is due again. A right Review moves the Card up one Box, except in the last Box, where it stays; a wrong Review sends it back to Box 0.
-_Avoid_: Repetition count, level, stage
+**Repetition**:
+How many times in a row a Card has been recalled correctly. An Again Review sends it back to 0.
+_Avoid_: Box, repetition count, level, stage, streak
+
+**Ease factor**:
+How easy a Card has proven for the user, which stretches or tightens each next interval the Card gets. It starts at 2.5 and never falls below 1.3.
+_Avoid_: Easiness, difficulty, EF
 
 **Review session**:
 One pass through the Cards that are due right now, made up of one Review per Card.
