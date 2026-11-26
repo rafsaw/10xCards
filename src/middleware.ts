@@ -39,7 +39,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.retentionUntil = null;
   }
 
-  if (PROTECTED_ROUTES.some((route) => context.url.pathname.startsWith(route))) {
+  // PROTOTYPE (issue #71) — throwaway, do not merge to main. `/review?variant=`
+  // renders the four-rating prototype, which reads no user data and writes
+  // nothing, so it is reachable signed out and without Supabase configured.
+  const isReviewPrototype =
+    import.meta.env.DEV && context.url.pathname.startsWith("/review") && context.url.searchParams.has("variant");
+
+  if (!isReviewPrototype && PROTECTED_ROUTES.some((route) => context.url.pathname.startsWith(route))) {
     if (!context.locals.user) {
       return context.redirect("/auth/signin");
     }
