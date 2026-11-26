@@ -36,6 +36,35 @@ function visibleText(page: Page, text: string) {
   return page.getByText(text).filter({ visible: true });
 }
 
+// Create one due card through the library form, and do not return until the
+// server has it. A manually created card gets next_due_at=now (cards.ts), so it
+// enters /review immediately. Two races make the short version of this
+// unreliable, and both of them show up as a FAILURE IN A LATER SPEC:
+//   - the island can hydrate AFTER fill() lands, and React then renders from its
+//     own empty state, silently discarding what was typed, so "Create card"
+//     stays disabled forever. fill() is idempotent, so re-filling until the
+//     button enables converges as soon as the island is live — and an enabled
+//     button is the only visible proof that React, not just the DOM, has the text.
+//   - on success the form navigates back to /library, so a wait that ANY text
+//     match satisfies returns before the card is saved: the two textareas this
+//     helper just filled match the front as well. The card's row in the library
+//     list is the first thing only a saved card can produce, so that is what we
+//     wait for; leaving the navigation in flight instead leaks the card past
+//     afterEach, and a leaked due card breaks every "Card 1 of 1" elsewhere.
+// exact: true on the textboxes because the library search box ("Search front or
+// back…") also matches "Front"/"Back" by accessible name.
+async function seedDueCard(page: Page, front: string, back: string) {
+  await page.goto("/library");
+  const submit = page.getByRole("button", { name: "Create card" });
+  await expect(async () => {
+    await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
+    await page.getByRole("textbox", { name: "Back", exact: true }).fill(back);
+    await expect(submit).toBeEnabled({ timeout: 1000 });
+  }).toPass({ timeout: 20000 });
+  await submit.click();
+  await expect(page.getByRole("listitem").filter({ hasText: front })).toBeVisible();
+}
+
 test.describe("review — an impatient second click cannot rate a card twice", () => {
   // The unique fronts of the cards this test creates, so afterEach can find and
   // remove exactly those rows however the test ends.
@@ -73,24 +102,10 @@ test.describe("review — an impatient second click cannot rate a card twice", (
       if (request.url().includes("/api/reviews") && request.method() === "POST") reviewPosts += 1;
     });
 
-    // Widen the in-flight window the guard has to cover. The request is passed
-    // straight through afterwards, so the rating is recorded by the real
-    // endpoint against the real database.
-    await page.route("**/api/reviews", async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      await route.continue();
-    });
-
-    // Setup — seed exactly two due cards: a manually created card has
-    // next_due_at=now (cards.ts), so both enter /review immediately. exact: true
-    // because the library search box ("Search front or back…") also matches
-    // "Front"/"Back" by accessible name.
-    await page.goto("/library");
+    // Setup — seed exactly two due cards, so the skip a duplicate review would
+    // cause is observable on screen.
     for (const front of fronts) {
-      await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
-      await page.getByRole("textbox", { name: "Back", exact: true }).fill(`answer for ${front}`);
-      await page.getByRole("button", { name: "Create card" }).click();
-      await expect(page.getByText(front)).toBeVisible();
+      await seedDueCard(page, front, `answer for ${front}`);
     }
 
     // Precondition — both cards are genuinely due, so the session has a SECOND
@@ -110,6 +125,19 @@ test.describe("review — an impatient second click cannot rate a card twice", (
     const [first, second] = firstIsA ? fronts : [fronts[1], fronts[0]];
     await expect(visibleText(page, first)).toBeVisible();
 
+    // Widen the in-flight window the guard has to cover. The request is passed
+    // straight through afterwards, so the rating is recorded by the real
+    // endpoint against the real database. Installed HERE, after the seeding is
+    // done, and not at the top of the test: route interception bypasses the
+    // browser cache for every request on the page, and under `astro dev` that
+    // turns each library load into a fresh fetch of the whole unoptimized module
+    // graph — slow enough that the create form had not hydrated before the test
+    // tried to use it. The slow-down is about the rating, so it belongs with it.
+    await page.route("**/api/reviews", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await route.continue();
+    });
+
     // The ratings only exist once the answer is revealed. Clicking Reveal also
     // proves the island is hydrated, so the double-click below cannot be
     // swallowed before hydration and pass for the wrong reason (anti-pattern #1).
@@ -117,12 +145,23 @@ test.describe("review — an impatient second click cannot rate a card twice", (
     const good = page.getByRole("button", { name: "Good" });
     await expect(good).toBeEnabled();
 
-    // The action under test: two activations of the same rating, as close
-    // together as a real user's double-click.
+    // The action under test: two activations of the same rating in ONE task.
+    // dblclick() is NOT enough: Playwright delivers its two clicks in separate
+    // tasks, which lets React re-render in between, so `disabled={submitting}`
+    // alone swallows the second one — verified by deleting `lockRef` from
+    // ReviewSession.tsx, after which a dblclick version of this test still
+    // passed. The risk in the header is a SAME-FRAME second activation, and
+    // dispatching both clicks in one task is the only way to state it: at that
+    // point no React state has been committed yet and the synchronous `lockRef`
+    // is the only thing standing between one user action and two reviews. The
+    // button is still located by role; only the dispatch is scripted.
     const rateResponse = page.waitForResponse(
       (res) => res.url().includes("/api/reviews") && res.request().method() === "POST",
     );
-    await good.dblclick();
+    await good.evaluate((el: HTMLElement) => {
+      el.click();
+      el.click();
+    });
 
     // Mid-flight: the rating is in progress and the row refuses further input.
     await expect(good).toBeDisabled();

@@ -37,9 +37,14 @@ test.describe("lesson tag — library display and review reveal", () => {
     // Setup/action — create a card with a unique tag. exact: true because the
     // library search box also matches "Front"/"Back" by accessible name.
     await page.goto("/library");
-    await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
-    await page.getByRole("textbox", { name: "Back", exact: true }).fill("lesson tag answer");
-    await page.getByLabel("Lesson tag (optional)").fill(tag);
+    // Re-fill until the React island is hydrated: filling a pre-hydration SSR input is
+    // discarded on hydrate and leaves the submit button disabled (library-tag-filter.spec.ts).
+    await expect(async () => {
+      await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
+      await page.getByRole("textbox", { name: "Back", exact: true }).fill("lesson tag answer");
+      await page.getByLabel("Lesson tag (optional)").fill(tag);
+      await expect(page.getByRole("button", { name: "Create card" })).toBeEnabled({ timeout: 1000 });
+    }).toPass({ timeout: 20000 });
     await page.getByRole("button", { name: "Create card" }).click();
 
     // The tag is persisted and rendered on THIS card's row after the SSR reload.
