@@ -58,7 +58,7 @@ Per `CLAUDE.md` → Code review rules: do not approve a change only because test
 
 ### Tests (major)
 
-- **CI does not run any test suite.** `.github/workflows/ci.yml` runs `astro sync` + `lint` + `build` only. A green CI badge is not evidence that tests pass; the reviewer must confirm the author ran the validation gate locally and, when the change touches Supabase behavior or the browser, the relevant extra suite.
+- **CI runs the gate but not the credentialed suites.** `.github/workflows/ci.yml` runs `astro sync` + `typecheck` + `lint` + `build` + `npm test`. It does not run `test:integration` (Supabase credentials) or `test:e2e` (a running app), so when the change touches Supabase behavior or the browser the reviewer must confirm the author ran the relevant extra suite locally.
 - Unit/integration specs are colocated (`*.test.ts`, `*.integration.test.ts`); integration specs use the two-user fixture and scoped Supabase mock in `test/integration/`. A change to data-scoping logic with no cross-user integration test is a major finding — that fixture exists precisely to prove isolation.
 - E2E specs live in `tests/e2e/` and follow the rules in `tests/e2e/AGENTS.md`: `getByRole`/`getByLabel`/`getByText` before `getByTestId`, never CSS/XPath, never `page.waitForTimeout()`, each test independent with its own setup and cleanup and unique ids. Violations are major — they are the failure modes that make a suite rot.
 

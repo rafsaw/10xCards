@@ -128,7 +128,7 @@ Two suites sit **outside** the gate because they need credentials or a running a
 - `npm run test:integration` — Vitest integration suite against Supabase (`vitest.integration.config.ts`, harness in `test/integration/`).
 - `npm run test:e2e` — Playwright end-to-end specs in `tests/e2e/`.
 
-CI (`.github/workflows/ci.yml`) runs `astro sync` + `lint` + `build` only; it does not run any test suite. That is exactly why the local gate above includes `npm test` — a green CI badge is not evidence the tests pass.
+CI (`.github/workflows/ci.yml`) runs the whole gate — `astro sync` + `typecheck` + `lint` + `build` + `npm test` — plus the `migration-guard` job on pull requests. The two suites above it stay local: CI has neither Supabase credentials nor a running app.
 
 ## Amending this process
 

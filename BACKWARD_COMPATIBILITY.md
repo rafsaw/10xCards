@@ -47,7 +47,9 @@ Tables `public.cards` and `public.account_deletion_requests`; functions `public.
 2. **Migrate** — deploy code that writes and reads the new shape while tolerating the old, and backfill.
 3. **Contract** — drop the old column/function in a later PR, once nothing reads it. Label it `risk-high` and say in the PR body which deploy made it safe.
 
-A destructive statement and the code depending on it in the same PR is a blocker. RLS is part of the contract, not an implementation detail: a migration that touches policies must state, in the PR body, what cross-user isolation still holds — the integration suite's two-user fixture is how that gets proven.
+**Expand / migrate / contract is the default, not one option among several.** Reach for it unless you can say why it does not apply; "the rename is value-preserving" is a reason the window is short, not a reason to skip the path. A destructive statement and the code depending on it in the same PR is a blocker, and the `migration-guard` CI job (`scripts/check-destructive-migrations.sh`) fails the PR when it is under-declared — see "When a break is genuinely the right call" for what declaring it takes.
+
+RLS is part of the contract, not an implementation detail: a migration that touches policies must state, in the PR body, what cross-user isolation still holds — the integration suite's two-user fixture is how that gets proven.
 
 ### 3. User-visible URLs — protected
 
@@ -78,4 +80,13 @@ Internal module layout, component structure, Tailwind classes, `src/lib/` helper
 
 ## When a break is genuinely the right call
 
-Say so explicitly. Open the PR with `risk-high`, state in the body which surface breaks, why the migration path is not worth it, and what has to happen at deploy time (secret updated, migration applied first, cache purged). A documented, deliberate break is fine; an undocumented one is a blocker.
+The required path for each surface above is the default. This section is the exception, and it is narrow: a break earns it when the migration path costs more than the window it protects, and that argument is made on the PR, not assumed.
+
+Taking the break then needs all four:
+
+1. the `risk-high` label on the PR;
+2. **which surface breaks**, named against its section above;
+3. **why the required path was not worth it** — a reason that survives a reviewer asking "what would expand/migrate/contract have cost here?";
+4. a **`## Deploy order`** section in the PR body: what has to happen at deploy time, in what order, and what breaks in the window between (secret updated, migration applied first, cache purged).
+
+Prose alone no longer discharges a schema break. For `supabase/migrations/**`, the `migration-guard` CI job (`scripts/check-destructive-migrations.sh`) requires 1 and 4 before the PR can go green; 2 and 3 stay the reviewer's call, and so does whether the exception was warranted at all. A break missing any of the four is a blocker.
