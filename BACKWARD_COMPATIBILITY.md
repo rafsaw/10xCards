@@ -17,15 +17,15 @@ Rules below are calibrated to that. They are deliberately lighter than a public-
 
 The full surface, all under `src/pages/api/`:
 
-| Route | Methods |
-|---|---|
-| `/api/auth/signup`, `/api/auth/signin`, `/api/auth/signout` | POST |
-| `/api/cards` | POST |
-| `/api/cards/[id]` | PATCH, DELETE |
-| `/api/generations` | POST |
-| `/api/generations/save` | POST |
-| `/api/reviews` | POST |
-| `/api/account/delete`, `/api/account/cancel` | POST |
+| Route                                                       | Methods       |
+| ----------------------------------------------------------- | ------------- |
+| `/api/auth/signup`, `/api/auth/signin`, `/api/auth/signout` | POST          |
+| `/api/cards`                                                | POST          |
+| `/api/cards/[id]`                                           | PATCH, DELETE |
+| `/api/generations`                                          | POST          |
+| `/api/generations/save`                                     | POST          |
+| `/api/reviews`                                              | POST          |
+| `/api/account/delete`, `/api/account/cancel`                | POST          |
 
 **Breaking:** removing or renaming a route; removing a method; removing or renaming a field in a success response; changing a status code for an existing outcome; making a previously optional request field required; changing the `{ error, message }` envelope or repurposing an existing `error` code (`unauthorized`, `bad_request`, `invalid_card`, `supabase_unconfigured`, `db_error`).
 

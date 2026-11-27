@@ -66,7 +66,7 @@ Per `CLAUDE.md` → Code review rules: do not approve a change only because test
 
 - ESLint runs type-aware TS plus React Hooks, React Compiler, Astro, and jsx-a11y rules; a change that only passes because a rule was disabled inline needs a written justification in the PR.
 - Interactive UI belongs in React islands under `src/components/`; primitives in `ui/`. Keep pages and layouts as `.astro`.
-- Accessible names matter twice here: they are the product's a11y surface *and* what the E2E locators bind to.
+- Accessible names matter twice here: they are the product's a11y surface _and_ what the E2E locators bind to.
 
 ### Documentation and process (minor)
 
@@ -85,9 +85,9 @@ Outside the gate, run deliberately when the change warrants it: `npm run test:in
 
 ## Severity guide
 
-| Severity | Use for | Action |
-|---|---|---|
-| **blocker** | Cross-user data leak, missing auth or read-only guard, missing RLS on a new table, secret in the diff, destructive migration, failing validation gate, breaking a surface listed in `BACKWARD_COMPATIBILITY.md` without the documented path | Must fix before merge |
-| **major** | Unvalidated input, unhandled failure path, missing test for the actual risk, response-shape drift, Workers-incompatible dependency, E2E anti-pattern | Fix before merge unless explicitly deferred with a follow-up issue |
-| **minor** | Maintainability, naming, duplication, docs drift | Fix now or file a follow-up |
-| **nit** | Preference, style not covered by Prettier/ESLint | Optional |
+| Severity    | Use for                                                                                                                                                                                                                                     | Action                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **blocker** | Cross-user data leak, missing auth or read-only guard, missing RLS on a new table, secret in the diff, destructive migration, failing validation gate, breaking a surface listed in `BACKWARD_COMPATIBILITY.md` without the documented path | Must fix before merge                                              |
+| **major**   | Unvalidated input, unhandled failure path, missing test for the actual risk, response-shape drift, Workers-incompatible dependency, E2E anti-pattern                                                                                        | Fix before merge unless explicitly deferred with a follow-up issue |
+| **minor**   | Maintainability, naming, duplication, docs drift                                                                                                                                                                                            | Fix now or file a follow-up                                        |
+| **nit**     | Preference, style not covered by Prettier/ESLint                                                                                                                                                                                            | Optional                                                           |

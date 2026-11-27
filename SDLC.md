@@ -16,18 +16,18 @@ Work enters through two paths: a free-form task brief handed to an agent, or a f
 
 ## Ticket lifecycle
 
-| Stage | What happens | Driven by | Done when |
-|---|---|---|---|
-| Intake | A ticket or task brief is filed in GitHub with enough detail to act on. | Anyone | Ticket exists |
-| Triage | Confirm the issue is real, still unfixed on `main`, and not already claimed or covered by an open PR. Read-only; stops the chain cleanly when there is nothing to do. | Author or reviewer | Confirmed actionable, or closed as no-action |
-| Claim | The author claims the ticket so concurrent agents back off. See the claim protocol below. | Author | Claim visible on the ticket |
-| Design | For a user-facing change, the flow and its states are settled before the code exists: what the screen does when empty, loading, in error, and without permission, and what the change deliberately does not do. A ticket that touches no UI skips this stage. | Designer | The flow and its states are decided, or the ticket is not user-facing |
-| Implement | Locate the minimal change surface, then implement the change with regression tests and run the validation gate. A task brief without a ticket follows the same path: plan, implement phase by phase, run the same gate. | Author | Change complete, validation gate green |
-| PR | Commit, push, and open a PR against `main` with normalized labels. On a hand-worked branch, run the validation gate, fix obvious drift, and push when green. | Author | Open, labeled PR |
-| Review loop | The reviewer reads the diff against the `CODE_REVIEW.md` checklist and approves or requests changes. Requested changes are addressed and the PR is re-reviewed until approved. A user-facing change also gets a design pass over the changed screens, reporting findings ranked by user impact. That pass is advisory — it informs the review, it does not hold the merge. | Reviewer, plus the designer for the design pass | Approving review submitted |
-| QA | A PR carrying `needs-qa` waits for QA. The reviewer boots the app once, walks the change in a real browser, attaches screenshots and a pass/fail report, and records the outcome. A flow worth keeping becomes integration-test coverage. See the QA gate below. | QA reviewer | `qa-approved` applied by a QA reviewer or the permitted self-QA exception; `qa-failed` routes it back |
-| Merge | Establish which PRs can merge now and which are close but blocked, then re-check every gate, approve, and squash-merge. | Reviewer or maintainer | PR squash-merged into `main` |
-| Post-merge housekeeping | Close issues the merged PR fixes; comment on issues whose PRs were closed without merging; turn leftover asks or review comments into tracked follow-up issues. | Author or maintainer | Tracker reconciled, follow-ups filed |
+| Stage                   | What happens                                                                                                                                                                                                                                                                                                                                                               | Driven by                                       | Done when                                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Intake                  | A ticket or task brief is filed in GitHub with enough detail to act on.                                                                                                                                                                                                                                                                                                    | Anyone                                          | Ticket exists                                                                                         |
+| Triage                  | Confirm the issue is real, still unfixed on `main`, and not already claimed or covered by an open PR. Read-only; stops the chain cleanly when there is nothing to do.                                                                                                                                                                                                      | Author or reviewer                              | Confirmed actionable, or closed as no-action                                                          |
+| Claim                   | The author claims the ticket so concurrent agents back off. See the claim protocol below.                                                                                                                                                                                                                                                                                  | Author                                          | Claim visible on the ticket                                                                           |
+| Design                  | For a user-facing change, the flow and its states are settled before the code exists: what the screen does when empty, loading, in error, and without permission, and what the change deliberately does not do. A ticket that touches no UI skips this stage.                                                                                                              | Designer                                        | The flow and its states are decided, or the ticket is not user-facing                                 |
+| Implement               | Locate the minimal change surface, then implement the change with regression tests and run the validation gate. A task brief without a ticket follows the same path: plan, implement phase by phase, run the same gate.                                                                                                                                                    | Author                                          | Change complete, validation gate green                                                                |
+| PR                      | Commit, push, and open a PR against `main` with normalized labels. On a hand-worked branch, run the validation gate, fix obvious drift, and push when green.                                                                                                                                                                                                               | Author                                          | Open, labeled PR                                                                                      |
+| Review loop             | The reviewer reads the diff against the `CODE_REVIEW.md` checklist and approves or requests changes. Requested changes are addressed and the PR is re-reviewed until approved. A user-facing change also gets a design pass over the changed screens, reporting findings ranked by user impact. That pass is advisory — it informs the review, it does not hold the merge. | Reviewer, plus the designer for the design pass | Approving review submitted                                                                            |
+| QA                      | A PR carrying `needs-qa` waits for QA. The reviewer boots the app once, walks the change in a real browser, attaches screenshots and a pass/fail report, and records the outcome. A flow worth keeping becomes integration-test coverage. See the QA gate below.                                                                                                           | QA reviewer                                     | `qa-approved` applied by a QA reviewer or the permitted self-QA exception; `qa-failed` routes it back |
+| Merge                   | Establish which PRs can merge now and which are close but blocked, then re-check every gate, approve, and squash-merge.                                                                                                                                                                                                                                                    | Reviewer or maintainer                          | PR squash-merged into `main`                                                                          |
+| Post-merge housekeeping | Close issues the merged PR fixes; comment on issues whose PRs were closed without merging; turn leftover asks or review comments into tracked follow-up issues.                                                                                                                                                                                                            | Author or maintainer                            | Tracker reconciled, follow-ups filed                                                                  |
 
 ## Label state machine
 
@@ -39,13 +39,13 @@ Pipeline labels are mutually exclusive: a PR carries at most one, and it names w
 - Only a QA reviewer sets the `qa` pipeline label. They move a queued `needs-qa` PR from `merge-queue` to `qa` while testing, then back to `merge-queue` with `qa-approved` on pass, or to `qa-failed` on failure. Automation requests QA with `needs-qa`; it never sets `qa`.
 - `blocked` and `do-not-merge` are set and cleared by humans and stop the flow wherever it is.
 
-| Group | Labels | Exclusivity | Meaning |
-|---|---|---|---|
-| Pipeline | `review`, `changes-requested`, `qa`, `qa-failed`, `merge-queue`, `blocked`, `do-not-merge` | one at a time | Workflow state |
-| Category | `bug`, `feature`, `refactor`, `security`, `dependencies`, `documentation` | additive | Kind of change |
-| Meta | `needs-qa`, `skip-qa`, `qa-approved`, `qa-self-verified`, `in-progress`, `ci-monitoring` | additive | Process signals |
-| Priority | `priority-low`, `priority-medium`, `priority-high`, `priority-extreme` | one at a time; unset = medium | Urgency of the work |
-| Risk | `risk-low`, `risk-medium`, `risk-high` | one at a time; unset = medium | Blast radius of the change |
+| Group    | Labels                                                                                     | Exclusivity                   | Meaning                    |
+| -------- | ------------------------------------------------------------------------------------------ | ----------------------------- | -------------------------- |
+| Pipeline | `review`, `changes-requested`, `qa`, `qa-failed`, `merge-queue`, `blocked`, `do-not-merge` | one at a time                 | Workflow state             |
+| Category | `bug`, `feature`, `refactor`, `security`, `dependencies`, `documentation`                  | additive                      | Kind of change             |
+| Meta     | `needs-qa`, `skip-qa`, `qa-approved`, `qa-self-verified`, `in-progress`, `ci-monitoring`   | additive                      | Process signals            |
+| Priority | `priority-low`, `priority-medium`, `priority-high`, `priority-extreme`                     | one at a time; unset = medium | Urgency of the work        |
+| Risk     | `risk-low`, `risk-medium`, `risk-high`                                                     | one at a time; unset = medium | Blast radius of the change |
 
 Priority is how urgent the work is; risk is how dangerous the change is to ship. A one-line fix for an outage can be `priority-extreme` and `risk-low`; a large auth refactor that can wait can be `priority-low` and `risk-high`. A PR inherits both from its source issue unless the scope clearly changed. When automation adds or changes a pipeline or meta label, it leaves a short comment explaining why.
 
@@ -64,14 +64,14 @@ When no risk label is set, infer one:
 
 When signals conflict, pick the higher label and say why in the label comment. A `risk-high` PR is not merely advised to get more scrutiny; it triggers gates:
 
-| Area behind `risk-high` | What the PR must carry |
-|---|---|
-| Auth, sessions, permissions | an integration test for the denied path and the wrong-scope read; a second person's review |
-| Data scoping | an isolation test proving one scope cannot read another |
-| Money | tests for the failure, retry, and idempotency paths; a second person's review |
-| Schema migrations | a migration test up and down, and a rollback plan in the PR body |
-| Shared contract surfaces | the consuming side exercised, per `BACKWARD_COMPATIBILITY.md` |
-| Any `risk-high` | `needs-qa` when user-facing; no self-QA; review blocks without the evidence above unless a maintainer waives it on the PR |
+| Area behind `risk-high`     | What the PR must carry                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Auth, sessions, permissions | an integration test for the denied path and the wrong-scope read; a second person's review                                |
+| Data scoping                | an isolation test proving one scope cannot read another                                                                   |
+| Money                       | tests for the failure, retry, and idempotency paths; a second person's review                                             |
+| Schema migrations           | a migration test up and down, and a rollback plan in the PR body                                                          |
+| Shared contract surfaces    | the consuming side exercised, per `BACKWARD_COMPATIBILITY.md`                                                             |
+| Any `risk-high`             | `needs-qa` when user-facing; no self-QA; review blocks without the evidence above unless a maintainer waives it on the PR |
 
 One label lives outside this taxonomy: `do-not-close`, applied by humans to issues that housekeeping automation must never auto-close. Automation only ever reads it.
 
