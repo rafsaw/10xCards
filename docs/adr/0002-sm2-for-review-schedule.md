@@ -45,7 +45,7 @@ until every Card scores at least 4; we drop that rule, and an Again Card returns
 instead. A single-pass review screen cannot loop a session, and we would rather deviate
 once, visibly, than build a house variant.
 
-**Three accepted weaknesses**, recorded so nobody "fixes" them without knowing they were
+**Four accepted weaknesses**, recorded so nobody "fixes" them without knowing they were
 chosen:
 
 - **Hard always lengthens an interval**, just less than Good. Hard is a pass, so the
@@ -55,6 +55,12 @@ chosen:
   having chosen it over Leitner Boxes with four ratings.
 - **One lapse on a mature Card destroys the whole interval.** A Card held for a year drops
   to 1 day on a single Again.
+- **A replayed Again on a just-lapsed Card is applied twice.** Retries are idempotent
+  because the write guard matches the pre-review state, which a real Review has already
+  moved on from. Again on a Card already at repetition 0 with a 1-day interval is the one
+  fixed point of `schedule()`, so a retry still matches and pushes `next_due_at` forward
+  by the retry's delay. Closing it needs an idempotency key, which the no-history decision
+  leaves nowhere to keep. `src/lib/sm2.test.ts` pins the fixed point.  
 - **The 30-day Box cap is gone with no replacement ceiling**, which is the intent, not an
   oversight. The only implicit ceilings are the `interval_days` column type and the
   JavaScript `Date` range, and both are unreachable and loud rather than silent: every

@@ -153,6 +153,36 @@ describe("schedule — the Again (failure) branch", () => {
     expect(schedule(state({ repetition: 3, interval_days: 30, efactor: 1.3 }), "again", NOW).efactor).toBe(1.3);
   });
 
+  it("still settles the ease factor it hands back, so the column can store it verbatim", () => {
+    // The failure branch does not CHANGE the factor, but the module's contract
+    // (#79) is that every ease factor schedule() returns is rounded to two
+    // decimals and clamped at 1.3 — the stored value is the next Review's echo,
+    // and the endpoint guards the write on it. An over-precise or sub-floor
+    // factor must not travel through the failure branch unsettled.
+    expect(schedule(state({ efactor: 2.50001 }), "again", NOW).efactor).toBe(2.5);
+    expect(schedule(state({ efactor: 1.2 }), "again", NOW).efactor).toBe(1.3);
+  });
+
+  it("is the ONE state where a replayed rating is not a no-op (known idempotency hole)", () => {
+    // The endpoint's idempotency rests on the write guard: a replay echoes the
+    // pre-review state, which after a real review no longer matches the row. That
+    // holds for every passing rating, because `repetition` always advances. Again
+    // on a Card ALREADY at repetition 0 / interval 1 is the single fixed point —
+    // schedule() returns the state it was given — so a retried Again does match
+    // the row and is applied twice, pushing next_due_at by the retry delay.
+    // Recorded as an accepted weakness in ADR 0002: closing it needs idempotency
+    // state the closed schema has nowhere to keep, and the blast radius is seconds.
+    const dayAfterLapse = state({ repetition: 0, interval_days: 1, efactor: 2.5 });
+    const replayed = schedule(dayAfterLapse, "again", NOW);
+    expect(replayed).toMatchObject(dayAfterLapse);
+
+    // Every other rating moves at least one guarded column, so no replay matches.
+    for (const rating of ["hard", "good", "easy"] as const) {
+      const next = schedule(dayAfterLapse, rating, NOW);
+      expect(next.repetition).not.toBe(dayAfterLapse.repetition);
+    }
+  });
+
   it("resets to 0, so the next success gives 1 day and the one after 6", () => {
     const lapsed = schedule(state({ repetition: 5, interval_days: 95 }), "again", NOW);
     expect(lapsed.repetition).toBe(0);

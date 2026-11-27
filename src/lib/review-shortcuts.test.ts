@@ -71,6 +71,14 @@ describe("resolveReviewShortcut — the acceptance criteria", () => {
     }
   });
 
+  it("AC6: Space is ignored too while a review submission is in flight", () => {
+    // "Nothing fires while a Review is already being recorded" is a claim about
+    // every key, not only the digits. Space happens to be unreachable in that
+    // window because `revealed` stays true until the response lands — this pins
+    // the guard so it does not quietly depend on that coincidence.
+    expect(resolveReviewShortcut(ctx({ key: " ", revealed: false, submitting: true }))).toBeNull();
+  });
+
   it("AC5: a held-down rating key auto-repeats without producing a second review", () => {
     for (const [key] of RATING_KEYS) {
       expect(resolveReviewShortcut(ctx({ key, revealed: true, repeat: true }))).toBeNull();
