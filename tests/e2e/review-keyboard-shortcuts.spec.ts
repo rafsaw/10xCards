@@ -14,46 +14,8 @@
 //       self-contained setup -> action -> assertion -> cleanup cycle. Auth comes
 //       from storageState (playwright.config.ts -> `setup` project), never the UI.
 
-import { test, expect, type Page } from "@playwright/test";
-
-// Text the USER can actually see. In dev mode the Astro dev toolbar mirrors each
-// island's serialized props into a hidden <pre> inside its shadow root, and
-// Playwright locators pierce shadow DOM — so a bare getByText() for a card front
-// or back also matches that hidden copy, and a raw DOM count would "find" an
-// answer that is nowhere on screen. Every visibility claim below goes through
-// this helper so it speaks about the rendered session, not the toolbar mirror.
-function visibleText(page: Page, text: string) {
-  return page.getByText(text).filter({ visible: true });
-}
-
-// Create one due card through the library form, and do not return until the
-// server has it. A manually created card gets next_due_at=now (cards.ts), so it
-// enters /review immediately. Two races make the short version of this
-// unreliable, and both of them show up as a FAILURE IN A LATER SPEC:
-//   - the island can hydrate AFTER fill() lands, and React then renders from its
-//     own empty state, silently discarding what was typed, so "Create card"
-//     stays disabled forever. fill() is idempotent, so re-filling until the
-//     button enables converges as soon as the island is live — and an enabled
-//     button is the only visible proof that React, not just the DOM, has the text.
-//   - on success the form navigates back to /library, so a wait that ANY text
-//     match satisfies returns before the card is saved: the two textareas this
-//     helper just filled match the front as well. The card's row in the library
-//     list is the first thing only a saved card can produce, so that is what we
-//     wait for; leaving the navigation in flight instead leaks the card past
-//     afterEach, and a leaked due card breaks every "Card 1 of 1" elsewhere.
-// exact: true on the textboxes because the library search box ("Search front or
-// back…") also matches "Front"/"Back" by accessible name.
-async function seedDueCard(page: Page, front: string, back: string) {
-  await page.goto("/library");
-  const submit = page.getByRole("button", { name: "Create card" });
-  await expect(async () => {
-    await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
-    await page.getByRole("textbox", { name: "Back", exact: true }).fill(back);
-    await expect(submit).toBeEnabled({ timeout: 1000 });
-  }).toPass({ timeout: 20000 });
-  await submit.click();
-  await expect(page.getByRole("listitem").filter({ hasText: front })).toBeVisible();
-}
+import { test, expect } from "@playwright/test";
+import { seedDueCard, visibleText } from "./helpers";
 
 test.describe("review — the card loop is drivable from the keyboard", () => {
   // The unique front of the card this test creates, so afterEach can find and

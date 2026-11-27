@@ -87,6 +87,13 @@ export const POST: APIRoute = async (context) => {
   // rows on replay -> applied:false, so a rating is recorded at most once. It is
   // also fail-closed against a client echoing state the row does not have.
   // Mirrors finalize_drafts' fail-closed guard.
+  //
+  // ONE known exception, accepted in ADR 0002: `again` on a Card already at
+  // repetition 0 / interval_days 1 is a fixed point of schedule(), so a replay of
+  // THAT rating still matches and is applied a second time, moving next_due_at by
+  // the retry delay. Every passing rating advances `repetition`, so none of them
+  // can replay. Closing it needs an idempotency key with nowhere to live under the
+  // no-history decision; src/lib/sm2.test.ts pins the fixed point.
   const { data, error } = await supabase
     .from("cards")
     .update({
