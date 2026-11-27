@@ -30,6 +30,17 @@ MIGRATIONS_DIR="supabase/migrations"
 # judge which of the two it is, so the check only demands the declaration.
 DESTRUCTIVE_PATTERN='drop[[:space:]]+table|drop[[:space:]]+column|rename[[:space:]]+column|rename[[:space:]]+to|alter[[:space:]]+column[[:space:]]+[^;]*[[:space:]]type[[:space:]]|set[[:space:]]+not[[:space:]]+null|drop[[:space:]]+policy'
 
+# `--` comments never carry a statement, so they are stripped everywhere below:
+# before matching (a header explaining a past rename must not trip the check) and
+# before deciding whether a modified file changed at all. Block comments are not
+# used in this repo's migrations.
+#
+# Two variants on purpose. `blank_comments` keeps one output line per input line,
+# so grep's line numbers still point at the real file. `normalised` collapses the
+# leftover whitespace too, so a comment-only edit compares equal.
+blank_comments() { sed -e 's/--.*$//'; }
+normalised() { sed -e 's/--.*$//' -e 's/[[:space:]]\+/ /g' -e 's/^ //' -e 's/ $//' -e '/^$/d'; }
+
 # Added or modified migrations only: a PR is not answerable for history. Three-dot
 # so the comparison is against the merge-base, matching the review's fixed point.
 mapfile -t changed < <(
@@ -41,18 +52,37 @@ if [ ${#changed[@]} -eq 0 ]; then
   exit 0
 fi
 
-echo "migration-guard: inspecting ${#changed[@]} migration file(s):"
-printf '  %s\n' "${changed[@]}"
-
-# Strip `--` comments before matching, so a header that explains a past rename
-# does not trip the check. Block comments are not used in this repo's migrations.
-findings=()
+# A migration already on the base branch has already shipped, so editing its
+# comments is not a schema change and must not demand a deploy-order
+# declaration. Only files whose statements actually differ are inspected.
+inspect=()
 for f in "${changed[@]}"; do
+  if git cat-file -e "$BASE_SHA:$f" 2>/dev/null; then
+    if diff -q \
+      <(git show "$BASE_SHA:$f" | normalised) \
+      <(git show "$HEAD_SHA:$f" | normalised) >/dev/null 2>&1; then
+      echo "migration-guard: $f — comments only, statements unchanged. Skipping."
+      continue
+    fi
+  fi
+  inspect+=("$f")
+done
+
+if [ ${#inspect[@]} -eq 0 ]; then
+  echo "migration-guard: no migration statement added or changed in this PR."
+  exit 0
+fi
+
+echo "migration-guard: inspecting ${#inspect[@]} migration file(s):"
+printf '  %s\n' "${inspect[@]}"
+
+findings=()
+for f in "${inspect[@]}"; do
   [ -f "$f" ] || continue
   while IFS= read -r hit; do
     findings+=("$f: $hit")
   done < <(
-    sed -e 's/--.*$//' "$f" |
+    blank_comments <"$f" |
       grep -inE "$DESTRUCTIVE_PATTERN" |
       sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]\+/ /g' || true
   )
