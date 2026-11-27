@@ -37,9 +37,39 @@ jobs:
 
       - run: npx astro sync
 
+      # The validation gate from SDLC.md, in its documented order:
+      # typecheck -> lint -> build -> test. `npm run typecheck` is `astro
+      # check`, which is the only step that type-checks `.astro` files and
+      # `tests/e2e/**`; neither lint nor build fails on a type error there.
+      - run: npm run typecheck
+
       - run: npm run lint
 
       - run: npm run build
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+      # Unit/integration-mocked specs only. `test:integration` and `test:e2e`
+      # stay out: they need Supabase credentials and a running app.
+      - run: npm test
+
+  # A destructive migration is a blocker per BACKWARD_COMPATIBILITY.md section 2
+  # unless the break is deliberate and discharged. This job is that discharge
+  # check: prose in the PR body is no longer sufficient on its own.
+  migration-guard:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The PR body and labels are attacker-controlled text, so they reach the
+      # script through the environment, never through `run:` interpolation.
+      - run: ./scripts/check-destructive-migrations.sh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
