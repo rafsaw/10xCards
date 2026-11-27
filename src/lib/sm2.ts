@@ -38,6 +38,16 @@ function stretch(intervalDays: number, efactor: number): number {
   return Math.ceil((intervalDays * Math.round(efactor * 100)) / 100);
 }
 
+// Every ease factor this module RETURNS goes through here: rounded to two
+// decimals so the value is identical to what the numeric(4,2) column stores (the
+// next Review echoes it back), and clamped at the floor so the column's CHECK
+// stays off the normal path. Applied on the failure branch too, which does not
+// change the factor but still must not hand back a value the column would
+// reject or silently re-round.
+function settleEfactor(efactor: number): number {
+  return Math.max(EFACTOR_FLOOR, Math.round(efactor * 100) / 100);
+}
+
 export function schedule(state: Sm2State, rating: Rating, now: number = Date.now()): Sm2Schedule {
   // The failure branch: SM-2 step 6 — restart the repetitions from the
   // beginning without changing the ease factor. `repetition` goes back to 0, so
@@ -45,7 +55,7 @@ export function schedule(state: Sm2State, rating: Rating, now: number = Date.now
   if (rating === "again") {
     return {
       repetition: 0,
-      efactor: state.efactor,
+      efactor: settleEfactor(state.efactor),
       interval_days: 1,
       next_due_at: new Date(now + DAY_MS).toISOString(),
       last_reviewed_at: new Date(now).toISOString(),
@@ -53,11 +63,7 @@ export function schedule(state: Sm2State, rating: Rating, now: number = Date.now
   }
 
   const repetition = state.repetition + 1;
-  // Rounded to two decimals so the returned value is identical to the value the
-  // numeric(4,2) column will store — the next Review echoes it back.
-  // Clamped at the floor here rather than left to the column's CHECK, so a run
-  // of Hard ratings cannot turn a legitimate rating into a 500.
-  const efactor = Math.max(EFACTOR_FLOOR, Math.round((state.efactor + EFACTOR_DELTA[rating]) * 100) / 100);
+  const efactor = settleEfactor(state.efactor + EFACTOR_DELTA[rating]);
   // I(1) = 1 and I(2) = 6 are fixed; beyond that the stored interval is
   // stretched by the ease factor this rating just produced, and rounded up. The
   // grade therefore lands on *this* interval, which is what makes Hard lengthen

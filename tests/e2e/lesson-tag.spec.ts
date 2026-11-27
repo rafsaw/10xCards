@@ -8,6 +8,7 @@
 //       cleanup. Auth comes from storageState (playwright.config.ts).
 
 import { test, expect } from "@playwright/test";
+import { seedDueCard } from "./helpers";
 
 test.describe("lesson tag — library display and review reveal", () => {
   // The unique front of the card this test creates, so afterEach can find and
@@ -34,18 +35,9 @@ test.describe("lesson tag — library display and review reveal", () => {
     const tag = `e2e-lesson-${stamp}`;
     marker = front;
 
-    // Setup/action — create a card with a unique tag. exact: true because the
-    // library search box also matches "Front"/"Back" by accessible name.
-    await page.goto("/library");
-    // Re-fill until the React island is hydrated: filling a pre-hydration SSR input is
-    // discarded on hydrate and leaves the submit button disabled (library-tag-filter.spec.ts).
-    await expect(async () => {
-      await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
-      await page.getByRole("textbox", { name: "Back", exact: true }).fill("lesson tag answer");
-      await page.getByLabel("Lesson tag (optional)").fill(tag);
-      await expect(page.getByRole("button", { name: "Create card" })).toBeEnabled({ timeout: 1000 });
-    }).toPass({ timeout: 20000 });
-    await page.getByRole("button", { name: "Create card" }).click();
+    // Setup/action — create a card with a unique tag through the shared seeding
+    // helper, which does not return until the server has the row (./helpers.ts).
+    await seedDueCard(page, front, "lesson tag answer", tag);
 
     // The tag is persisted and rendered on THIS card's row after the SSR reload.
     const row = page.getByRole("listitem").filter({ hasText: front });

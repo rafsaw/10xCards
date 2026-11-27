@@ -70,21 +70,27 @@ export function isSpaceActivatedTarget(target: ShortcutTarget | null): boolean {
  *   left to right — and only after the answer is revealed. A digit pressed while
  *   the answer is still hidden is DROPPED: this function is stateless, so there is
  *   nowhere to queue it and revealing can never replay it.
- * - Nothing fires while a review submission is in flight, on an auto-repeating
- *   (held) key, with a modifier held, or from a text-entry element — the three
- *   ways a keyboard could otherwise produce a duplicate or unintended review.
+ * - Nothing fires — not even `Space` — while a review submission is in flight,
+ *   nor on an auto-repeating (held) key, with a modifier held, or from a
+ *   text-entry element: the ways a keyboard could otherwise produce a duplicate
+ *   or unintended review.
  */
 export function resolveReviewShortcut(context: ReviewShortcutContext): ReviewShortcutAction | null {
   const { key, repeat, withModifier, target, revealed, submitting } = context;
 
   if (repeat || withModifier) return null;
   if (isTextEntryTarget(target)) return null;
+  // NOTHING fires while a review is being recorded (#81) — checked ahead of the
+  // Space branch as well, not only ahead of the digits. Space is unreachable in
+  // that window anyway, because `revealed` stays true until the response lands,
+  // but a guard worded as "nothing" should not rest on that coincidence.
+  if (submitting) return null;
 
   if (key === " " || key === "Spacebar") {
     if (revealed || isSpaceActivatedTarget(target)) return null;
     return "reveal";
   }
 
-  if (!revealed || submitting) return null;
+  if (!revealed) return null;
   return RATING_KEYS[key] ?? null;
 }

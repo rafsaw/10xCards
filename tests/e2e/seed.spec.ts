@@ -39,7 +39,10 @@ test.describe("library — created card persistence (R5)", () => {
 
   test("a manually created card persists across a page reload", async ({ page }) => {
     // Unique marker: no other worker (or a re-run) can see this card's front.
-    marker = `E2E seed card ${Date.now()}`;
+    // Held in a const as well as the describe-scoped `marker` because TypeScript
+    // drops the narrowing of a mutable `let` inside the toPass callback below.
+    const front = `E2E seed card ${Date.now()}`;
+    marker = front;
 
     // Setup — open the library; storageState already authenticated us.
     await page.goto("/library");
@@ -50,7 +53,7 @@ test.describe("library — created card persistence (R5)", () => {
     // Re-fill until the React island is hydrated: filling a pre-hydration SSR input is
     // discarded on hydrate and leaves the submit button disabled (library-tag-filter.spec.ts).
     await expect(async () => {
-      await page.getByRole("textbox", { name: "Front", exact: true }).fill(marker);
+      await page.getByRole("textbox", { name: "Front", exact: true }).fill(front);
       await page.getByRole("textbox", { name: "Back", exact: true }).fill("seed answer");
       await expect(page.getByRole("button", { name: "Create card" })).toBeEnabled({ timeout: 1000 });
     }).toPass({ timeout: 20000 });
@@ -60,13 +63,13 @@ test.describe("library — created card persistence (R5)", () => {
     // matches it too, and a wait that returns before the reload leaves the next
     // step racing a navigation.
     await page.getByRole("button", { name: "Create card" }).click();
-    await expect(page.getByRole("listitem").filter({ hasText: marker })).toBeVisible();
+    await expect(page.getByRole("listitem").filter({ hasText: front })).toBeVisible();
 
     // The risk made concrete: did the card actually PERSIST server-side, or did
     // it only live in client state? A full reload re-runs the SSR query — the
     // card is here on reload ONLY if it was truly saved. This assertion fails if
     // R5 materializes (the write is dropped or not faithfully persisted).
     await page.reload();
-    await expect(page.getByText(marker)).toBeVisible();
+    await expect(page.getByText(front)).toBeVisible();
   });
 });
