@@ -60,12 +60,24 @@ chosen:
   moved on from. Again on a Card already at repetition 0 with a 1-day interval is the one
   fixed point of `schedule()`, so a retry still matches and pushes `next_due_at` forward
   by the retry's delay. Closing it needs an idempotency key, which the no-history decision
-  leaves nowhere to keep. `src/lib/sm2.test.ts` pins the fixed point.  
+  leaves nowhere to keep. `src/lib/sm2.test.ts` pins the fixed point.
 - **The 30-day Box cap is gone with no replacement ceiling**, which is the intent, not an
   oversight. The only implicit ceilings are the `interval_days` column type and the
   JavaScript `Date` range, and both are unreachable and loud rather than silent: every
   Review pushes `next_due_at` further into the future and the endpoint only accepts due
   Cards. A sanity cap was rejected because it would turn a pathological Card into a 500 for
   no benefit.
+
+**Existing Cards carry over rather than reset, and nothing is rescheduled.** The migration has no
+`UPDATE` and no backfill: `box` is renamed to `repetition`, which is metadata-only, so values, the
+NOT NULL constraint, the default, the `cards_due_idx` index and the RLS policies all survive it, and
+`next_due_at` is never touched. The seeding rule is `repetition = box`, as-is — from box 2 up that
+is identical to `box + 2`, and below it nothing is lost (box 0 gives 1 day, which is right for a
+just-failed Card; box 1 gives 6, a jump up from the old 4). Never-reviewed Cards need no special
+case. `efactor` is `numeric(4,2)` rather than floating point so the deltas stay exact to two
+decimals from 2.5, and `not null default 2.5` seeds every row for free; the 1.3 floor is enforced in
+`src/lib/sm2.ts` and the column CHECK is only a safety net. No new index — nothing queries either
+column selectively. Rollback is a new forward migration that renames back and drops `efactor`,
+lossless precisely because the two names hold the same values.
 
 **No review history is stored.** See [ADR 0003](./0003-no-review-history.md).

@@ -57,4 +57,6 @@ When a literal appears in both the code and a test that greps the code, say whic
 
 ## Match the surrounding file
 
-Where this document and the file disagree, the file wins for anything local to it: naming, the shape of a helper, how errors are threaded. A diff that is internally consistent and locally conventional is better than one that is globally tidy and reads as an import from another codebase.
+The file wins on anything local to it: naming, the shape of a helper, how errors are threaded. A diff that is internally consistent and locally conventional is better than one that is globally tidy and reads as an import from another codebase.
+
+This never overrides a rule above it. Where a file contradicts one of those, the rule wins and the file is what to fix — a long migration header does not license the next long migration header. Fix it in the same diff when it is the file you are already touching, and raise it as a finding when it is not.
