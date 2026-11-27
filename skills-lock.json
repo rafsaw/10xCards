@@ -36,6 +36,13 @@
       "skillPath": "skills/engineering/implement-spec/SKILL.md",
       "computedHash": "c3474ef320861d793e8b30d41fbdd2cb0ceaa1081bb5c81b7f26c455eb776573"
     },
+    "pr": {
+      "source": "mattpocock/skills",
+      "commit": "6f7f7831a625f040a8e06a0e7954826b87ce775a",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/pr/SKILL.md",
+      "computedHash": "a66195583d0f9323004cdd4da169f93449071f29023671f3e31a916e740f6861"
+    },
     "prototype": {
       "source": "mattpocock/skills",
       "commit": "6f7f7831a625f040a8e06a0e7954826b87ce775a",
