@@ -58,7 +58,7 @@ Per `CLAUDE.md` → Code review rules: do not approve a change only because test
 
 ### Tests (major)
 
-- **CI does not run any test suite.** `.github/workflows/ci.yml` runs `astro sync` + `lint` + `build` only. A green CI badge is not evidence that tests pass; the reviewer must confirm the author ran the validation gate locally and, when the change touches Supabase behavior or the browser, the relevant extra suite.
+- **CI runs the gate but not the credentialed suites.** `.github/workflows/ci.yml` runs `astro sync` + `typecheck` + `lint` + `build` + `npm test`. It does not run `test:integration` (Supabase credentials) or `test:e2e` (a running app), so when the change touches Supabase behavior or the browser the reviewer must confirm the author ran the relevant extra suite locally.
 - Unit/integration specs are colocated (`*.test.ts`, `*.integration.test.ts`); integration specs use the two-user fixture and scoped Supabase mock in `test/integration/`. A change to data-scoping logic with no cross-user integration test is a major finding — that fixture exists precisely to prove isolation.
 - E2E specs live in `tests/e2e/` and follow the rules in `tests/e2e/AGENTS.md`: `getByRole`/`getByLabel`/`getByText` before `getByTestId`, never CSS/XPath, never `page.waitForTimeout()`, each test independent with its own setup and cleanup and unique ids. Violations are major — they are the failure modes that make a suite rot.
 
@@ -66,7 +66,7 @@ Per `CLAUDE.md` → Code review rules: do not approve a change only because test
 
 - ESLint runs type-aware TS plus React Hooks, React Compiler, Astro, and jsx-a11y rules; a change that only passes because a rule was disabled inline needs a written justification in the PR.
 - Interactive UI belongs in React islands under `src/components/`; primitives in `ui/`. Keep pages and layouts as `.astro`.
-- Accessible names matter twice here: they are the product's a11y surface *and* what the E2E locators bind to.
+- Accessible names matter twice here: they are the product's a11y surface _and_ what the E2E locators bind to.
 
 ### Documentation and process (minor)
 
@@ -85,9 +85,9 @@ Outside the gate, run deliberately when the change warrants it: `npm run test:in
 
 ## Severity guide
 
-| Severity | Use for | Action |
-|---|---|---|
-| **blocker** | Cross-user data leak, missing auth or read-only guard, missing RLS on a new table, secret in the diff, destructive migration, failing validation gate, breaking a surface listed in `BACKWARD_COMPATIBILITY.md` without the documented path | Must fix before merge |
-| **major** | Unvalidated input, unhandled failure path, missing test for the actual risk, response-shape drift, Workers-incompatible dependency, E2E anti-pattern | Fix before merge unless explicitly deferred with a follow-up issue |
-| **minor** | Maintainability, naming, duplication, docs drift | Fix now or file a follow-up |
-| **nit** | Preference, style not covered by Prettier/ESLint | Optional |
+| Severity    | Use for                                                                                                                                                                                                                                     | Action                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **blocker** | Cross-user data leak, missing auth or read-only guard, missing RLS on a new table, secret in the diff, destructive migration, failing validation gate, breaking a surface listed in `BACKWARD_COMPATIBILITY.md` without the documented path | Must fix before merge                                              |
+| **major**   | Unvalidated input, unhandled failure path, missing test for the actual risk, response-shape drift, Workers-incompatible dependency, E2E anti-pattern                                                                                        | Fix before merge unless explicitly deferred with a follow-up issue |
+| **minor**   | Maintainability, naming, duplication, docs drift                                                                                                                                                                                            | Fix now or file a follow-up                                        |
+| **nit**     | Preference, style not covered by Prettier/ESLint                                                                                                                                                                                            | Optional                                                           |
