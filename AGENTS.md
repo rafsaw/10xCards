@@ -5,9 +5,19 @@
 ## Agent Tripwires
 
 - Committing runs `npx lint-staged` (`.husky/pre-commit`): `eslint --fix` on staged `*.{ts,tsx,astro}`, `prettier --write` on `*.{json,css,md}`. Expect staged files to change — re-stage after.
-- CI (`@.github/workflows/ci.yml`) runs `lint` + `build` on push/PR to `main`. It does not run the test suites (`npm test`, `test:integration`, `test:e2e`) — verify those locally.
+- CI (`@.github/workflows/ci.yml`) runs `typecheck` + `lint` + `build` + `npm test` on push/PR to `main`. It does not run `test:integration` or `test:e2e` (credentials and a running app) — verify those locally.
+- A PR adding a destructive migration fails the `migration-guard` job unless it carries the `risk-high` label and a `## Deploy order` section. See `BACKWARD_COMPATIBILITY.md`.
 - `@.github/workflows/ai-code-review.yml` posts an advisory AI review comment on every PR to `main` (never blocks merge); re-run it by re-adding the `ai-cr:review` label.
 - Never overwrite `context/` — the 10x-workflow source of truth (PRD, tech-stack, plans). `context/archive/**` and `context/foundation/archive/**` are immutable.
+
+## Steering docs
+
+Repo-local reference, none of it loaded by default. Each line says when to reach for it.
+
+- `CODING_STANDARDS.md` — the judgement calls no linter can make. Read when writing or reviewing code.
+- `CODE_REVIEW.md` — the severity-graded review checklist: data isolation and RLS, auth guards, the read-only account state, input validation, response shapes, the Workers runtime, migrations. Read before reviewing a diff.
+- `BACKWARD_COMPATIBILITY.md` — the protected contract surfaces (HTTP routes and response shapes, DB schema, user-visible URLs, env var names, `App.Locals`, `readOnlyGuard`, `src/lib/sm2.ts`, accessible names the E2E suite binds to) and the required path for changing one. Read before touching any of them.
+- `SDLC.md` — ticket lifecycle, the label state machine, the QA gate, the validation gate. Read when moving a ticket or a PR through the process.
 
 ## Agent skills
 
